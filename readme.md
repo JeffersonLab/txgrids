@@ -24,9 +24,9 @@ For instance to run ``main/main00/py`` do the following:
 
 ## What is available 
 
-| observable     | reaction             | group | main |
-| :--:           | :--:                 | :--:  | :--: |
-| ``dsig/dxdQ2`` | ``nu + p -> nu' +X`` |       |      |
+| observable     | reaction             | group | main      | comments |
+| :--:           | :--:                 | :--:  | :--:      | :--:     |
+| ``dsig/dxdQ2`` | ``nu + p -> nu' +X`` | NNPDF | main00.py | in-dev   |
 
 
 
