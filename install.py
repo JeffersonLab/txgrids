@@ -17,7 +17,6 @@ def get_lhapdf_dir():
     except:
         sys.exit("lhapdf-config not available")
 
-
 def create_symliks():
 
     names=get_folder_names()
@@ -33,11 +32,11 @@ def remove_symliks():
     names=get_folder_names()
     lhapdf_dir=get_lhapdf_dir()
 
-    cmds=['rm %s/%s"'%(lhapdf_dir,_) for _ in names]
+    cmds=['rm %s/%s'%(lhapdf_dir,_) for _ in names]
     for cmd in cmds:
         print(cmd)
         process = Popen(cmd.split(), stdout=PIPE, stderr=PIPE)
-
+        stdout, stderr = process.communicate()
 
 if __name__=="__main__":
 
