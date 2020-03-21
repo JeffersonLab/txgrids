@@ -29,7 +29,7 @@ For instance to run ``main/main00/py`` do the following:
 | ``dsig/dxdQ2`` | ``nu + p -> nu' +X`` | NNPDF | main00.py | in-dev   | [nsato] |
 
 
-[nsato]:nsato@jlab.org
+[nsato]:(mailto:nsato@jlab.org)
 
 
 
