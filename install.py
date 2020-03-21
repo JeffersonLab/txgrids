@@ -4,14 +4,14 @@ import argparse
 from subprocess import Popen, PIPE
 
 def get_folder_names():
-    process = Popen(['ls','stf-grids'], stdout=PIPE, stderr=PIPE)
+    process = Popen(['ls','stf-grids'], stdout=PIPE, stderr=PIPE,universal_newlines=True)
     stdout, stderr = process.communicate()
     names=stdout.split()
     return names
 
 def get_lhapdf_dir():
     try:
-        process = Popen(['lhapdf-config','--datadir'], stdout=PIPE, stderr=PIPE)
+        process = Popen(['lhapdf-config','--datadir'], stdout=PIPE, stderr=PIPE,universal_newlines=True)
         stdout, stderr = process.communicate()
         return stdout.strip()
     except:
@@ -21,11 +21,12 @@ def create_symliks():
 
     names=get_folder_names()
     lhapdf_dir=get_lhapdf_dir()
-
-    cmds=['ln -s "$(pwd)/stf-grids/%s" %s/%s'%(_,lhapdf_dir,_) for _ in names]
+    pwd=os.getcwd()
+    cmds=[r'ln -s %s/stf-grids/%s %s/%s'%(pwd,_,lhapdf_dir,_) for _ in names]
     for cmd in cmds:
-        print(cmd)
-        process = Popen(cmd.split(), stdout=PIPE, stderr=PIPE)
+        process = Popen(cmd.strip().split(), stdout=PIPE, stderr=PIPE,universal_newlines=True)
+        stdout, stderr = process.communicate()
+        if stderr.strip()!='': sys.exit('ERR: %s'%stderr.strip())
 
 def remove_symliks():
 
@@ -37,6 +38,7 @@ def remove_symliks():
         print(cmd)
         process = Popen(cmd.split(), stdout=PIPE, stderr=PIPE)
         stdout, stderr = process.communicate()
+        #if stderr.strip()!='': sys.exit('ERR: %s'%stderr.strip())
 
 if __name__=="__main__":
 
