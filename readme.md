@@ -42,10 +42,21 @@ For instance to run ``main/main00/py`` do the following:
 
 ### CC proton
 
+- currently only  CC  for ``e+p -> v+X`` is available from NNPDF
+  we need to get NC for ``e+p -> v+X`` and from other groups
+
+
+### PVDIS proton 
+
+- neet grids for ``F_2,3 (gamma/Z)``
+- neet grids for ``F_2,3 (W-)``
+- neet grids for ``g_1,5 (gamma/Z)``
+- neet grids for ``g_1,5 (W-)``
 
 
 
-### PVDIS proton
+
+
 
 
 
