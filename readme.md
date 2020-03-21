@@ -24,14 +24,13 @@ For instance to run ``main/main00/py`` do the following:
 
 ## What is available 
 
-| observable     | reaction             | group | main      | comments | contact |
-| :--:           | :--:                 | :--:  | :--:      | :--:     | :--:    |
-| ``dsig/dxdQ2`` | ``nu + p -> nu' +X`` | NNPDF | main00.py | in-dev   | [nsato] |
+| observable     | reaction             | group | main      | comments | contact        |
+| :--:           | :--:                 | :--:  | :--:      | :--:     | :--:           |
+| ``dsig/dxdQ2`` | ``nu + p -> nu' +X`` | NNPDF | main00.py | in-dev   | [nsato],[rojo] |
 
 
 [nsato]:<mailto:nsato@jlab.org>
-
-
+[rojo]:<mailto:j.rojo@vu.nl>
 
 ## TODO
 
