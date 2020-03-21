@@ -6,7 +6,7 @@ import theory as thy
 from theory import params as par
 from theory import nnpdf
 
-def main():
+def main00():
 
     #--setup beams energies
     me,Ee=0,18.0
