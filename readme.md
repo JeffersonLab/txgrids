@@ -19,6 +19,7 @@ e.g. ``main/mainXY.py``  for some available index XY
 For instance to run ``main/main00/py`` do the following:
 
 ``cd main``
+
 ``./main00.py``
 
 ## What is available 
