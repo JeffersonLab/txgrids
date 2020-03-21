@@ -5,6 +5,7 @@ Theoretical cross section grids for EIC YR
 ## dependencies 
 
 - python 2 or 3
+- lhapdf
 
 ## setup
 
