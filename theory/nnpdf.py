@@ -1,24 +1,23 @@
 #!/usr/bin/env python
 import sys,os
 import numpy as np
-import pylab as py
+import params as par
 import lhapdf
+
 
 #--Open LHAPDF set with the structure functions (isoscalar target)
 dist=lhapdf.mkPDFs("NNPDF31sx_nnlonllx_as_0118_LHCb_nf_6_SF")
 
 #--Relevant EW parameters and constants
-MZ   = 91.1876
-MW   = 80.385
-GF   = 1.1663787e-5
-MN   = 0.938272046
+MZ = par.MZ
+MW = par.MW
+GF = par.GF
+MN = par.MN
 
-#--Derived parameters.See Eqs. (8.22) and (8.25) of
-#--https://arxiv.org/pdf/0709.1075.pdfhttps://arxiv.org/pdf/0709.1075.pdf
-MZ2  = MZ * MZ
-MW2  = MW * MW
-MN2  = MN * MN
-GF2  = GF * GF
+MZ2  = par.MZ2
+MW2  = par.MW2
+MN2  = par.MN2
+GF2  = par.GF2
 coef = GF * dist[0].quarkMass(6)**2/8/np.sqrt(2)/ np.pi**2
 rho  = 1 + 3 * coef * ( 1 + coef * ( 19 - 2 * np.pi**2 ) )
 
@@ -30,17 +29,16 @@ Qu   = dist[0].q2Max**0.5
 xl   = dist[0].xMin
 xu   = dist[0].xMax
 
-Enu=30.0
-stot = MN2 + 2 * MN * Enu
 
-#--Conversion factor from natural unists to pb.
-conv = 0.3894e9
-
-
-def dsigdlnxdlnQ2(proc,particle,x,Q2,stot,imem):
+def dsig_dx_dQ2(proc,particle,x,Q2,stot,units='pb',imem=0):
     """
+    NOTE: this routine is for nu + N -> l + X,  
+          need to addapt it for e + N -> l + X
+
+
     proc     = NC, CC
     particle = 12(neutrino), -22(antineutrino) 
+
     """
 
     y      = Q2 / x / ( stot - MN2 )
@@ -51,47 +49,41 @@ def dsigdlnxdlnQ2(proc,particle,x,Q2,stot,imem):
 
     if proc == 'NC':
 
-        fact=conv*8*pow((MZ2*rho-MW2)*MW2/MZ2/Q2/rho/rho/(2-rho),2)*GF2/np.pi/x
+        fact=8*pow((MZ2*rho-MW2)*MW2/MZ2/Q2/rho/rho/(2-rho),2)*GF2/np.pi/x
         offset=1000
 
     elif proc=='CC':
 
-        fact = conv * GF2 / 4 / np.pi / x * pow(MW2 / ( MW2 + Q2 ), 2)
+        fact = GF2 / 4 / np.pi / x * pow(MW2 / ( MW2 + Q2 ), 2)
         if particle == 12:  offset=2000
         if particle ==-12:  offset=3000
 
     if particle== 12: nsgn= 1
     if particle==-12: nsgn=-1
 
+    #--Conversion factor from natural unists to pb.
+    if units=='pb': conv = 0.3894e9
+    else: sys.exit('ERR: %s not available'%units)
 
-    #--The factor x is the jacobian of the x
-    #--integration due to the fact that dx = x *
-    #--d(log(x)).
-    return  x*fact*(Yplus*dist[imem].xfxQ(offset+1,x,Q)
+    return  conv*fact*(Yplus*dist[imem].xfxQ(offset+1,x,Q)
             -y*y*dist[imem].xfxQ(offset+2,x,Q)
             +nsgn*Yminus*dist[imem].xfxQ(offset+3,x,Q))
 
 
-proc='NC'
-particle=12
-x=0.1
-imem=0
-Q2=10.0
+
+if __name__=="__main__":
 
 
-print(dsigdlnxdlnQ2(proc,particle,x,Q2,stot,imem))
+    me,Ee=0,18.0
+    mN,EN=par.MN, 275.
+    stot=par.get_stot(me,Ee,mN,EN)
 
-
-
-
-
-
-
-#if __name__=="__main__":
-#
-#    name="NNPDF31sx_nnlonllx_as_0118_LHCb_nf_6_SF"
-#    #st=load_stfuncs(name)
-
+    proc='NC'
+    particle=12
+    x=0.1
+    imem=0
+    Q2=10.0
+    print(dsig_dx_dQ2(proc,particle,x,Q2,stot,units='pb',imem=0))
 
 
 
