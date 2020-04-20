@@ -95,8 +95,9 @@ class IDIS:
         return xsec*wgt*jac
 
     def units(self,units):
+        one=0.3893793721 #--GeV2 mbarn
         if   units=='GeV^-2':return 1
-        elif units=='fb'    :return 0.3893793721 #--GeV2 mbarn
+        elif units=='fb'    :return one*1e12 
         else: sys.exit('%s conversion not available')
 
     def get_cross_section(self,data):
