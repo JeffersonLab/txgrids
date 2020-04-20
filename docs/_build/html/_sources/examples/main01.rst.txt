@@ -129,7 +129,7 @@ We can now plot the histogram of events
 
 
 
-.. image:: main01/hist2d.png
+.. image:: ./main01/hist2d.png
 
 
 
