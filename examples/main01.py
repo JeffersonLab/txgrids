@@ -52,6 +52,7 @@ data['veto']    =  veto
 #--generate events
 mceg=MCEG(data)
 mceg.buil_mceg()
+ntot=10000
 data=mceg.gen_events(ntot)
 save(data,'%s/data.po'%wdir)
 
