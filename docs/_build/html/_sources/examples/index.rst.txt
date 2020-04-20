@@ -12,6 +12,7 @@ example programs
 
    main00
    main01
+   main02
 
 .. Indices and tables
    ==================
