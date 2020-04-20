@@ -34,9 +34,11 @@ idis=IDIS(data)
 data['neval'] = 10000
 data['rs']    = 140.7
 data['iw']    = 0
-data['Q2min'] = 1
 data['units'] = 'fb'
 #data['units'] = 'GeV^-2'
+
+data['mode']  = 'tot'
+print('%0.3e'%idis.get_cross_section(data))
 
 data['mode']  = 'xy'
 data['xmin']  = 0.01
@@ -44,10 +46,16 @@ data['xmax']  = 0.02
 data['ymin']  = 0.7
 data['ymax']  = 0.8
 
-print(idis.get_cross_section(data))
+print('%0.3e'%idis.get_cross_section(data))
 
-data['mode']  = 'tot'
-print(idis.get_cross_section(data))
+data['mode']  = 'xQ2'
+data['xmin']  = 0.01
+data['xmax']  = 0.02
+data['Q2min'] = 5.0
+data['Q2max'] = 10.0
+
+print('%0.3e'%idis.get_cross_section(data))
+
 
 
 
