@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -9,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; QCD theory for inclusive reactions at EIC  documentation</title>
+  <title>HOW-TO &mdash; QCD theory for inclusive reactions at EIC  documentation</title>
   
 
   
@@ -35,8 +34,9 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="index" title="Index" href="#" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="TO-DO" href="todo.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -81,13 +81,16 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="start.html">Gettin Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grids.html">LHAPDF grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/index.html">example programs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="todo.html">TO-DO</a></li>
-<li class="toctree-l1"><a class="reference internal" href="howto.html">HOW-TO</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">HOW-TO</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#contribute-to-the-documentation">Contribute to the documentation</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -133,12 +136,14 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Index</li>
+      <li>HOW-TO</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
+            <a href="_sources/howto.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -150,11 +155,32 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-
-<h1 id="index">Index</h1>
-
-<div class="genindex-jumpbox">
- 
+  <div class="section" id="how-to">
+<h1>HOW-TO<a class="headerlink" href="#how-to" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="contribute-to-the-documentation">
+<h2>Contribute to the documentation<a class="headerlink" href="#contribute-to-the-documentation" title="Permalink to this headline">¶</a></h2>
+<p>The documentation are located at <cite>docs</cite>.  If you want to help improving the
+documentation you can do it simple as modifying/adding rst files inside the
+<cite>docs</cite>.  You need to have sphinx and the rtd them installed in your system.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install -U sphinx
+pip install sphinx-rtd-theme
+</pre></div>
+</div>
+<p>Once you modify the <cite>docs</cite> type</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> docs
+make html
+firefox index.html
+</pre></div>
+</div>
+<p>You will need to reload the page once you run the <cite>make</cite>
+again.</p>
+<p>Once you are done with the modifications</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git add docs
+git commit -m <span class="s1">&#39;update docs&#39;</span>
+git push
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -162,6 +188,13 @@
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="todo.html" class="btn btn-neutral float-left" title="TO-DO" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
