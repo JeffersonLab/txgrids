@@ -5,13 +5,21 @@ except:
 import sys, os
 import zlib
 
+#--physics 
+
+def convert_lum(lum):
+    one=0.3893793721  #--GeV2 mbarn from PDG
+    lum,units=lum.split(':')
+    lum=float(lum)
+    units=units.strip()
+    if units=='fb-1':   return lum*one*1e12
+    else: sys.exit('units not convertible!')
+
+#--aux 
 
 def checkdir(path):
   if not os.path.exists(path): 
     os.makedirs(path)
-
-def tex(x):
-  return r'$\mathrm{'+x+'}$'
 
 def save(data,name):  
   #compressed=zlib.compress(cPickle.dumps(data))
@@ -29,27 +37,8 @@ def load(name):
   data=cPickle.loads(zlib.decompress(compressed))
   return data
 
-def load2(name): 
-  compressed=open(name,"rb").read()
-  data=cPickle.loads(compressed)
-  return data
-
-def isnumeric(value):
-  try:
-    int(value)
-    return True
-  except:
-    return False
-
-  return r'$\mathrm{'+x+'}$'
-
-def ERR(msg):
-  print(msg)
-  sys.exit()
-
-def lprint(msg,irow=0):
-  off='\n'*irow
-  sys.stdout.write(off+'\r\033[A')
+def lprint(msg):
+  sys.stdout.write('\r')
   sys.stdout.write(msg)
   sys.stdout.flush()
 
