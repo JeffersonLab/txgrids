@@ -89,7 +89,11 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">example programs</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="index.html">example programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="main00.html">main00.py</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">main01.py</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">main01.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gloals">Gloals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#code">Code</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../todo.html">TO-DO</a></li>
@@ -161,6 +165,16 @@
             
   <div class="section" id="main01-py">
 <h1>main01.py<a class="headerlink" href="#main01-py" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="gloals">
+<h2>Gloals<a class="headerlink" href="#gloals" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>compute total cross section in <span class="math notranslate nohighlight">\(ep\)</span> reaction</li>
+<li>generate MC events (inclusive electrons)</li>
+</ul>
+</div>
+<div class="section" id="code">
+<h2>Code<a class="headerlink" href="#code" title="Permalink to this headline">¶</a></h2>
+<p>First we include some headers</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span><span class="nn">os</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -174,27 +188,34 @@
 <span class="kn">import</span> <span class="nn">pylab</span>  <span class="k">as</span> <span class="nn">py</span>
 <span class="kn">from</span> <span class="nn">matplotlib.lines</span> <span class="kn">import</span> <span class="n">Line2D</span>
 <span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LogNorm</span>
-
-
 <span class="n">wdir</span><span class="o">=</span><span class="s1">&#39;.main01&#39;</span>
-
-<span class="c1">#--physical params</span>
-<span class="n">rs</span><span class="o">=</span> <span class="mf">140.7</span>
-<span class="n">lum</span><span class="o">=</span><span class="s1">&#39;10:fb-1&#39;</span>
-<span class="n">sign</span><span class="o">=</span><span class="mi">1</span> <span class="c1">#--electron=1 positron=-1</span>
-
-<span class="c1">#--lhapdf set and stf idx</span>
-<span class="n">tabname</span><span class="o">=</span><span class="s1">&#39;JAM4EIC&#39;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">sys.path.append(os.path.dirname(</span> <span class="pre">os.path.dirname(os.path.abspath(__file__)</span> <span class="pre">)</span> <span class="pre">)</span> <span class="pre">)</span></code>
+will add paths to be able to load the theory module.  <code class="docutils literal notranslate"><span class="pre">wdir</span></code> is where we store
+the results.</p>
+<p>Next we set physical parameters of the reaction</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rs</span>   <span class="o">=</span> <span class="mf">140.7</span>
+<span class="n">lum</span>  <span class="o">=</span> <span class="s1">&#39;10:fb-1&#39;</span>
+<span class="n">sign</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1">#--electron=1 positron=-1</span>
+</pre></div>
+</div>
+<p>Select lhapdf tables and flavor flags for structure functions</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tabname</span><span class="o">=</span><span class="s1">&#39;JAM4EIC&#39;</span>
 <span class="n">iset</span><span class="p">,</span><span class="n">iF2</span><span class="p">,</span><span class="n">iFL</span><span class="p">,</span><span class="n">iF3</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="mi">90001</span><span class="p">,</span><span class="mi">90002</span><span class="p">,</span><span class="mi">90003</span>
-
-<span class="k">def</span> <span class="nf">veto00</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">Q2</span><span class="p">,</span><span class="n">W2</span><span class="p">):</span>
+</pre></div>
+</div>
+<p>Define a user defined cuts</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">veto00</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">Q2</span><span class="p">,</span><span class="n">W2</span><span class="p">):</span>
     <span class="k">if</span>   <span class="n">W2</span> <span class="o">&lt;</span> <span class="mi">10</span>          <span class="p">:</span> <span class="k">return</span> <span class="mi">0</span>
     <span class="k">elif</span> <span class="n">Q2</span> <span class="o">&lt;</span> <span class="mi">1</span>           <span class="p">:</span> <span class="k">return</span> <span class="mi">0</span>
     <span class="k">else</span>                  <span class="p">:</span> <span class="k">return</span> <span class="mi">1</span>
 
 <span class="n">fname</span><span class="p">,</span><span class="n">veto</span><span class="o">=</span><span class="s1">&#39;mceg00&#39;</span><span class="p">,</span><span class="n">veto00</span>
-
-<span class="n">data</span><span class="o">=</span><span class="p">{}</span>
+</pre></div>
+</div>
+<p>Create a dictionary with all the parameters</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="o">=</span><span class="p">{}</span>
 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;wdir&#39;</span><span class="p">]</span>    <span class="o">=</span>  <span class="n">wdir</span>
 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;tabname&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="n">tabname</span>
 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;iset&#39;</span><span class="p">]</span>    <span class="o">=</span>  <span class="n">iset</span>
@@ -205,15 +226,21 @@
 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rs&#39;</span><span class="p">]</span>      <span class="o">=</span>  <span class="n">rs</span>
 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;fname&#39;</span><span class="p">]</span>   <span class="o">=</span>  <span class="n">fname</span>
 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;veto&#39;</span><span class="p">]</span>    <span class="o">=</span>  <span class="n">veto</span>
-
-<span class="c1">#--generate events</span>
-<span class="n">mceg</span><span class="o">=</span><span class="n">MCEG</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Build the event generator</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mceg</span><span class="o">=</span><span class="n">MCEG</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 <span class="n">mceg</span><span class="o">.</span><span class="n">buil_mceg</span><span class="p">()</span>
-<span class="n">data</span><span class="o">=</span><span class="n">mceg</span><span class="o">.</span><span class="n">gen_events</span><span class="p">(</span><span class="n">ntot</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The generator will be saved inside <code class="docutils literal notranslate"><span class="pre">wdir</span></code>.
+Next will generate events and store the results</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="o">=</span><span class="n">mceg</span><span class="o">.</span><span class="n">gen_events</span><span class="p">(</span><span class="n">ntot</span><span class="p">)</span>
 <span class="n">save</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/data.po&#39;</span><span class="o">%</span><span class="n">wdir</span><span class="p">)</span>
-
-<span class="c1">#--make plots</span>
-<span class="n">data</span><span class="o">=</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/data.po&#39;</span><span class="o">%</span><span class="n">wdir</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can now plot the histogram of events</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="o">=</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/data.po&#39;</span><span class="o">%</span><span class="n">wdir</span><span class="p">)</span>
 <span class="n">X</span>  <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">]</span>
 <span class="n">Y</span>  <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">]</span>
 <span class="n">Q2</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Q2&#39;</span><span class="p">]</span>
@@ -245,6 +272,7 @@
 <span class="n">py</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 <span class="n">py</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/hist2d.pdf&#39;</span><span class="o">%</span><span class="n">wdir</span><span class="p">)</span>
 </pre></div>
+</div>
 </div>
 </div>
 

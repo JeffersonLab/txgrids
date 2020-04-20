@@ -1,6 +1,17 @@
 main01.py
 =========
 
+Gloals
+------
+
+- compute total cross section in :math:`ep` reaction
+- generate MC events (inclusive electrons) 
+
+Code
+----
+
+First we include some headers
+
 .. code-block:: python
 
    import sys,os
@@ -16,18 +27,31 @@ main01.py
    import pylab  as py
    from matplotlib.lines import Line2D
    from matplotlib.colors import LogNorm
-   
-   
    wdir='.main01'
    
-   #--physical params
-   rs= 140.7
-   lum='10:fb-1'
-   sign=1 #--electron=1 positron=-1
+
+``sys.path.append(os.path.dirname( os.path.dirname(os.path.abspath(__file__) ) ) )`` 
+will add paths to be able to load the theory module.  ``wdir`` is where we store 
+the results.
+
+Next we set physical parameters of the reaction
+
+.. code-block:: python
    
-   #--lhapdf set and stf idx
+   rs   = 140.7
+   lum  = '10:fb-1'
+   sign = 1  #--electron=1 positron=-1
+
+Select lhapdf tables and flavor flags for structure functions
+
+.. code-block:: python
+   
    tabname='JAM4EIC'             
    iset,iF2,iFL,iF3=0,90001,90002,90003  
+
+Define a user defined cuts
+
+.. code-block:: python
    
    def veto00(x,y,Q2,W2):
        if   W2 < 10          : return 0
@@ -35,6 +59,10 @@ main01.py
        else                  : return 1
    
    fname,veto='mceg00',veto00
+
+Create a dictionary with all the parameters
+
+.. code-block:: python
    
    data={}
    data['wdir']    =  wdir   
@@ -47,14 +75,26 @@ main01.py
    data['rs']      =  rs     
    data['fname']   =  fname  
    data['veto']    =  veto
+
+Build the event generator
    
-   #--generate events
+.. code-block:: python
+
    mceg=MCEG(data)
    mceg.buil_mceg()
+
+The generator will be saved inside ``wdir``.
+Next will generate events and store the results
+
+.. code-block:: python
+
    data=mceg.gen_events(ntot)
    save(data,'%s/data.po'%wdir)
+
+We can now plot the histogram of events
    
-   #--make plots
+.. code-block:: python
+
    data=load('%s/data.po'%wdir)
    X  = data['X']
    Y  = data['Y']
