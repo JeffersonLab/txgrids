@@ -19,7 +19,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'eic'
+project = u'QCD theory for inclusive reactions at EIC'
 copyright = u'2020, inclusive-wg'
 author = u'inclusive-wg'
 
@@ -40,6 +40,7 @@ release = u''
 # ones.
 extensions = [
     'sphinx.ext.mathjax',
+    'sphinx.ext.githubpages',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -103,7 +104,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'eicdoc'
+htmlhelp_basename = 'QCDtheoryforinclusivereactionsatEICdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -130,7 +131,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'eic.tex', u'eic Documentation',
+    (master_doc, 'QCDtheoryforinclusivereactionsatEIC.tex', u'QCD theory for inclusive reactions at EIC Documentation',
      u'inclusive-wg', 'manual'),
 ]
 
@@ -140,7 +141,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'eic', u'eic Documentation',
+    (master_doc, 'qcdtheoryforinclusivereactionsateic', u'QCD theory for inclusive reactions at EIC Documentation',
      [author], 1)
 ]
 
@@ -151,8 +152,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'eic', u'eic Documentation',
-     author, 'eic', 'One line description of project.',
+    (master_doc, 'QCDtheoryforinclusivereactionsatEIC', u'QCD theory for inclusive reactions at EIC Documentation',
+     author, 'QCDtheoryforinclusivereactionsatEIC', 'One line description of project.',
      'Miscellaneous'),
 ]
 
