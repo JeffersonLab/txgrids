@@ -1,5 +1,5 @@
-HOWTO
-=====
+HOW-TO
+======
 
 
 Contribute to the documentation

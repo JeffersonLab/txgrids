@@ -19,17 +19,13 @@ There are example programs inside the folder ``main``
 which you can use as a template.
 
 
-## What is available 
+what is available 
+-----------------
 
-| observable     | reaction             | group | main      | comments | contact |
-| :--:           | :--:                 | :--:  | :--:      | :--:     | :--:    |
-| ``dsig/dxdQ2`` | ``nu + p -> nu' +X`` | NNPDF | main00.py | in-dev   | [rojo]  |
+- LHAPDF grids for DIS structure functions
 
+- A collection tools for DIS simulation 
 
-[rojo]:<mailto:j.rojo@vu.nl>
-[nsato]:<mailto:nsato@jlab.org>
-
-
-
+- Example scripts
 
 
