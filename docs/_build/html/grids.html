@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Gettin Started &mdash; eic  documentation</title>
+  <title>LHAPDF grids &mdash; eic  documentation</title>
   
 
   
@@ -35,8 +35,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="LHAPDF grids" href="grids.html" />
-    <link rel="prev" title="QCD theory for inclusive reactions at EIC" href="index.html" /> 
+    <link rel="next" title="example programs" href="examples/index.html" />
+    <link rel="prev" title="Gettin Started" href="start.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -82,14 +82,12 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Gettin Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#dependencies">dependencies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#setup">setup</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#usage">usage</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="grids.html">LHAPDF grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="start.html">Gettin Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">LHAPDF grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">example programs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="todo.html">TO-DO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">HOWTO</a></li>
 </ul>
 
             
@@ -135,13 +133,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Gettin Started</li>
+      <li>LHAPDF grids</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/start.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/grids.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -154,32 +152,41 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="gettin-started">
-<h1>Gettin Started<a class="headerlink" href="#gettin-started" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="dependencies">
-<h2>dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>python 2 or 3</li>
-<li>lhapdf</li>
-</ul>
-</div>
-<div class="section" id="setup">
-<h2>setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
-<p>use the script  <code class="docutils literal notranslate"><span class="pre">install.py</span></code> to create symlinks to your lhapdf directory</p>
-</div>
-<div class="section" id="usage">
-<h2>usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
-<p>There are example programs inside the folder <code class="docutils literal notranslate"><span class="pre">main</span></code>
-which you can use as a template.</p>
-<p>## What is available</p>
-<div class="line-block">
-<div class="line">observable     | reaction             | group | main      | comments | contact |</div>
-<div class="line">:–:           | :–:                 | :–:  | :–:      | :–:     | :–:    |</div>
-<div class="line"><code class="docutils literal notranslate"><span class="pre">dsig/dxdQ2</span></code> | <code class="docutils literal notranslate"><span class="pre">nu</span> <span class="pre">+</span> <span class="pre">p</span> <span class="pre">-&gt;</span> <span class="pre">nu'</span> <span class="pre">+X</span></code> | NNPDF | main00.py | in-dev   | [rojo]  |</div>
-</div>
+  <div class="section" id="lhapdf-grids">
+<h1>LHAPDF grids<a class="headerlink" href="#lhapdf-grids" title="Permalink to this headline">¶</a></h1>
+<table border="1" class="docutils">
+<colgroup>
+<col width="24%" />
+<col width="38%" />
+<col width="10%" />
+<col width="15%" />
+<col width="13%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">observable</th>
+<th class="head">reaction</th>
+<th class="head">group</th>
+<th class="head">comments</th>
+<th class="head">contact</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">dsig/dxdQ2</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">nu</span> <span class="pre">+</span> <span class="pre">p</span> <span class="pre">-&gt;</span> <span class="pre">nu'</span> <span class="pre">+X</span></code></td>
+<td>NNPDF</td>
+<td>in-dev</td>
+<td>[rojo]</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">dsig/dxdy</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">e+/-</span> <span class="pre">+</span> <span class="pre">p</span> <span class="pre">-&gt;</span> <span class="pre">e+/-'</span> <span class="pre">+X</span></code></td>
+<td>JAM</td>
+<td>in-dev</td>
+<td>[nsato]</td>
+</tr>
+</tbody>
+</table>
 <p>[rojo]:&lt;<a class="reference external" href="mailto:j&#46;rojo&#37;&#52;&#48;vu&#46;nl">mailto:j<span>&#46;</span>rojo<span>&#64;</span>vu<span>&#46;</span>nl</a>&gt;
 [nsato]:&lt;<a class="reference external" href="mailto:nsato&#37;&#52;&#48;jlab&#46;org">mailto:nsato<span>&#64;</span>jlab<span>&#46;</span>org</a>&gt;</p>
-</div>
 </div>
 
 
@@ -190,10 +197,10 @@ which you can use as a template.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="grids.html" class="btn btn-neutral float-right" title="LHAPDF grids" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="examples/index.html" class="btn btn-neutral float-right" title="example programs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="QCD theory for inclusive reactions at EIC" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="start.html" class="btn btn-neutral float-left" title="Gettin Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

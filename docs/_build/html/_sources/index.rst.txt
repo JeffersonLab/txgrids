@@ -10,12 +10,10 @@ QCD theory for inclusive reactions at EIC
    :maxdepth: 2
    :caption: Contents:
 
+   roadmap
    start
+   grids
+   examples/index
+   todo
+   howto
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
