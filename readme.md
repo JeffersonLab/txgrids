@@ -1,10 +1,10 @@
 # QCD theory for inclusive reactions at EIC
 
-# What tools are available
+## What tools are available
 
 - ...
 
-# Documentation 
+## Documentation 
 
 Visit the link [doc] for more information
 
