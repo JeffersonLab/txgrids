@@ -70,7 +70,6 @@ class IDIS:
     def __init__(self,tabname,iset,iF2,iFL,iF3,sign,veto):
 
         self.tabname  =  tabname
-        print tabname
         self.iset     =  iset   
         self.iF2      =  iF2    
         self.iFL      =  iFL    
