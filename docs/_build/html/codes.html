@@ -1,0 +1,369 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Codes &mdash; QCD theory for inclusive reactions at EIC  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="example programs" href="examples/index.html" />
+    <link rel="prev" title="LHAPDF grids" href="grids.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> QCD theory for inclusive reactions at EIC
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="start.html">Gettin Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grids.html">LHAPDF grids</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Codes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-theory.mceg">MC event generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-theory.idis">DIS cross section calculator</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">example programs</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QCD theory for inclusive reactions at EIC</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Codes</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/codes.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="codes">
+<h1>Codes<a class="headerlink" href="#codes" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-theory.mceg">
+<span id="mc-event-generator"></span><h2>MC event generator<a class="headerlink" href="#module-theory.mceg" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="theory.mceg.MCEG">
+<em class="property">class </em><code class="descclassname">theory.mceg.</code><code class="descname">MCEG</code><span class="sig-paren">(</span><em>wdir</em>, <em>tabname</em>, <em>iset</em>, <em>iF2</em>, <em>iFL</em>, <em>iF3</em>, <em>sign</em>, <em>rs</em>, <em>fname</em>, <em>veto</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="headerlink" href="#theory.mceg.MCEG" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>wdir</strong> – directory to store the results</li>
+<li><strong>tabname</strong> – The lhapdf  table name see LHAPDF grids</li>
+<li><strong>iset</strong> – The table set</li>
+<li><strong>iF2</strong> – flavor index for F2</li>
+<li><strong>iFL</strong> – flavor index for FL</li>
+<li><strong>iF3</strong> – flavor index for F3</li>
+<li><strong>sign</strong> – 1 for electron 1 for positron</li>
+<li><strong>rs</strong> – center of mass energy</li>
+<li><strong>fname</strong> – file name for the generator</li>
+<li><strong>veto</strong> – user defined cuts</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="theory.mceg.MCEG.buil_mceg">
+<code class="descname">buil_mceg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#theory.mceg.MCEG.buil_mceg" title="Permalink to this definition">¶</a></dt>
+<dd><p>build the vegas integrator as MCEG</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="theory.mceg.MCEG.gen_events">
+<code class="descname">gen_events</code><span class="sig-paren">(</span><em>nevents</em><span class="sig-paren">)</span><a class="headerlink" href="#theory.mceg.MCEG.gen_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate events</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>nevents</strong> – number of desired events</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dictionary with arrays for X,Y,Q2,W.
+it also includes root s used to generate
+the mceg in case is needed for cross checks</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="theory.mceg.MCEG.get_ntot">
+<code class="descname">get_ntot</code><span class="sig-paren">(</span><em>lum</em><span class="sig-paren">)</span><a class="headerlink" href="#theory.mceg.MCEG.get_ntot" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>lum</strong> – str e.g.  ‘10:fb-1’</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">total number of events for a given 
+of the current generator and input luminosity</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-theory.idis">
+<span id="dis-cross-section-calculator"></span><h2>DIS cross section calculator<a class="headerlink" href="#module-theory.idis" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="theory.idis.IDIS">
+<em class="property">class </em><code class="descclassname">theory.idis.</code><code class="descname">IDIS</code><span class="sig-paren">(</span><em>tabname</em>, <em>iset</em>, <em>iF2</em>, <em>iFL</em>, <em>iF3</em>, <em>sign</em>, <em>veto</em><span class="sig-paren">)</span><a class="headerlink" href="#theory.idis.IDIS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tabname</strong> – The lhapdf  table name see LHAPDF grids</li>
+<li><strong>iset</strong> – The table set</li>
+<li><strong>iF2</strong> – flavor index for F2</li>
+<li><strong>iFL</strong> – flavor index for FL</li>
+<li><strong>iF3</strong> – flavor index for F3</li>
+<li><strong>sign</strong> – 1 for electron 1 for positron</li>
+<li><strong>veto</strong> – user defined cuts</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="theory.idis.IDIS.get_cross_section">
+<code class="descname">get_cross_section</code><span class="sig-paren">(</span><em>neval</em>, <em>rs</em>, <em>mode</em>, <em>iw</em>, <em>xmin=None</em>, <em>xmax=None</em>, <em>ymin=None</em>, <em>ymax=None</em>, <em>Q2min=None</em>, <em>Q2max=None</em>, <em>units=None</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="headerlink" href="#theory.idis.IDIS.get_cross_section" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute integrated DIS cross section</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>neval</strong> – number of vegas integration samples</li>
+<li><strong>rs</strong> – center of mass energy</li>
+<li><strong>mode</strong> – ‘xy’ or ‘xQ2’</li>
+<li><strong>iw</strong> – 0:cross section 1,2: weighted cross section</li>
+<li><strong>xmin</strong> – minimum x</li>
+<li><strong>xmax</strong> – maximum x</li>
+<li><strong>ymin</strong> – minimum y</li>
+<li><strong>ymax</strong> – maximum y</li>
+<li><strong>Q2min</strong> – minimum Q2</li>
+<li><strong>Q2max</strong> – maximum Q2</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="theory.idis.IDIS.get_sigma_dxdQ2">
+<code class="descname">get_sigma_dxdQ2</code><span class="sig-paren">(</span><em>x</em>, <em>Q2</em>, <em>iw</em><span class="sig-paren">)</span><a class="headerlink" href="#theory.idis.IDIS.get_sigma_dxdQ2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute differential cross section</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> – x bjorken</li>
+<li><strong>Q2</strong> – Q2</li>
+<li><strong>iw</strong> – 0:cross section 1,2: weighted cross section</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="theory.idis.IDIS.get_sigma_dxdy">
+<code class="descname">get_sigma_dxdy</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>iw</em><span class="sig-paren">)</span><a class="headerlink" href="#theory.idis.IDIS.get_sigma_dxdy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute differential cross section</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> – x bjorken</li>
+<li><strong>y</strong> – y</li>
+<li><strong>iw</strong> – 0:cross section 1,2: weighted cross section</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="examples/index.html" class="btn btn-neutral float-right" title="example programs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="grids.html" class="btn btn-neutral float-left" title="LHAPDF grids" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, inclusive-wg
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
