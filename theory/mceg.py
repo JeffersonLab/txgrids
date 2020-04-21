@@ -8,22 +8,26 @@ import lhapdf
 import vegas
 
 import params as par
-from   tools import checkdir,load,save,lprint
+from tools import checkdir,load,save,lprint
+from tools import convert_lum
 
 class MCEG:
+    """
+    :param arg1: data
+    """
 
-    def __init__(self,data):
+    def __init__(self,wdir,tabname,iset,iF2,iFL,iF3,sign,rs,fname,veto,**kargs):
 
-        self.wdir     = data['wdir']    
-        self.tabname  = data['tabname'] 
-        self.iset     = data['iset']
-        self.iF2      = data['iF2']
-        self.iFL      = data['iFL']
-        self.iF3      = data['iF3']
-        self.sign     = data['sign']
-        self.rs       = data['rs']
-        self.fname    = data['fname']
-        self.veto     = data['veto'] 
+        self.wdir     = wdir
+        self.tabname  = tabname
+        self.iset     = iset
+        self.iF2      = iF2
+        self.iFL      = iFL
+        self.iF3      = iF3
+        self.sign     = sign
+        self.rs       = rs
+        self.fname    = fname
+        self.veto     = veto
 
         self.stf=lhapdf.mkPDF(self.tabname,self.iset)
 
@@ -209,9 +213,9 @@ if __name__=="__main__":
     data['fname']   =fname  
     data['veto']    =veto
     
-    mceg=MCEG(data)
-    #mceg.buil_mceg()
-    #ntot=mceg.get_ntot(lum)
+    mceg=MCEG(**data)
+    mceg.buil_mceg()
+    ntot=mceg.get_ntot(lum)
     ntot=10000
     mceg.gen_events(ntot)
 

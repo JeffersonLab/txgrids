@@ -11,16 +11,72 @@ import params as par
 from   tools import checkdir,load,save,lprint
 
 class IDIS:
+    """
+    Retrieves rows pertaining to the given keys from the Table instance
+    represented by big_table.  Silly things may happen if
+    other_silly_variable is not None.
 
-    def __init__(self,data):
+    Args:
+       big_table: An open Bigtable Table instance.
+       keys: A sequence of strings representing the key of each table row
+           to fetch.
+       other_silly_variable: Another optional variable, that has a much
+           longer name than the other args, and which does nothing.
 
-        self.tabname  = data['tabname'] 
-        self.iset     = data['iset']
-        self.iF2      = data['iF2']
-        self.iFL      = data['iFL']
-        self.iF3      = data['iF3']
-        self.sign     = data['sign']
-        self.veto     = data['veto']
+
+
+    :param arg1: dictionary with parameters for initial setup
+   
+    .. note::
+
+      An example of intersphinx is this: 
+      you **cannot** use :mod:`pickle` on this class.
+ 
+    
+    Returns:
+        A dict mapping keys to the corresponding table row data
+        fetched. Each row is represented as a tuple of strings. For
+        example:
+
+        {'Serak': ('Rigel VII', 'Preparer'),
+         'Zim': ('Irk', 'Invader'),
+         'Lrrr': ('Omicron Persei 8', 'Emperor')}
+
+        If a key from the keys argument is missing from the dictionary,
+        then that row was not found in the table.
+
+    :example:
+    data={}
+    data['tabname'] = tabname
+    data['iset']    = iset   
+    data['iF2']     = iF2    
+    data['iFL']     = iFL    
+    data['iF3']     = iF3    
+    data['sign']    = 1 #--electron=1 positron=-1
+    data['veto']    = veto
+
+    
+    Parameters
+    ----------
+    arg1 : int
+        Description of arg1
+    arg2 : str
+        Description of arg2
+
+
+
+    """
+
+    def __init__(self,tabname,iset,iF2,iFL,iF3,sign,veto):
+
+        self.tabname  =  tabname
+        print tabname
+        self.iset     =  iset   
+        self.iF2      =  iF2    
+        self.iFL      =  iFL    
+        self.iF3      =  iF3    
+        self.sign     =  sign   
+        self.veto     =  veto   
 
         self.stf=lhapdf.mkPDF(self.tabname,self.iset)
         self.integ = vegas.Integrator([[0,1],[0,1]])
@@ -100,28 +156,28 @@ class IDIS:
         elif units=='fb'    :return one*1e12 
         else: sys.exit('%s conversion not available')
 
-    def get_cross_section(self,data):
+    def get_cross_section(self,neval,rs,mode,iw,
+        xmin=None,xmax=None,ymin=None,ymax=None,iymin=None,
+        Q2min=None,Q2max=None,iQ2min=None,units=None,**kargs):
 
-        neval   = data['neval']
-        self.rs = data['rs']
-        mode    = data['mode']
-        self.iw = data['iw']
+        self.rs = rs 
+        self.iw = iw 
 
         if mode=='xy':
       
-            self.xmin  = data['xmin']
-            self.xmax  = data['xmax']
-            self.ymin  = data['ymin']
-            self.ymax  = data['ymax']
+            self.xmin  = xmin
+            self.xmax  = xmax
+            self.ymin  = ymin
+            self.ymax  = ymax
             self.iymin = True
             result = self.integ(self.tgrand_dxdy, nitn=10, neval=neval)
 
         elif mode=='xQ2':
       
-            self.xmin  = data['xmin']
-            self.xmax  = data['xmax']
-            self.Q2min = data['Q2min']
-            self.Q2max = data['Q2max']
+            self.xmin  = xmin
+            self.xmax  = xmax
+            self.Q2min = Q2min
+            self.Q2max = Q2max
             self.iQ2max= True
             result = self.integ(self.tgrand_dxdQ2, nitn=10, neval=neval)
 
@@ -136,7 +192,7 @@ class IDIS:
             result = self.integ(self.tgrand_dxdy, nitn=10, neval=neval)
             #result = self.integ(self.tgrand_dxdQ2, nitn=10, neval=neval)
 
-        return result.val*self.units(data['units'])
+        return result.val*self.units(units)
 
 if __name__=="__main__":
 
@@ -158,7 +214,7 @@ if __name__=="__main__":
     data['sign']    = 1 #--electron=1 positron=-1
     data['veto']    = veto
     
-    idis=IDIS(data)
+    idis=IDIS(**data)
 
     data['neval'] = 10000
     data['rs']    = 140.7
@@ -173,7 +229,7 @@ if __name__=="__main__":
     data['ymin']  = 0.7
     data['ymax']  = 0.8
     
-    print idis.get_cross_section(data)
+    print idis.get_cross_section(**data)
 
     #elif mode=='xQ2':
     #
