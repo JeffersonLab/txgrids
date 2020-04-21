@@ -7,6 +7,14 @@ dependencies
 - python 2 or 3
 - lhapdf
 
+getting the code
+----------------
+
+.. code-block:: shell
+
+   git clone https://github.com/JeffersonLab/txgrids 
+
+
 setup
 -----
 

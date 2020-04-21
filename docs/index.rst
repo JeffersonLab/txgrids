@@ -10,7 +10,6 @@ QCD theory for inclusive reactions at EIC
    :maxdepth: 2
    :caption: Contents:
 
-   roadmap
    start
    grids
    codes
