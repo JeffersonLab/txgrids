@@ -12,59 +12,13 @@ from   tools import checkdir,load,save,lprint
 
 class IDIS:
     """
-    Retrieves rows pertaining to the given keys from the Table instance
-    represented by big_table.  Silly things may happen if
-    other_silly_variable is not None.
-
-    Args:
-       big_table: An open Bigtable Table instance.
-       keys: A sequence of strings representing the key of each table row
-           to fetch.
-       other_silly_variable: Another optional variable, that has a much
-           longer name than the other args, and which does nothing.
-
-
-
-    :param arg1: dictionary with parameters for initial setup
-   
-    .. note::
-
-      An example of intersphinx is this: 
-      you **cannot** use :mod:`pickle` on this class.
- 
-    
-    Returns:
-        A dict mapping keys to the corresponding table row data
-        fetched. Each row is represented as a tuple of strings. For
-        example:
-
-        {'Serak': ('Rigel VII', 'Preparer'),
-         'Zim': ('Irk', 'Invader'),
-         'Lrrr': ('Omicron Persei 8', 'Emperor')}
-
-        If a key from the keys argument is missing from the dictionary,
-        then that row was not found in the table.
-
-    :example:
-    data={}
-    data['tabname'] = tabname
-    data['iset']    = iset   
-    data['iF2']     = iF2    
-    data['iFL']     = iFL    
-    data['iF3']     = iF3    
-    data['sign']    = 1 #--electron=1 positron=-1
-    data['veto']    = veto
-
-    
-    Parameters
-    ----------
-    arg1 : int
-        Description of arg1
-    arg2 : str
-        Description of arg2
-
-
-
+    :param tabname: The lhapdf  table name see LHAPDF grids
+    :param iset:    The table set  
+    :param iF2:     flavor index for F2
+    :param iFL:     flavor index for FL
+    :param iF3:     flavor index for F3
+    :param sign:    1 for electron 1 for positron
+    :param veto:    user defined cuts
     """
 
     def __init__(self,tabname,iset,iF2,iFL,iF3,sign,veto):
@@ -84,8 +38,11 @@ class IDIS:
 
     def get_sigma_dxdy(self,x,y,iw):
         """
-        positron sign =-1
-        electron sign = 1
+        Compute differential cross section 
+
+        :param x:     x bjorken
+        :param y:     y
+        :param iw:    0:cross section 1,2: weighted cross section
         """
 
         Q2=x*y*(self.rs**2-par.M2)
@@ -103,8 +60,11 @@ class IDIS:
 
     def get_sigma_dxdQ2(self,x,Q2,iw):
         """
-        positron sign =-1
-        electron sign = 1
+        Compute differential cross section 
+
+        :param x:     x bjorken
+        :param Q2:    Q2 
+        :param iw:    0:cross section 1,2: weighted cross section
         """
         y=Q2/x/(self.rs**2-par.M2)
         F2=self.stf.xfxQ2(self.iF2,x,Q2) 
@@ -119,7 +79,7 @@ class IDIS:
         factor*=4*np.pi*par.alfa**2/x/y/Q2/(self.rs**2-par.M2)/x
         return factor*((1-y-x**2*y**2*par.M2/Q2)*F2 + y**2*x*F1 +self.sign*(y-y**2/2)*x*F3)
 
-    def tgrand_dxdy(self,X):
+    def _tgrand_dxdy(self,X):
         jx    = self.xmax-self.xmin
         x     = self.xmin+X[0]*jx
 
@@ -134,7 +94,7 @@ class IDIS:
         wgt   = self.veto(x,y,Q2,W2)
         return xsec*wgt*jac
 
-    def tgrand_dxdQ2(self,X):
+    def _tgrand_dxdQ2(self,X):
         jx    = self.xmax-self.xmin
         x     = self.xmin+X[0]*jx
 
@@ -149,15 +109,29 @@ class IDIS:
         wgt   = self.veto(x,y,Q2,W2)
         return xsec*wgt*jac
 
-    def units(self,units):
+    def _units(self,units):
         one=0.3893793721 #--GeV2 mbarn
         if   units=='GeV^-2':return 1
         elif units=='fb'    :return one*1e12 
         else: sys.exit('%s conversion not available')
 
     def get_cross_section(self,neval,rs,mode,iw,
-        xmin=None,xmax=None,ymin=None,ymax=None,iymin=None,
-        Q2min=None,Q2max=None,iQ2min=None,units=None,**kargs):
+        xmin=None,xmax=None,ymin=None,ymax=None,
+        Q2min=None,Q2max=None,units=None,**kargs):
+        """
+        Compute integrated DIS cross section 
+
+        :param neval: number of vegas integration samples 
+        :param rs:    center of mass energy
+        :param mode:  'xy' or 'xQ2'
+        :param iw:    0:cross section 1,2: weighted cross section
+        :param xmin:  minimum x
+        :param xmax:  maximum x
+        :param ymin:  minimum y
+        :param ymax:  maximum y
+        :param Q2min: minimum Q2
+        :param Q2max: maximum Q2
+        """
 
         self.rs = rs 
         self.iw = iw 
@@ -169,7 +143,7 @@ class IDIS:
             self.ymin  = ymin
             self.ymax  = ymax
             self.iymin = True
-            result = self.integ(self.tgrand_dxdy, nitn=10, neval=neval)
+            result = self.integ(self._tgrand_dxdy, nitn=10, neval=neval)
 
         elif mode=='xQ2':
       
@@ -178,7 +152,7 @@ class IDIS:
             self.Q2min = Q2min
             self.Q2max = Q2max
             self.iQ2max= True
-            result = self.integ(self.tgrand_dxdQ2, nitn=10, neval=neval)
+            result = self.integ(self._tgrand_dxdQ2, nitn=10, neval=neval)
 
         elif mode=='tot':
 
@@ -188,10 +162,10 @@ class IDIS:
             self.xmin  = self.Q2min/(self.rs**2-par.M2)
             self.iQ2max = False
             self.iymin  = False
-            result = self.integ(self.tgrand_dxdy, nitn=10, neval=neval)
+            result = self.integ(self._tgrand_dxdy, nitn=10, neval=neval)
             #result = self.integ(self.tgrand_dxdQ2, nitn=10, neval=neval)
 
-        return result.val*self.units(units)
+        return result.val*self._units(units)
 
 if __name__=="__main__":
 

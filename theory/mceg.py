@@ -13,7 +13,16 @@ from tools import convert_lum
 
 class MCEG:
     """
-    :param arg1: data
+    :param wdir:    directory to store the results
+    :param tabname: The lhapdf  table name see LHAPDF grids
+    :param iset:    The table set  
+    :param iF2:     flavor index for F2
+    :param iFL:     flavor index for FL
+    :param iF3:     flavor index for F3
+    :param sign:    1 for electron 1 for positron
+    :param rs:      center of mass energy
+    :param fname:   file name for the generator
+    :param veto:    user defined cuts
     """
 
     def __init__(self,wdir,tabname,iset,iF2,iFL,iF3,sign,rs,fname,veto,**kargs):
@@ -43,11 +52,7 @@ class MCEG:
 
         if self.veto==None: self.veto=lambda x,y,Q2,W2:1
 
-    def get_sigma_dxdy(self,x,y,iw):
-        """
-        positron sign =-1
-        electron sign = 1
-        """
+    def _get_sigma_dxdy(self,x,y,iw):
 
         Q2=x*y*(self.rs**2-par.M2)
         F2=self.stf.xfxQ2(self.iF2,x,Q2) 
@@ -62,7 +67,7 @@ class MCEG:
         factor*=4*np.pi*par.alfa**2/x/y/Q2
         return factor*((1-y-x**2*y**2*par.M2/Q2)*F2 + y**2*x*F1 +self.sign*(y-y**2/2)*x*F3)
 
-    def f(self,X):
+    def _f(self,X):
         jx    = self.xmax-self.xmin
         x     = self.xmin+X[0]*jx
         ymin  = self.Q2min/(self.rs**2-par.M2)/x
@@ -74,24 +79,27 @@ class MCEG:
         Q2max = x*self.ymax*(self.rs**2-par.M2)         
         if Q2>Q2max: return 0
 
-        xsec  = self.get_sigma_dxdy(x,y,self.iw)
+        xsec  = self._get_sigma_dxdy(x,y,self.iw)
         jac   = jx*jy
         wgt   = self.veto(x,y,Q2,W2)
         return xsec*wgt*jac
 
-    def vegas_integrate(self,neval,iw=0):
+    def _vegas_integrate(self,neval,iw=0):
         self.iw=iw
-        result = self.integ(self.f, nitn=10, neval=neval)
+        result = self.integ(self._f, nitn=10, neval=neval)
         return result
 
     def buil_mceg(self):
+        """
+        build the vegas integrator as MCEG
+        """
    
         print('integrating cross section...') 
         neval=10000
         cnt=0
         while 1:
             print('trial %d'%cnt)
-            result= self.vegas_integrate(neval)
+            result= self._vegas_integrate(neval)
             if result.Q<0.2:  neval*=10
             else: break
             cnt+=1
@@ -114,30 +122,43 @@ class MCEG:
         with open(mceg_name,'wb') as f:
             pickle.dump(self.integ,f)
 
-    def load_mceg(self):
+    def _load_mceg(self):
         file = open('%s/%s.po'%(self.wdir,self.fname), 'rb')
         self.integ = pickle.load(file) 
 
     def get_ntot(self,lum):
-        self.load_mceg()
+        """
+        :param lum:  str e.g.  '10:fb-1' 
+        :return: total number of events for a given 
+                 of the current generator and input luminosity
+        """
+        self._load_mceg()
         tot=0
         for X, wgt in self.integ.random():
-            tot+=wgt*self.f(X)
+            tot+=wgt*self._f(X)
         lum=convert_lum(lum)
         return int(lum*tot)
 
-    def get_batch_size(self):
-        self.load_mceg()
+    def _get_batch_size(self):
+        self._load_mceg()
         cnt=0
         for X, wgt in self.integ.random():
             cnt+=1
         return cnt
 
     def gen_events(self,nevents):
+        """
+        Generate events
+
+        :param nevents: number of desired events
+        :return: dictionary with arrays for X,Y,Q2,W.
+                 it also includes root s used to generate
+                 the mceg in case is needed for cross checks
+        """
         print('\nstart event generation')
 
-        self.load_mceg()
-        bsize=self.get_batch_size()
+        self._load_mceg()
+        bsize=self._get_batch_size()
         nruns=nevents/bsize+1
 
         X,Y,W=[],[],[]
@@ -146,7 +167,7 @@ class MCEG:
         for i in range(nruns):
             _X,_Y,_W=[],[],[]
             for V, wgt in self.integ.random():
-                _w =wgt*self.f(V)
+                _w =wgt*self._f(V)
                 if _w<=0: continue
                 cnt+=1
                 lprint('%d/%d'%(cnt,nevents))
