@@ -1,4 +1,4 @@
-from mpmath import fp
+#from mpmath import fp
 from scipy.special import gamma
 import numpy as np
 
@@ -8,7 +8,7 @@ CA       = 3.0
 CF       = 4.0/3.0
 TR       = 0.5
 TF       = 0.5
-euler    = fp.euler 
+#euler    = fp.euler 
 
 #--masses
 me       = 0.000511
