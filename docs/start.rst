@@ -5,7 +5,7 @@ dependencies
 ------------
 
 - python 2 or 3
-- lhapdf
+- lhapdf 6
 
 getting the code
 ----------------
@@ -18,7 +18,7 @@ getting the code
 setup
 -----
 
-use the script  ``install.py`` to create symlinks to your lhapdf directory 
+use the script ``setup.sh`` to set paths for  lhapdf 6 
 
 usage
 -----
