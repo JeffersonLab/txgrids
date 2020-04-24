@@ -111,11 +111,17 @@ smax=np.array([s['max']['W'],s['max']['X'],s['max']['Q2']])
 rho, pvalue = stats.spearmanr(smin,smax,axis=1)
 columns = ['W_min', 'X_min', 'Q2_min', 'W_max', 'X_max', 'Q2_max']
 
-output = OrderedDict()
+rho_output = OrderedDict()
 for i,key in enumerate(columns):
-    output[key]=rho[i]
-output = pd.DataFrame.from_dict( output, orient='index', columns=columns)
-print(output)
+    rho_output[key]=rho[i]
+rho_output = pd.DataFrame.from_dict( rho_output, orient='index', columns=columns)
+print(rho_output)
+
+pvalue_output = OrderedDict()
+for i,key in enumerate(columns):
+    pvalue_output[key]=pvalue[i]
+pvalue_output = pd.DataFrame.from_dict( pvalue_output, orient='index', columns=columns)
+print(pvalue_output)
 #--------------------------------------------------------------------------------------------------------------------
 
 
