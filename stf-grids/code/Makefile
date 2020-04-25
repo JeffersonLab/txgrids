@@ -17,12 +17,15 @@ LDFLAGS  += $(LHAPDFINCS) $(APFELINCS)
 CLIBS += $(LHAPDFLIBS) $(APFELLIBS)
 
 install : all
-all : PDFGrid StructureFunctionGrid
+all : PDFGrid StructureFunctionGrid SumRules
 
 PDFGrid: PDFGrid.o 
 	$(CXX) $(LDFLAGS) -o $@ $< $(CLIBS)
 
 StructureFunctionGrid: StructureFunctionGrid.o 
+	$(CXX) $(LDFLAGS) -o $@ $< $(CLIBS)
+
+SumRules: SumRules.o 
 	$(CXX) $(LDFLAGS) -o $@ $< $(CLIBS)
 
 .SUFFIXES : .cxx .o .f .c
@@ -34,4 +37,4 @@ StructureFunctionGrid: StructureFunctionGrid.o
 	$(F77)  -c $< 
 
 clean:
-	rm -rf *.lo *.o *.la PDFGrid StructureFunctionGrid *~
+	rm -rf *.lo *.o *.la PDFGrid StructureFunctionGrid SumRules *~
