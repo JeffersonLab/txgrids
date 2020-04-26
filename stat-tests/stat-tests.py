@@ -11,11 +11,11 @@ sys.path.append(os.path.dirname( os.path.dirname(os.path.abspath(__file__) ) ) )
 import numpy as np
 from theory.tools import save, load
 from theory.mceg  import MCEG
+from ndtest import ndtest
 
 #--matplotlib
 import matplotlib
-matplotlib.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
-matplotlib.rc('text',usetex=True)
+import matplotlib.pyplot as plt
 import pylab  as py
 from matplotlib.lines import Line2D
 from matplotlib.colors import LogNorm
@@ -24,7 +24,20 @@ from scipy import stats
 import pandas as pd
 from collections import OrderedDict, Counter
 
+from  matplotlib import rc
+rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+rc('text',usetex=True)
+
 wdir='.stats-tests'
+
+
+#to tweak:
+#---
+if len(sys.argv) < 1:
+    print "usage: ./stat-tests.py <Nevents>"
+    exit(1)
+
+Nevents = int(sys.argv[1])
 
 #--physical params and cuts
 rs= 140.7
@@ -35,18 +48,26 @@ def veto00(x,y,Q2,W2):
     if   W2 < 10          : return 0
     elif Q2 < 1           : return 0
     else                  : return 1
-
+#---
 
 #--lhapdf set and stf idx
 s = {'min':{}, 'max':{}}
-
+"""
 s['min']['tabname'] = 'JAM4EIC'
 s['min']['iset'] = 0
 s['min']['iF2'] = 90001
 s['min']['iFL'] = 90002
 s['min']['iF3'] = 90003
 
-s['max']['tabname'] = 'NNPDF31sx_nnlonllx_as_0118_LHCb_nf_6_SF'
+"""
+s['min']['tabname'] = 'NNPDF31_nnlo_pch_as_0118_rs_0.5_SF'
+s['min']['iset'] = 0
+s['min']['iF2'] = 1001
+s['min']['iFL'] = 1002
+s['min']['iF3'] = 1003
+
+
+s['max']['tabname'] = 'NNPDF31_nnlo_pch_as_0118_rs_1.0_SF'
 s['max']['iset'] = 0
 s['max']['iF2'] = 1001
 s['max']['iFL'] = 1002
@@ -59,7 +80,7 @@ for key in s.keys():
     s[key]['rs'] = rs
     s[key]['fname'] = 'mceg00'
     s[key]['veto'] = veto00
-    s[key]['fdata'] = wdir+"/"+s[key]['tabname']+"_data.po"
+    s[key]['fdata'] = wdir+"/"+s[key]['tabname']+"_data"+str(int(Nevents/1000))+"k.po"
 
 
 #--generate events
@@ -68,8 +89,7 @@ for key in s.keys():
     if not os.path.isfile(s[key]['fdata']):
         mceg=MCEG(**(s[key]))
         mceg.buil_mceg()
-        ntot=10000
-        s[key].update(mceg.gen_events(ntot))
+        s[key].update(mceg.gen_events(Nevents))
         save(s[key], s[key]['fdata'])
     else:
         s[key] = load(s[key]['fdata'])
@@ -78,6 +98,150 @@ np.set_printoptions(threshold=sys.maxsize)
 
 smin=np.array([s['min']['W'],s['min']['X'],s['min']['Q2']])
 smax=np.array([s['max']['W'],s['max']['X'],s['max']['Q2']])
+
+#------ 
+#--------------------------------------------------------------------------------------------------------------------
+stat, pvalue = stats.ks_2samp(smin[0,:], smax[0,:])
+print "Kolmogorov-Smirnov: stat = ", stat, " p-value = ", pvalue, "..."
+print "----------"
+#--------------------------------------------------------------------------------------------------------------------
+#------
+#--------------------------------------------------------------------------------------------------------------------
+
+#to tweak:
+#---
+NQ2bins = 100 # int(np.log10(Nevents)*25)
+print "NQ2bins = ", NQ2bins
+NXbins = 100  # int(np.log10(Nevents)*25)
+print "NXbins = ", NXbins
+choice_bins = 'min'
+#---
+
+Q2bins_smin = np.logspace(np.log10(np.min(s['min']['Q2'])), np.log10(np.max(s['min']['Q2'])),NQ2bins+1)
+Q2bins_smax = np.logspace(np.log10(np.min(s['max']['Q2'])), np.log10(np.max(s['max']['Q2'])),NQ2bins+1)
+
+Xbins_smin = np.logspace(np.log10(np.min(s['min']['X'])), np.log10(np.max(s['min']['X'])),NXbins+1)
+Xbins_smax = np.logspace(np.log10(np.min(s['max']['X'])), np.log10(np.max(s['max']['X'])),NXbins+1)
+
+if choice_bins == 'min':
+    Q2bins = Q2bins_smin
+    Xbins = Xbins_smin
+    resultpath = 'plots/ks-test_perxQ2_'+str(NXbins)+"-"+str(NQ2bins)+'sminbins_'+str(Nevents/1000)+'k-events.pdf'
+elif choice_bins == 'max':
+    Q2bins = Q2bins_smax
+    Xbins = Xbins_smax
+    resultpath = 'plots/ks-test_perxQ2_'+str(NXbins)+"-"+str(NQ2bins)+'smaxbins_'+str(Nevents/1000)+'k-events.pdf'
+
+smin_perQ2bin_perXbin = []
+smax_perQ2bin_perXbin = []
+
+Q2_dig_smin = np.digitize(s['min']['Q2'], Q2bins)
+Q2_dig_smax = np.digitize(s['max']['Q2'], Q2bins)
+
+X_dig_smin = np.digitize(s['min']['X'], Xbins)
+X_dig_smax = np.digitize(s['max']['X'], Xbins)
+
+for iQ2 in range(1, NQ2bins+1):
+    Q2mask_smin = np.where(Q2_dig_smin == iQ2, True, False)
+    Q2mask_smax = np.where(Q2_dig_smax == iQ2, True, False)
+    smin_perQ2bin_perXbin.append([])
+    smax_perQ2bin_perXbin.append([])
+    for iX in range(1, NXbins+1):
+        Xmask_smin = np.where(X_dig_smin == iX, True, False)
+        Xmask_smax = np.where(X_dig_smax == iX, True, False)
+
+        #combining masks
+        mask_smin = Q2mask_smin * Xmask_smin
+        mask_smax = Q2mask_smax * Xmask_smax
+
+        #apply mask
+        masked_smin = smin[:, mask_smin]
+        masked_smax = smax[:, mask_smax]
+
+        #append
+        smin_perQ2bin_perXbin[iQ2-1].append(masked_smin)
+        smax_perQ2bin_perXbin[iQ2-1].append(masked_smax)
+
+
+pvalues_perQ2bin_perXbin = []
+for iQ2 in range(0, NQ2bins):
+    pvalues_perQ2bin_perXbin.append([])
+    for iX in range(0, NXbins):
+        if not list(smin_perQ2bin_perXbin[iQ2][iX][0]) or not list(smax_perQ2bin_perXbin[iQ2][iX][0]):      
+            pvalue=-1
+        else:
+            stat, pvalue = stats.ks_2samp(smin_perQ2bin_perXbin[iQ2][iX][0], smax_perQ2bin_perXbin[iQ2][iX][0])
+        
+        pvalues_perQ2bin_perXbin[iQ2].append(pvalue)
+
+plt.clf()
+
+
+fig = plt.figure()
+fig.suptitle(r'$\textrm{Kolmogorov-Smirnov\,\,test}$' +
+             "\n min: "+s['min']['tabname'].replace("_", "\_") +
+             "\n max: "+s['max']['tabname'].replace("_", "\_"), fontsize=10)
+
+ax = fig.add_subplot(111)
+
+central_Q2bins = np.array(Q2bins)[:-1]+(np.array(Q2bins)[1:]-np.array(Q2bins)[:-1])/2
+central_Xbins = np.array(Xbins)[:-1]+(np.array(Xbins)[1:]-np.array(Xbins)[:-1])/2
+
+hist_Q2bins = []
+hist_Xbins = []
+hist_pvalues = []
+Nbins=0
+#reshaping
+for iQ2 in range(0, NQ2bins):
+    for iX in range(0, NXbins):
+        hist_Xbins.append(central_Xbins[iX])
+        hist_Q2bins.append(central_Q2bins[iQ2])
+        hist_pvalues.append(pvalues_perQ2bin_perXbin[iQ2][iX])
+
+h = plt.hist2d(np.log(hist_Xbins), np.log(hist_Q2bins), weights=hist_pvalues, bins=[
+               NXbins, NQ2bins], cmap='hot_r')  # , norm=LogNorm())
+#plt.colorbar(h[3], label=r'$p-value$')  # ticks=range(6),
+plt.clim(0, 1)
+cbar = plt.colorbar()
+cbar.ax.set_xlabel(r"$p-value$")  # , rotation=270)
+#cbar.ax.set_yscale('linear')  # , rotation=270)
+
+ax.set_xticks(np.log([1e-4,1e-3,1e-2,1e-1]))
+ax.set_xticklabels([r'$0.0001$',r'$0.001$',r'$0.01$',r'$0.1$'])
+ax.set_yticks(np.log([1,10,100,1000,10000]))
+ax.set_yticklabels([r'$1$',r'$10$',r'$100$',r'$1000$',r'$10000$'])
+#ax.set_yscale('log')
+#ax.set_xscale('log')
+ax.set_ylabel(r'$Q^2$',size=20)
+ax.set_xlabel(r'$x$',size=20)
+#ax.text(0.1, 0.7, r'$N_x = %s$, $N_{Q^2} = %s$ \\ $N_{events}= %s$ \\$\sqrt{s}=%0.2f{\rm~GeV}$' %(NXbins, NQ2bins, Nevents, rs), transform=ax.transAxes, size=15)
+props = dict(boxstyle='square', facecolor='white', edgecolor='gray', alpha=0.5)
+ax.text(0.1, 0.9, r'\hspace{-15pt}$N_x = %s$, $N_{Q^2} = %s$ \\ $N_{events}= %sk$ \\$\sqrt{s}=%0.2f{\rm~GeV}$' % (NXbins, NQ2bins, Nevents/1000, rs), transform=ax.transAxes, fontsize=15, verticalalignment='top', bbox=props)
+"""
+plt.hist(central_bins, weights=pvalues_perQ2bin, bins=Q2bins,
+         histtype="step", color="blue", ls="solid", linewidth=1.0, label=r"p-value")
+plt.xscale('log')
+plt.gcf().subplots_adjust(bottom=0.15)
+plt.xlabel(r"$Q^2$",fontsize=13)
+plt.ylabel(r"$p-value$",fontsize=17)
+plt.ylim(0,1.)
+plt.title("min: "+s['min']['tabname'].replace("_", "\_") +
+          "\n max: "+s['max']['tabname'].replace("_", "\_"), fontsize=12)
+handles, labels = ax.get_legend_handles_labels()
+new_handles = [Line2D([], [], c=h.get_edgecolor(), ls=h.get_linestyle()) for h in handles]
+#zer = np.zeros(NQ2bins)
+#ax.plot(central_bins, zer, linewidth=1, ls='--', color='black')
+#plt.legend(handles=new_handles, labels=labels, fontsize=13, loc='best')
+
+props = dict(boxstyle='square', facecolor='white', edgecolor='gray', alpha=0.5)
+ax.text(0.7, 0.95, r"$N^{Q^2}_{bins}=$"+str(NQ2bins)+"\n"+"Nevents="+str(Nevents/1000)+"k", transform=ax.transAxes, fontsize=12,
+        verticalalignment='top', bbox=props)
+"""
+plt.savefig(resultpath)
+print(resultpath+" saved...")
+print "----------"
+#--------------------------------------------------------------------------------------------------------------------
+
 
 #------ Pearson correlation coefficient
 #--------------------------------------------------------------------------------------------------------------------
@@ -122,10 +286,43 @@ for i,key in enumerate(columns):
     pvalue_output[key]=pvalue[i]
 pvalue_output = pd.DataFrame.from_dict( pvalue_output, orient='index', columns=columns)
 print(pvalue_output)
+print "----------"
 #--------------------------------------------------------------------------------------------------------------------
 
 
 
+#------
+#--------------------------------------------------------------------------------------------------------------------
+stat, pvalue = stats.ansari(smin[0, :], smax[0, :])
+print "Ansari-Bradley: stat = ", stat, " p-value = ", pvalue, "..."
+print "----------"
+#--------------------------------------------------------------------------------------------------------------------
+
+#------
+#--------------------------------------------------------------------------------------------------------------------
+stat, pvalue = stats.bartlett(smin[0, :], smax[0, :])
+print "Barlett: stat = ", stat, " p-value = ", pvalue, "..."
+print "----------"
+#--------------------------------------------------------------------------------------------------------------------
+
+#------
+#--------------------------------------------------------------------------------------------------------------------
+stat, critical_values, significance_level = stats.anderson_ksamp([smin[0, :], smax[0, :]])
+print "Anderson-Darling: stat = ", stat, " critical values = ", pvalue, " significance level = ", significance_level, "..."
+print "----------"
+#--------------------------------------------------------------------------------------------------------------------
+
+#------
+#--------------------------------------------------------------------------------------------------------------------
+stat, pvalue = stats.fligner(smin[0, :], smax[0, :])
+print "Fligner-Killeen: stat = ", stat, " p-value = ", pvalue, "..."
+print "----------"
+#--------------------------------------------------------------------------------------------------------------------
 
 
-
+#------
+#--------------------------------------------------------------------------------------------------------------------
+stat, pvalue = stats.kruskal(smin[0:], smax[0:])
+print "Kruskal-Wallis: stat = ", stat, " p-value = ", pvalue, "..." 
+print "----------"
+#--------------------------------------------------------------------------------------------------------------------
