@@ -131,23 +131,25 @@ LHAPDF grids
 
 
 .. list-table:: :math:`\rm \small \bf{A\!V\!AILABLE~~GRIDS}`
-   :widths: 10 10 30 25 20 15 15
+   :widths: 10 10 30 25 20 15 20 15
    :header-rows: 1
 
    * - Group
-     - target
+     - Target
      - Structure Functions
      - Theory
      - Cuts :math:`({\rm in~GeV}^2)`
-     - `lhapdf name`
-     - `status`
+     - lhapdf name
+     - Comments
+     - Status
 
    * - JAM
      - :math:`p`
      - :math:`\small F^{\gamma}_{2,L}~~F^{\gamma Z}_{2,L,3}~~F^{Z}_{2,L,3}~~F^{W^{\pm}}_{2,L,3}`
      - :math:`\small {\rm  NLO\!+\!TMC(GP)\!+\!HT}`
      - :math:`\small Q^2>1.69,~W^2>4`
-     - JAM4EIC 
+     - JAM4EIC
+     -  
      - in dev.
 
    * - 
@@ -156,11 +158,13 @@ LHAPDF grids
      - :math:`\small {\rm \small NLO\!+\!TMC(GP)\!+\!HT}`
      - :math:`\small Q^2>1.69,~W^2>4`
      - 
+     -  
      - in dev.
 
    * - NNPDF
      - :math:`p`
      - :math:`\small F_{2}`
+     - 
      - 
      - 
      - 
