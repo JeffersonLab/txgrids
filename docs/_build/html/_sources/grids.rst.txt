@@ -1,8 +1,12 @@
 LHAPDF grids
 ============
 
+Structure function index convention
+--------------------------------------
 
-.. list-table:: :math:`{\rm \small \bf{STRUCTURE~~FUNCTION~~INDEX~~CONVENTION}}~(T=p,n,d,...,A)`
+:math:`(T=p,n,d,...,A)`
+
+.. list-table:: 
    :widths: 25 25 25
    :header-rows: 1
 
@@ -129,8 +133,10 @@ LHAPDF grids
 
 
 
+Available grids
+---------------
 
-.. list-table:: :math:`\rm \small \bf{A\!V\!AILABLE~~GRIDS}`
+.. list-table:: 
    :widths: 10 10 30 25 20 15 20 15
    :header-rows: 1
 
@@ -143,27 +149,110 @@ LHAPDF grids
      - Comments
      - Status
 
+   * - CJ
+     - :math:`p`
+     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^-}_{2,L,3}`
+     - 
+     - 
+     - 
+     -  
+     - in dev.
+
+   * - 
+     - :math:`d`
+     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^-}_{2,L,3}`
+     - 
+     - 
+     - 
+     -  
+     - in dev.
+
+   * - CT
+     - :math:`p`
+     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^-}_{2,L,3}`
+     - 
+     - 
+     - 
+     -  
+     - in dev.
+
+   * - 
+     - :math:`d`
+     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^-}_{2,L,3}`
+     - 
+     - 
+     - 
+     -  
+     - in dev.
+
    * - JAM
      - :math:`p`
-     - :math:`\small F^{\gamma}_{2,L}~~F^{\gamma Z}_{2,L,3}~~F^{Z}_{2,L,3}~~F^{W^{\pm}}_{2,L,3}`
-     - :math:`\small {\rm  NLO\!+\!TMC(GP)\!+\!HT}`
-     - :math:`\small Q^2>1.69,~W^2>4`
+     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^-}_{2,L,3}`
+     - :math:`{\rm  NLO(ZMFVS)}`
+     - :math:`Q^2>1.69,~W^2>10`
+     - JAM4EIC
+     -  
+     - in dev.
+
+
+   * - 
+     - :math:`d`
+     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^-}_{2,L,3}`
+     - :math:`{\rm  NLO(ZMFVS)}`
+     - :math:`Q^2>1.69,~W^2>10`
      - JAM4EIC
      -  
      - in dev.
 
    * - 
+     - :math:`^3{\rm He}`
+     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^-}_{2,L,3}`
+     - :math:`{\rm  NLO(ZMFVS)}`
+     - :math:`Q^2>1.69,~W^2>10`
+     - JAM4EIC
+     -  
+     - in dev.
+
+
+   * - 
      - :math:`p`
-     - :math:`\small g^{\gamma}_{1,2}~~~g^{\gamma Z}_{1,2,5}~~~g^{Z}_{1,2,5}~~~g^{W^{\pm}}_{1,2,5}`
-     - :math:`\small {\rm \small NLO\!+\!TMC(GP)\!+\!HT}`
-     - :math:`\small Q^2>1.69,~W^2>4`
+     - :math:`g^{\gamma+\gamma Z+ Z}_{1},~~~g^{W^-}_{1}`
+     - :math:`{\rm  NLO(ZMFVS)}`
+     - :math:`Q^2>1.69,~W^2>10`
+     - 
+     -  
+     - in dev.
+
+   * - 
+     - :math:`d`
+     - :math:`g^{\gamma+\gamma Z+ Z}_{1},~~~g^{W^-}_{1}`
+     - :math:`{\rm  NLO(ZMFVS)}`
+     - :math:`Q^2>1.69,~W^2>10`
+     - 
+     -  
+     - in dev.
+
+   * - 
+     - :math:`^3{\rm He}`
+     - :math:`g^{\gamma+\gamma Z+ Z}_{1},~~~g^{W^-}_{1}`
+     - :math:`{\rm  NLO(ZMFVS)}`
+     - :math:`Q^2>1.69,~W^2>10`
      - 
      -  
      - in dev.
 
    * - NNPDF
      - :math:`p`
-     - :math:`\small F_{2}`
+     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^{\pm}}_{2,L,3}`
+     - :math:`{\rm NNLO(FONLL~GM~VFNS)\!+\!TMC}`
+     - :math:`Q^2 > 3,~W^2 > 12.5`
+     - 
+     - 
+     - in dev.
+
+   * - nNNPDF
+     - :math:`d`
+     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^{\pm}}_{2,L,3}`
      - 
      - 
      - 
@@ -172,14 +261,61 @@ LHAPDF grids
 
 
 
+.. _accardi: accardi@jlab.org
+.. _bertone: valerio.bertone@cern.ch
+.. _ethier: j.j.ethier@vu.nl
+.. _khalek: rabahak@nikhef.nl
+.. _melnitchouk: wmelnitc@jlab.org
+.. _nocera: e.nocera@nikhef.nl
+.. _rojo: j.rojo@vu.nl
+.. _sato: nsato@jlab.org
+
+
 Contact
 -------
 
-.. _rojo: j.rojo@vu.nl
-.. _nsato: nsato@jlab.org
+.. list-table:: 
+   :widths: 10 10 30 25 
+   :header-rows: 1
 
-- JAM: `nsato`_
-- NNPDF: `rojo`_
+   * - Group
+     - Target
+     - lhapdf name
+     - Contact
+
+   * - CJ(upol)
+     - :math:`p,d`
+     - 
+     - `accardi`_ , `melnitchouk`_
+
+   * - JAM(upol)
+     - :math:`p,d,^3{\rm \!He}`
+     - JAM4EIC
+     - `sato`_ , `melnitchouk`_
+
+   * - JAM(pol)
+     - :math:`p,d,^3{\rm \!He}`
+     - JAM4EIC
+     - `sato`_ , `melnitchouk`_
+
+
+   * - NNPDF(upol)
+     - :math:`p`
+     - 
+     - `bertone`_ , `khalek`_ 
+
+   * - NNPDF(pol)
+     - :math:`p,d`
+     - 
+     - `nocera`_ 
+
+
+   * - NNPDF(nuc)
+     - :math:`d,^3{\rm \!He}`
+     - 
+     - `ethier`_ , `khalek`_
+
+
 
 
 
