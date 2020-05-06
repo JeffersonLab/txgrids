@@ -21,11 +21,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -166,9 +166,9 @@
 <span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span><span class="nn">os</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pylab</span> <span class="k">as</span> <span class="nn">py</span>
-<span class="kn">import</span> <span class="nn">theory</span> <span class="k">as</span> <span class="nn">thy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">py</span>
+<span class="kn">import</span> <span class="nn">theory</span> <span class="kn">as</span> <span class="nn">thy</span>
 
 <span class="kn">from</span> <span class="nn">theory</span> <span class="kn">import</span> <span class="n">params</span> <span class="k">as</span> <span class="n">par</span>
 <span class="kn">from</span> <span class="nn">theory</span> <span class="kn">import</span> <span class="n">nnpdf</span>
@@ -188,7 +188,7 @@
 <span class="n">imem</span><span class="o">=</span><span class="mi">0</span>
 <span class="n">Q2</span><span class="o">=</span><span class="mf">10.0</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">thy</span><span class="o">.</span><span class="n">nnpdf</span><span class="o">.</span><span class="n">dsig_dx_dQ2</span><span class="p">(</span><span class="n">proc</span><span class="p">,</span><span class="n">particle</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">Q2</span><span class="p">,</span><span class="n">stot</span><span class="p">,</span><span class="n">units</span><span class="o">=</span><span class="s1">&#39;pb&#39;</span><span class="p">,</span><span class="n">imem</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="n">thy</span><span class="o">.</span><span class="n">nnpdf</span><span class="o">.</span><span class="n">dsig_dx_dQ2</span><span class="p">(</span><span class="n">proc</span><span class="p">,</span><span class="n">particle</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">Q2</span><span class="p">,</span><span class="n">stot</span><span class="p">,</span><span class="n">units</span><span class="o">=</span><span class="s1">&#39;pb&#39;</span><span class="p">,</span><span class="n">imem</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>

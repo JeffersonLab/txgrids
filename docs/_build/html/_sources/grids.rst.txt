@@ -31,12 +31,20 @@ Structure function index convention
      - :math:`908,~909,~910`
 
    * - 
-     - :math:`F_{2c}^{\gamma+\gamma Z+Z},~F_{Lc}^{\gamma+\gamma Z+Z},~F_{2c}^{\gamma+\gamma Z+Z}`
+     - :math:`F_{2c}^{\gamma+\gamma Z+Z},~F_{Lc}^{\gamma+\gamma Z+Z},~F_{3c}^{\gamma+\gamma Z+Z}`
      - :math:`911,~912,~913`
 
    * - 
-     - :math:`F_{2b}^{\gamma+\gamma Z+Z},~F_{Lb}^{\gamma+\gamma Z+Z},~F_{2b}^{\gamma+\gamma Z+Z}`
+     - :math:`F_{2b}^{\gamma+\gamma Z+Z},~F_{Lb}^{\gamma+\gamma Z+Z},~F_{3b}^{\gamma+\gamma Z+Z}`
      - :math:`914,~915,~916`
+
+   * - 
+     - :math:`F_{2c}^{\gamma},~F_{Lc}^{\gamma}`
+     - :math:`917,~918,~919`
+
+   * - 
+     - :math:`F_{2b}^{\gamma},~F_{Lb}^{\gamma}`
+     - :math:`920,~921,~922`
 
    * - :math:`~` 
      - 
