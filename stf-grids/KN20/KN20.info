@@ -1,0 +1,11 @@
+SetDesc: KN20 color dipole framework - quark + gluon shadowing, various dipole cross sections, various nuclei, for more visit: https://zenodo.org/record/3470138
+M. Krelina, J. Nemchik
+Reference: arXiv:2003.04156 [hep-ph]
+Format: lhagrid1
+DataVersion: 1
+Flavors: [900 901 911 912 914 915]
+FlavoursDesc: [F2, FL, F2c, FLc, F2b, FLb]
+XMin: 1e-06
+XMax: 0.1
+QMin: 0.31622776601683794
+QMax: 31.622776601683793
