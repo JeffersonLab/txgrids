@@ -262,7 +262,7 @@ Available grids
      - :math:`p`
      - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
      - Color dipole model + GBW
-     - :math:`0.1 < Q^2 < 1000, 1e-6 < x < 0.2`
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.2`
      - KN20_p_GBW
      - more details in arXiv:2003.04157
      - in dev
@@ -271,25 +271,25 @@ Available grids
      - :math:`p`
      - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
      - Color dipole model + IP-sat
-     - :math:`0.1 < Q^2 < 1000, 1e-6 < x < 0.3`
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.3`
      - KN20_p_IPsat
      - more details in arXiv:2003.04158
      - in dev
 
    * - 
-     - :math:`2D`
+     - :math:`d`
      - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
      - Color dipole model + KST + quark shadowing
-     - :math:`0.1 < Q^2 < 1000, 1e-6 < x < 0.4`
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.4`
      - KN20_2D_KST_qShad
      - more details in arXiv:2003.04159
      - in dev
       
    * - 
-     - :math:`2D`
+     - :math:`d`
      - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
      - Color dipole model + GBW + quark shadowing
-     - :math:`0.1 < Q^2 < 1000, 1e-6 < x < 0.5`
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.5`
      - KN20_2D_GBW_qShad
      - more details in arXiv:2003.04160
      - in dev
