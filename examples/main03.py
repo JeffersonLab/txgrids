@@ -47,7 +47,7 @@ ax.plot(X,F3,label='F3 NNPDF')
 ax.legend()
 ax.set_ylim(0,1.7)
 ax.semilogx()
-ax.set_ylabel(r'$F_x(x,Q^2=100)$')
+ax.set_ylabel(r'$F_x(x,Q^2=90)$')
 ax.set_xlabel(r'$x$')
 
 py.tight_layout()
