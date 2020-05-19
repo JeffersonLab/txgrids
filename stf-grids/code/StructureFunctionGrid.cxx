@@ -85,6 +85,7 @@ int main() {
   APFEL::SetAlphaQCDRef(asref,Qref);
   APFEL::SetPoleMasses(mc,mb,mt);
   APFEL::SetLHgridParameters(150, 75, xmin, 0.1, 1, 100, Q2min, Q2max);
+  APFEL::EnableTargetMassCorrections(true);
   APFEL::LHAPDFgridStructureFunctions(dist.size()-1, Qin, set + "_SF");
 
   // Test produced grid
@@ -93,7 +94,7 @@ int main() {
   const vector<double> Qtest{2, 5, 10, 20, 100, 1000, 10000};
   APFEL::SetReplica(0);
   APFEL::SetProcessDIS("NC");
-  APFEL::SetProjectileDIS("neutrino");
+  //APFEL::SetProjectileDIS("neutrino");
 
   cout << scientific;
   for (auto const& q: Qtest)
