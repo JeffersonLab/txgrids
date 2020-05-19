@@ -34,7 +34,7 @@ iset,iF2,iFL,iF3=0,90001,90002,90003
 F2,FL,F3 = get_stf(tabname,iset,iF2,iFL,iF3)
 ax.plot(X,F2,label='F2 JAM')
 ax.plot(X,FL,label='FL JAM')
-ax.plot(X,F2,label='F3 JAM')
+ax.plot(X,F3,label='F3 JAM')
 
 
 tabname='NNPDF31_nnlo_pch_as_0118_rs_0.5_SF'     
