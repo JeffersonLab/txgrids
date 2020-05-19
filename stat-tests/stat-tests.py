@@ -32,7 +32,7 @@ wdir='.stats-tests'
 
 
 #to tweak:
-#---
+#-----------------------------------------------
 if len(sys.argv) < 1:
     print "usage: ./stat-tests.py <Nevents>"
     exit(1)
@@ -42,13 +42,20 @@ Nevents = int(sys.argv[1])
 #--physical params and cuts
 rs= 140.7
 lum='10:fb-1'
+lum_label= r'$\mathcal{L} = 10\,fb^{-1}$'
 sign=1 #--electron=1 positron=-1
 
+cuts_label = r"$ W^2 > 10\,\,,\,\, Q^2> 1$"
 def veto00(x,y,Q2,W2):
     if   W2 < 10          : return 0
     elif Q2 < 1           : return 0
     else                  : return 1
-#---
+
+
+stat_methods = ["Kolmogorov-Smirnov", "Mann-Whitney",
+                "Kruskal-Wallis"]  # "Barlett" #"Fligner-Killeen" #"Ansari-Bradley"
+fig_composition = [3,2] # make room for 2 additional hists
+#-----------------------------------------------
 
 #--lhapdf set and stf idx
 s = {'min':{}, 'max':{}}
@@ -99,20 +106,22 @@ np.set_printoptions(threshold=sys.maxsize)
 smin=np.array([s['min']['W'],s['min']['X'],s['min']['Q2']])
 smax=np.array([s['max']['W'],s['max']['X'],s['max']['Q2']])
 
+"""
 #------ 
 #--------------------------------------------------------------------------------------------------------------------
 stat, pvalue = stats.ks_2samp(smin[0,:], smax[0,:])
 print "Kolmogorov-Smirnov: stat = ", stat, " p-value = ", pvalue, "..."
 print "----------"
 #--------------------------------------------------------------------------------------------------------------------
+"""
 #------
 #--------------------------------------------------------------------------------------------------------------------
 
 #to tweak:
 #---
-NQ2bins = 100 # int(np.log10(Nevents)*25)
+NQ2bins = 50 # int(np.log10(Nevents)*25)
 print "NQ2bins = ", NQ2bins
-NXbins = 100  # int(np.log10(Nevents)*25)
+NXbins = 50  # int(np.log10(Nevents)*25)
 print "NXbins = ", NXbins
 choice_bins = 'min'
 #---
@@ -141,6 +150,7 @@ Q2_dig_smax = np.digitize(s['max']['Q2'], Q2bins)
 X_dig_smin = np.digitize(s['min']['X'], Xbins)
 X_dig_smax = np.digitize(s['max']['X'], Xbins)
 
+empty_bins=[]
 for iQ2 in range(1, NQ2bins+1):
     Q2mask_smin = np.where(Q2_dig_smin == iQ2, True, False)
     Q2mask_smax = np.where(Q2_dig_smax == iQ2, True, False)
@@ -162,71 +172,136 @@ for iQ2 in range(1, NQ2bins+1):
         smin_perQ2bin_perXbin[iQ2-1].append(masked_smin)
         smax_perQ2bin_perXbin[iQ2-1].append(masked_smax)
 
-
-pvalues_perQ2bin_perXbin = []
-for iQ2 in range(0, NQ2bins):
-    pvalues_perQ2bin_perXbin.append([])
-    for iX in range(0, NXbins):
-        if not list(smin_perQ2bin_perXbin[iQ2][iX][0]) or not list(smax_perQ2bin_perXbin[iQ2][iX][0]):      
-            pvalue=-1
-        else:
-            stat, pvalue = stats.ks_2samp(smin_perQ2bin_perXbin[iQ2][iX][0], smax_perQ2bin_perXbin[iQ2][iX][0])
-        
-        pvalues_perQ2bin_perXbin[iQ2].append(pvalue)
-
-plt.clf()
-
+        #keep track of empty bins
+        if not list(masked_smin[0]) or not list(masked_smax[0]): #! TBD: if this should be an 'and' instead
+            empty_bins.append([iQ2-1,iX-1])
 
 fig = plt.figure()
-fig.suptitle(r'$\textrm{Kolmogorov-Smirnov\,\,test}$' +
-             "\n min: "+s['min']['tabname'].replace("_", "\_") +
-             "\n max: "+s['max']['tabname'].replace("_", "\_"), fontsize=10)
+fig.subplots_adjust(top=0.85, bottom=0.)
+fig.suptitle(r'\hspace{-15pt}$\textrm{min: '+s['min']['tabname'].replace("_", "\_") + r'}$' +
+             r'\\ $\textrm{max: '+s['max']['tabname'].replace("_", "\_") + r'}$', fontsize=10, y=0.98)
+for imethod, stat_method in enumerate(stat_methods): # ["Kolmogorov-Smirnov", "Ansari-Bradley", "Barlett", "Fligner-Killeen", "Kruskal-Wallis"]
+    print "method: ", stat_method, "... "
+    pvalues_perQ2bin_perXbin = []
+    for iQ2 in range(0, NQ2bins):
+        pvalues_perQ2bin_perXbin.append([])
+        for iX in range(0, NXbins):
+            if [iQ2, iX] in empty_bins:
+                pvalue=-1
+            else:
+                if stat_method == "Kolmogorov-Smirnov":
+                    stat, pvalue = stats.ks_2samp(smin_perQ2bin_perXbin[iQ2][iX][0], smax_perQ2bin_perXbin[iQ2][iX][0])
+                elif stat_method == "Ansari-Bradley":
+                    stat, pvalue = stats.ansari(smin_perQ2bin_perXbin[iQ2][iX][0], smax_perQ2bin_perXbin[iQ2][iX][0])
+                elif stat_method == "Mann-Whitney":
+                    stat, pvalue = stats.mannwhitneyu(smin_perQ2bin_perXbin[iQ2][iX][0], smax_perQ2bin_perXbin[iQ2][iX][0])
+                elif stat_method == "Barlett":
+                    stat, pvalue = stats.bartlett(smin_perQ2bin_perXbin[iQ2][iX][0], smax_perQ2bin_perXbin[iQ2][iX][0])
+                elif stat_method == "Fligner-Killeen":
+                    stat, pvalue = stats.fligner(smin_perQ2bin_perXbin[iQ2][iX][0], smax_perQ2bin_perXbin[iQ2][iX][0])
+                elif stat_method == "Kruskal-Wallis":
+                    stat, pvalue = stats.kruskal(smin_perQ2bin_perXbin[iQ2][iX][0], smax_perQ2bin_perXbin[iQ2][iX][0])
+            
+            pvalues_perQ2bin_perXbin[iQ2].append(pvalue)
 
-ax = fig.add_subplot(111)
+    #plt.clf()
+    #fig = plt.figure()
+    #fig.suptitle(r'$\textrm{'+stat_method+r'\,\,test}$' +
+    #            r'\\ $\textrm{min: '+s['min']['tabname'].replace("_", "\_") + r'}$'+
+    #            r'\\ $\textrm{max: '+s['max']['tabname'].replace("_", "\_") + r'}$', fontsize=10)
 
-central_Q2bins = np.array(Q2bins)[:-1]+(np.array(Q2bins)[1:]-np.array(Q2bins)[:-1])/2
-central_Xbins = np.array(Xbins)[:-1]+(np.array(Xbins)[1:]-np.array(Xbins)[:-1])/2
+    ax = fig.add_subplot(fig_composition[0]*100+fig_composition[1]*10+imethod+1)
+    plt.tight_layout(rect=[0, 0.08, 1., 0.95])
+    ax.title.set_text(r'$\textrm{'+stat_method+r'\,\,test}$')# +
+                      #r'\\ $\textrm{min: '+s['min']['tabname'].replace("_", "\_") + r'}$' +
+                      #r'\\ $\textrm{max: '+s['max']['tabname'].replace("_", "\_") + r'}$')#, fontsize=10)
 
-hist_Q2bins = []
-hist_Xbins = []
-hist_pvalues = []
-Nbins=0
-#reshaping
-for iQ2 in range(0, NQ2bins):
-    for iX in range(0, NXbins):
-        hist_Xbins.append(central_Xbins[iX])
-        hist_Q2bins.append(central_Q2bins[iQ2])
-        hist_pvalues.append(pvalues_perQ2bin_perXbin[iQ2][iX])
+    central_Q2bins = np.array(Q2bins)[:-1]+(np.array(Q2bins)[1:]-np.array(Q2bins)[:-1])/2
+    central_Xbins = np.array(Xbins)[:-1]+(np.array(Xbins)[1:]-np.array(Xbins)[:-1])/2
 
-h = plt.hist2d(np.log(hist_Xbins), np.log(hist_Q2bins), weights=hist_pvalues, bins=[
-               NXbins, NQ2bins], cmap='hot_r')  # , norm=LogNorm())
-#plt.colorbar(h[3], label=r'$p-value$')  # ticks=range(6),
-plt.clim(0, 1)
-cbar = plt.colorbar()
-cbar.ax.set_xlabel(r"$p-value$")  # , rotation=270)
-#cbar.ax.set_yscale('linear')  # , rotation=270)
+    hist_Q2bins = []
+    hist_Xbins = []
+    hist_pvalues = []
+    hist_Nevents = {'max':[],'min':[]}
+    Nbins=0
+    #reshaping
+    for iQ2 in range(0, NQ2bins):
+        for iX in range(0, NXbins):
+            #if [iQ2, iX] not in empty_bins:
+            hist_Xbins.append(central_Xbins[iX])
+            hist_Q2bins.append(central_Q2bins[iQ2])
+            hist_pvalues.append(pvalues_perQ2bin_perXbin[iQ2][iX])
+            hist_Nevents['min'].append(len(list(smin_perQ2bin_perXbin[iQ2][iX][0])))
+            hist_Nevents['max'].append(len(list(smax_perQ2bin_perXbin[iQ2][iX][0])))
 
-ax.set_xticks(np.log([1e-4,1e-3,1e-2,1e-1]))
-ax.set_xticklabels([r'$0.0001$',r'$0.001$',r'$0.01$',r'$0.1$'])
-ax.set_yticks(np.log([1,10,100,1000,10000]))
-ax.set_yticklabels([r'$1$',r'$10$',r'$100$',r'$1000$',r'$10000$'])
-#ax.set_yscale('log')
-#ax.set_xscale('log')
-ax.set_ylabel(r'$Q^2$',size=20)
-ax.set_xlabel(r'$x$',size=20)
+    #convert p-values to Z-scores
+    hist_Z_score = stats.norm.ppf(1-(np.array(hist_pvalues))/2)
+
+    h = plt.hist2d(np.log(hist_Xbins), np.log(hist_Q2bins), weights=hist_Z_score, bins=[
+                NXbins, NQ2bins], cmap='hot_r')
+    #plt.clim(0, 1)
+    plt.clim(0,5)
+    cbar = plt.colorbar()
+    cbar.ax.set_xlabel(r"$\sigma-level$")  # , rotation=270)
+    #cbar.ax.set_yscale('linear')  # , rotation=270)
+
+    if (imethod+1)%2 == 0:
+        #remove xticks labels
+        ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
+        ax.set_xticklabels([])
+        ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
+        ax.set_yticklabels([])
+    else:
+        #remove xticks labels
+        ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
+        ax.set_xticklabels([])
+        ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
+        ax.set_yticklabels([r'$1$', r'$10$', r'$100$', r'$1000$', r'$10000$'])
+        ax.set_ylabel(r'$Q^2$', size=20)
+
 #ax.text(0.1, 0.7, r'$N_x = %s$, $N_{Q^2} = %s$ \\ $N_{events}= %s$ \\$\sqrt{s}=%0.2f{\rm~GeV}$' %(NXbins, NQ2bins, Nevents, rs), transform=ax.transAxes, size=15)
 props = dict(boxstyle='square', facecolor='white', edgecolor='gray', alpha=0.5)
-ax.text(0.1, 0.9, r'\hspace{-15pt}$N_x = %s$, $N_{Q^2} = %s$ \\ $N_{events}= %sk$ \\$\sqrt{s}=%0.2f{\rm~GeV}$' % (NXbins, NQ2bins, Nevents/1000, rs), transform=ax.transAxes, fontsize=15, verticalalignment='top', bbox=props)
+ax.text(1.45, 0.9, r'\hspace{-15pt}$N_x = %s$, $N_{Q^2} = %s$ \\ $N_{events}= %sk$ \\$\sqrt{s}=%0.2f{\rm~GeV}$ \\ %s' % (
+    NXbins, NQ2bins, Nevents/1000, rs, cuts_label), transform=ax.transAxes, fontsize=15, verticalalignment='top', bbox=props)
+
+#plot number of events in bins
+for ikey,key in enumerate(s.keys()):
+    print "Nevents of sample ",key," plotted..."
+    ax = fig.add_subplot(fig_composition[0]*100+fig_composition[1]*10+5+ikey)
+    ax.title.set_text(r'$\textrm{'+key+r' sample}\,\,N_{events}$')  # +
+    h = plt.hist2d(np.log(hist_Xbins), np.log(hist_Q2bins), weights=hist_Nevents[key], bins=[
+        NXbins, NQ2bins], cmap='hot_r')
+    
+    #plt.clim(0, 5)
+    cbar = plt.colorbar()
+    cbar.ax.set_xlabel(r"$N_{events}$")  # , rotation=270)
+
+    if (ikey+1) % 2 == 0:
+        ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
+        ax.set_xticklabels([r'$0.0001$', r'$0.001$', r'$0.01$', r'$0.1$'])
+        ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
+        ax.set_yticklabels([])
+        ax.set_xlabel(r'$x$', size=20)
+
+    else:
+        ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
+        ax.set_xticklabels([r'$0.0001$', r'$0.001$', r'$0.01$', r'$0.1$'])
+        ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
+        ax.set_yticklabels([r'$1$', r'$10$', r'$100$', r'$1000$', r'$10000$'])
+        ax.set_ylabel(r'$Q^2$', size=20)
+        ax.set_xlabel(r'$x$', size=20)
+
+
 """
 plt.hist(central_bins, weights=pvalues_perQ2bin, bins=Q2bins,
-         histtype="step", color="blue", ls="solid", linewidth=1.0, label=r"p-value")
+        histtype="step", color="blue", ls="solid", linewidth=1.0, label=r"p-value")
 plt.xscale('log')
 plt.gcf().subplots_adjust(bottom=0.15)
 plt.xlabel(r"$Q^2$",fontsize=13)
 plt.ylabel(r"$p-value$",fontsize=17)
 plt.ylim(0,1.)
 plt.title("min: "+s['min']['tabname'].replace("_", "\_") +
-          "\n max: "+s['max']['tabname'].replace("_", "\_"), fontsize=12)
+        "\n max: "+s['max']['tabname'].replace("_", "\_"), fontsize=12)
 handles, labels = ax.get_legend_handles_labels()
 new_handles = [Line2D([], [], c=h.get_edgecolor(), ls=h.get_linestyle()) for h in handles]
 #zer = np.zeros(NQ2bins)
@@ -242,6 +317,8 @@ print(resultpath+" saved...")
 print "----------"
 #--------------------------------------------------------------------------------------------------------------------
 
+
+"""
 
 #------ Pearson correlation coefficient
 #--------------------------------------------------------------------------------------------------------------------
@@ -326,3 +403,4 @@ stat, pvalue = stats.kruskal(smin[0:], smax[0:])
 print "Kruskal-Wallis: stat = ", stat, " p-value = ", pvalue, "..." 
 print "----------"
 #--------------------------------------------------------------------------------------------------------------------
+"""
