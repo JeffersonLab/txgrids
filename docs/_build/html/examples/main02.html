@@ -85,6 +85,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../start.html">Gettin Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../grids.html">LHAPDF grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bench.html">Benchmarks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../codes.html">Codes</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">example programs</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="index.html">example programs</a></li>
@@ -182,17 +183,15 @@
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">sys.path.append(os.path.dirname(</span> <span class="pre">os.path.dirname(os.path.abspath(__file__)</span> <span class="pre">)</span> <span class="pre">)</span> <span class="pre">)</span></code>
-will add paths to be able to load the theory module.</p>
-<p>Next we setup lhapdf structure functions</p>
-<p>Next we set physical parameters of the reaction</p>
+will add paths to be able to load the theory module.
+Next we set physical parameters of the reaction</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rs</span>   <span class="o">=</span> <span class="mf">140.7</span>
 <span class="n">lum</span>  <span class="o">=</span> <span class="s1">&#39;10:fb-1&#39;</span>
 <span class="n">sign</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1">#--electron=1 positron=-1</span>
 </pre></div>
 </div>
-<p>Select lhapdf tables and flavor flags for structure functions</p>
+<p>Select lhapdf table name</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tabname</span><span class="o">=</span><span class="s1">&#39;JAM4EIC&#39;</span>
-<span class="n">iset</span><span class="p">,</span><span class="n">iF2</span><span class="p">,</span><span class="n">iFL</span><span class="p">,</span><span class="n">iF3</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="mi">90001</span><span class="p">,</span><span class="mi">90002</span><span class="p">,</span><span class="mi">90003</span>
 </pre></div>
 </div>
 <p>Define a user defined global cuts</p>
@@ -206,13 +205,12 @@ will add paths to be able to load the theory module.</p>
 and initialize the <code class="docutils literal notranslate"><span class="pre">IDIS</span></code> class</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="o">=</span><span class="p">{}</span>
 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;tabname&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tabname</span>
-<span class="n">data</span><span class="p">[</span><span class="s1">&#39;iset&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">iset</span>
-<span class="n">data</span><span class="p">[</span><span class="s1">&#39;iF2&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="n">iF2</span>
-<span class="n">data</span><span class="p">[</span><span class="s1">&#39;iFL&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="n">iFL</span>
-<span class="n">data</span><span class="p">[</span><span class="s1">&#39;iF3&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="n">iF3</span>
-<span class="n">data</span><span class="p">[</span><span class="s1">&#39;sign&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="mi">1</span> <span class="c1">#--electron=1 positron=-1</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;iset&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="mi">0</span>    <span class="c1">#--central</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;iF2&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="mi">908</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;iFL&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="mi">909</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;iF3&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="mi">910</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;sign&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="mi">1</span>    <span class="c1">#--electron=1 positron=-1</span>
 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;veto&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">veto</span>
-
 <span class="n">idis</span><span class="o">=</span><span class="n">IDIS</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -229,7 +227,8 @@ cross section</p>
 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ymin&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="mf">0.7</span>
 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ymax&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="mf">0.8</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">idis</span><span class="o">.</span><span class="n">get_cross_section</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+<span class="n">val</span><span class="p">,</span><span class="n">err</span><span class="p">,</span><span class="n">Q</span> <span class="o">=</span> <span class="n">idis</span><span class="o">.</span><span class="n">get_cross_section</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%0.4e</span><span class="s1"> +/- </span><span class="si">%0.4e</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">) (Q=</span><span class="si">%f</span><span class="s1">)&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">val</span><span class="p">,</span><span class="n">err</span><span class="p">,</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">],</span><span class="n">Q</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Here use <code class="docutils literal notranslate"><span class="pre">mode=xy</span></code> to integrate cross sections in <span class="math notranslate nohighlight">\(x-y\)</span> space.  The
@@ -243,13 +242,8 @@ the cross section in <span class="math notranslate nohighlight">\(x-Q^2\)</span>
 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Q2min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">5.0</span>
 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Q2max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">10.0</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%0.3e</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">idis</span><span class="o">.</span><span class="n">get_cross_section</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
-</pre></div>
-</div>
-<p>or to compute the toal cross section
-with cuts</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="s1">&#39;tot&#39;</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">idis</span><span class="o">.</span><span class="n">get_cross_section</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+<span class="n">val</span><span class="p">,</span><span class="n">err</span><span class="p">,</span><span class="n">Q</span> <span class="o">=</span> <span class="n">idis</span><span class="o">.</span><span class="n">get_cross_section</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%0.4e</span><span class="s1"> +/- </span><span class="si">%0.4e</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">) (Q=</span><span class="si">%f</span><span class="s1">)&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">val</span><span class="p">,</span><span class="n">err</span><span class="p">,</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">],</span><span class="n">Q</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
