@@ -6,7 +6,7 @@ Format:          lhagrid1
 DataVersion:     1
 NumMembers:      1
 Particle:        p
-Flavors:         [90001, 90002, 90003, ]
+Flavors:         [908, 909, 910, ]
 OrderQCD:        1
 FlavorScheme:    <flav scheme>
 NumFlavors:      3
