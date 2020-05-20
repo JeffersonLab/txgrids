@@ -10,7 +10,7 @@ import sys,os
 sys.path.append(os.path.dirname( os.path.dirname(os.path.abspath(__file__) ) ) )
 import numpy as np
 from theory.tools import save, load
-from theory.mceg  import MCEG
+from theory.seed_mceg  import MCEG
 from ndtest import ndtest
 
 #--matplotlib
@@ -67,7 +67,7 @@ s['min']['iFL'] = 90002
 s['min']['iF3'] = 90003
 
 """
-s['min']['tabname'] = 'NNPDF31_nnlo_pch_as_0118_rs_0.5_SF'
+s['min']['tabname'] = 'NNPDF31_nnlo_pch_as_0118_SF'
 s['min']['iset'] = 0
 s['min']['iF2'] = 1001
 s['min']['iFL'] = 1002
@@ -75,7 +75,7 @@ s['min']['iF3'] = 1003
 s['min']['seed'] = 1
 
 
-s['max']['tabname'] = 'NNPDF31_nnlo_pch_as_0118_rs_0.5_SF'
+s['max']['tabname'] = 'NNPDF31_nnlo_pch_as_0118_SF'
 s['max']['iset'] = 0
 s['max']['iF2'] = 1001
 s['max']['iFL'] = 1002
@@ -189,7 +189,7 @@ for imethod, stat_method in enumerate(stat_methods): # ["Kolmogorov-Smirnov", "A
         pvalues_perQ2bin_perXbin.append([])
         for iX in range(0, NXbins):
             if [iQ2, iX] in empty_bins:
-                pvalue=-1
+                pvalue=1
             else:
                 if stat_method == "Kolmogorov-Smirnov":
                     stat, pvalue = stats.ks_2samp(smin_perQ2bin_perXbin[iQ2][iX][0], smax_perQ2bin_perXbin[iQ2][iX][0])
@@ -237,7 +237,18 @@ for imethod, stat_method in enumerate(stat_methods): # ["Kolmogorov-Smirnov", "A
             hist_Nevents['max'].append(len(list(smax_perQ2bin_perXbin[iQ2][iX][0])))
 
     #convert p-values to Z-scores
-    hist_Z_score = stats.norm.ppf(1-(np.array(hist_pvalues))/2)
+    hist_Z_score=[]
+    for i in range(0, NQ2bins*NXbins):
+            if hist_pvalues[i] <= 1e-15:
+                sigma_lvl = stats.norm.ppf(1-(1e-15)/2)
+            elif hist_pvalues[i] == 1:
+                sigma_lvl=0
+            else:
+                sigma_lvl = stats.norm.ppf(1-(hist_pvalues[i])/2)
+
+            hist_Z_score.append(sigma_lvl)
+
+    #hist_Z_score = stats.norm.ppf(1-(np.array(hist_pvalues))/2)
 
     h = plt.hist2d(np.log(hist_Xbins), np.log(hist_Q2bins), weights=hist_Z_score, bins=[
                 NXbins, NQ2bins], cmap='hot_r')
@@ -315,6 +326,7 @@ ax.text(0.7, 0.95, r"$N^{Q^2}_{bins}=$"+str(NQ2bins)+"\n"+"Nevents="+str(Nevents
         verticalalignment='top', bbox=props)
 """
 plt.savefig(resultpath)
+plt.clf
 print(resultpath+" saved...")
 print "----------"
 #--------------------------------------------------------------------------------------------------------------------
@@ -406,3 +418,21 @@ print "Kruskal-Wallis: stat = ", stat, " p-value = ", pvalue, "..."
 print "----------"
 #--------------------------------------------------------------------------------------------------------------------
 """
+os.system("rm -r bins")
+os.mkdir('bins/')
+i=0
+for iQ2 in range(0, NQ2bins):
+    for iX in range(0, NXbins):
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        #plt.tight_layout(rect=[0, 0.08, 1., 0.95])
+        ax.title.set_text(r'$\sigma-lvl=$' +
+                          str(round(hist_Z_score[i], 2))+"; x="+str(round(central_Xbins[iX], 2))+"; Q2="+str(round(central_Q2bins[iQ2], 2)))
+
+        ax.hist(smin_perQ2bin_perXbin[iQ2][iX][0], bins='fd', facecolor='red', histtype="step", alpha=1., label='min',ls='-',linewidth=1.5)
+        ax.hist(smax_perQ2bin_perXbin[iQ2][iX][0], bins='fd', facecolor='blue', histtype="step", alpha=1., label='min', ls='-', linewidth=1.5)
+
+        plt.savefig("bins/Q2_"+str(iQ2)+"_X_"+str(iX)+"_p_"+str(round(hist_Z_score[i],2))+".pdf")
+        plt.clf
+        i+=1
+
