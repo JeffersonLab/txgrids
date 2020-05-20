@@ -1,9 +1,4 @@
 #!/usr/bin/env python
-######################################
-# authors: N.Sato (nsato@jlab.org) 
-#
-# last update: 05-19-20
-#####################################
 import sys,os
 sys.path.append(os.path.dirname( os.path.dirname(os.path.abspath(__file__) ) ) )
 import numpy as np
@@ -15,81 +10,83 @@ matplotlib.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
 matplotlib.rc('text',usetex=True)
 import pylab  as py
 
-Q2=90.0
+Q2=[5,10,100]
 X1=10**np.linspace(-4,-1)
 X2=np.linspace(0.101,0.99)
 X=np.append(X1,X2)
+iset,iF2,iFL,iF3=0,908, 909, 910 
 
-def get_stf(tabname,iset,iF2,iFL,iF3):
+def get_stf(X,Q2,tabname,iset,iF2,iFL,iF3):
     stf=lhapdf.mkPDF(tabname,iset)
-    F2=[stf.xfxQ2(iF2,x,Q2) for x in X]  
-    FL=[stf.xfxQ2(iFL,x,Q2) for x in X]
-    F3=[stf.xfxQ2(iF3,x,Q2) for x in X]
+    F2=np.array([stf.xfxQ2(iF2,x,Q2) for x in X]) 
+    FL=np.array([stf.xfxQ2(iFL,x,Q2) for x in X])
+    F3=np.array([stf.xfxQ2(iF3,x,Q2) for x in X])
     return F2,FL,F3
 
-ax=py.subplot(111)
 
-tabname='JAM4EIC'             
-iset,iF2,iFL,iF3=0,90001,90002,90003  
-F2,FL,F3 = get_stf(tabname,iset,iF2,iFL,iF3)
+tabnames=[        
+           'NNPDF31_lo_as_0118_SF'
+          ,'NNPDF31_nnlo_pch_as_0118_SF'
+          ,'JAM4EIC'      
+         ]
 
-ax.plot(X,F2,label='F2 '+tabname,ls='-')
-ax.plot(X,FL,label='FL '+tabname,ls='-')
-ax.plot(X,F3,label='F3 '+tabname,ls='-')
+data={}
+for tabname in tabnames:
+    data[tabname]={}
+    for q2 in Q2:
+        F2,FL,F3 = get_stf(X,q2,tabname,iset,iF2,iFL,iF3)
+        data[tabname][q2]={}
+        data[tabname][q2]['F2']=F2 
+        data[tabname][q2]['FL']=FL 
+        data[tabname][q2]['F3']=F3
 
 
-tabname = 'NNPDF31_nnlo_pch_as_0118_SF'
-iset,iF2,iFL,iF3=0,1001,1002,1003  
-F2,FL,F3 = get_stf(tabname,iset,iF2,iFL,iF3)
-ax.plot(X,F2,label='NC F2 '+tabname.replace("_","\_"),ls='--')
-ax.plot(X,FL,label='FL '+tabname.replace("_","\_"),ls='--')
-ax.plot(X,F3,label='F3 '+tabname.replace("_","\_"),ls='--')
+nrows,ncols=3,3
+fig = py.figure(figsize=(ncols*5,nrows*3))
 
-"""
-tabname = 'NNPDF31_lo_as_0118_SF'
-iset,iF2,iFL,iF3=0,1001,1002,1003  
-F2,FL,F3 = get_stf(tabname,iset,iF2,iFL,iF3)
-ax.plot(X,F2,label='NC F2 '+tabname.replace("_","\_"),ls='dotted')
-ax.plot(X,FL,label='FL '+tabname.replace("_","\_"),ls='dotted')
-ax.plot(X,F3,label='F3 '+tabname.replace("_","\_"),ls='dotted')
-"""
+cnt=0
+for q2 in Q2:
 
-ax.legend()
-#ax.set_ylim(0,1.7)
-ax.semilogx()
-ax.set_ylabel(r'$F_x(x,Q^2='+str(Q2)+' GeV^2)$')
-ax.set_xlabel(r'$x$')
+    cnt+=1
+    ax=py.subplot(nrows,ncols,cnt)
+    for tabname in tabnames:
+        F2=data[tabname][q2]['F2']
+        label=tabname.replace("_","\_")
+        ax.plot(X,F2,label=label)
+    ax.set_ylim(0,2)
+    ax.semilogx()
+    if cnt==1: ax.legend(loc=2)
+    if cnt==1: ax.text(0.7,0.7,r'$F_2$',size=40,transform=ax.transAxes)
+    ax.set_ylabel(r'$Q^2=%0.1f~{\rm GeV^2}$'%q2,size=20)
+    if cnt==7: ax.set_xlabel(r'$x$',size=20)
+
+    cnt+=1
+    ax=py.subplot(nrows,ncols,cnt)
+    for tabname in tabnames:
+        FL=data[tabname][q2]['FL']
+        ax.plot(X,FL)
+    ax.set_ylim(0,0.3)
+    ax.semilogx()
+    if cnt==2: ax.text(0.7,0.7,r'$F_L$',size=40,transform=ax.transAxes)
+    if cnt==8: ax.set_xlabel(r'$x$',size=20)
+
+    cnt+=1
+    ax=py.subplot(nrows,ncols,cnt)
+    for tabname in tabnames:
+        F3=data[tabname][q2]['F3']
+        ax.plot(X,F3)#,label='F2 '+tabname,ls='-')
+    ax.semilogx()
+    ax.set_ylim(0,0.9)
+    if cnt==3: ax.text(0.7,0.7,r'$F_3$',size=40,transform=ax.transAxes)
+    if cnt==9: ax.set_xlabel(r'$x$',size=20)
+
+    #ax.legend()
+    #ax.set_ylim(0,1.7)
 
 py.tight_layout()
-py.savefig('SF_comparison.pdf')
+py.savefig('SF_comparison.png')
 py.clf()
+   
 
-"""
-ax = py.subplot(111)
-
-tabname = 'NNPDF31_nnlo_pch_as_0118_SF'
-iset, iF2, iFL, iF3 = 0, 1001, 1002, 1003
-F2_nnlo, FL_nnlo, F3_nnlo = get_stf(tabname, iset, iF2, iFL, iF3)
-
-tabname = 'NNPDF31_lo_as_0118_SF'
-label='NNPDF nnlo/nlo'
-iset, iF2, iFL, iF3 = 0, 1001, 1002, 1003
-F2, FL, F3 = get_stf(tabname, iset, iF2, iFL, iF3)
-ax.plot(X, np.array(F2_nnlo)/np.array(F2), label='NC F2 '+label, ls='-')
-ax.plot(X, np.array(FL_nnlo)/np.array(FL), label='FL '+label, ls='-')
-ax.plot(X, np.array(F3_nnlo)/np.array(F3), label='F3 '+label, ls='-')
-
-ax.legend()
-#ax.set_ylim(0,1.7)
-#ax.set_yscale('symlog')
-ax.set_xscale('log')
-#ax.semilogx()
-ax.set_ylabel(r'$R_x(x,Q^2='+str(Q2)+' GeV^2)$')
-ax.set_xlabel(r'$x$')
-
-py.tight_layout()
-py.savefig('ratioSF_comparison.pdf')
-
-"""
 
 

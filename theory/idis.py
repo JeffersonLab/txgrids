@@ -164,8 +164,10 @@ class IDIS:
             self.iymin  = False
             result = self.integ(self._tgrand_dxdy, nitn=10, neval=neval)
             #result = self.integ(self.tgrand_dxdQ2, nitn=10, neval=neval)
-
-        return result.val*self._units(units)
+        
+        return result.val*self._units(units),\
+               result.var**0.5*self._units(units),\
+               result.Q
 
 if __name__=="__main__":
 
