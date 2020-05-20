@@ -69,17 +69,17 @@ s['min']['iF3'] = 90003
 """
 s['min']['tabname'] = 'NNPDF31_nnlo_pch_as_0118_SF'
 s['min']['iset'] = 0
-s['min']['iF2'] = 1001
-s['min']['iFL'] = 1002
-s['min']['iF3'] = 1003
+s['min']['iF2'] = 908
+s['min']['iFL'] = 909
+s['min']['iF3'] = 910
 s['min']['seed'] = 1
 
 
 s['max']['tabname'] = 'NNPDF31_nnlo_pch_as_0118_SF'
 s['max']['iset'] = 0
-s['max']['iF2'] = 1001
-s['max']['iFL'] = 1002
-s['max']['iF3'] = 1003
+s['max']['iF2'] = 908
+s['max']['iFL'] = 909
+s['max']['iF3'] = 910
 s['max']['seed'] = 1234567
 
 #common keys
