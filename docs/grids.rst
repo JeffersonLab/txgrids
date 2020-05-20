@@ -144,6 +144,8 @@ Structure function index convention
 Available grids
 ---------------
 
+Only those rows with lhapdf name is actually available
+
 .. list-table:: 
    :widths: 10 10 30 25 20 15 20 15
    :header-rows: 1
@@ -195,20 +197,28 @@ Available grids
 
    * - JAM
      - :math:`p`
-     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^-}_{2,L,3}`
+     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3}`
      - :math:`{\rm  NLO(ZMFVS)}`
      - :math:`Q^2>1.69,~W^2>10`
      - JAM4EIC
      -  
      - in dev.
 
+   * - 
+     - :math:`p`
+     - :math:`F^{W^-}_{2,L,3}`
+     - :math:`{\rm  NLO(ZMFVS)}`
+     - :math:`Q^2>1.69,~W^2>10`
+     - 
+     -  
+     - in dev.
 
    * - 
      - :math:`d`
      - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^-}_{2,L,3}`
      - :math:`{\rm  NLO(ZMFVS)}`
      - :math:`Q^2>1.69,~W^2>10`
-     - JAM4EIC
+     - 
      -  
      - in dev.
 
@@ -217,7 +227,7 @@ Available grids
      - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^-}_{2,L,3}`
      - :math:`{\rm  NLO(ZMFVS)}`
      - :math:`Q^2>1.69,~W^2>10`
-     - JAM4EIC
+     - 
      -  
      - in dev.
 
@@ -297,9 +307,18 @@ Available grids
    * - NNPDF
      - :math:`p`
      - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^{\pm}}_{2,L,3}`
+     - :math:`{\rm LO}`
+     - :math:`Q^2 > 3,~W^2 > 12.5`
+     - NNPDF31_lo_as_0118_SF
+     - 
+     - in dev.
+
+   * - NNPDF
+     - :math:`p`
+     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^{\pm}}_{2,L,3}`
      - :math:`{\rm NNLO(FONLL~GM~VFNS)\!+\!TMC}`
      - :math:`Q^2 > 3,~W^2 > 12.5`
-     - 
+     - NNPDF31_nnlo_pch_as_0118_SF
      - 
      - in dev.
 
