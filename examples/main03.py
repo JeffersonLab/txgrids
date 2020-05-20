@@ -41,20 +41,55 @@ ax.plot(X,F3,label='F3 '+tabname,ls='-')
 tabname = 'NNPDF31_nnlo_pch_as_0118_SF'
 iset,iF2,iFL,iF3=0,1001,1002,1003  
 F2,FL,F3 = get_stf(tabname,iset,iF2,iFL,iF3)
-ax.plot(X,F2,label='F2 '+tabname.replace("_","\_"),ls='--')
+ax.plot(X,F2,label='NC F2 '+tabname.replace("_","\_"),ls='--')
 ax.plot(X,FL,label='FL '+tabname.replace("_","\_"),ls='--')
 ax.plot(X,F3,label='F3 '+tabname.replace("_","\_"),ls='--')
+
+"""
+tabname = 'NNPDF31_lo_as_0118_SF'
+iset,iF2,iFL,iF3=0,1001,1002,1003  
+F2,FL,F3 = get_stf(tabname,iset,iF2,iFL,iF3)
+ax.plot(X,F2,label='NC F2 '+tabname.replace("_","\_"),ls='dotted')
+ax.plot(X,FL,label='FL '+tabname.replace("_","\_"),ls='dotted')
+ax.plot(X,F3,label='F3 '+tabname.replace("_","\_"),ls='dotted')
+"""
 
 ax.legend()
 #ax.set_ylim(0,1.7)
 ax.semilogx()
-ax.set_ylabel(r'$F_x(x,Q^2=90 GeV^2)$')
+ax.set_ylabel(r'$F_x(x,Q^2='+str(Q2)+' GeV^2)$')
 ax.set_xlabel(r'$x$')
 
 py.tight_layout()
 py.savefig('SF_comparison.pdf')
+py.clf()
 
+"""
+ax = py.subplot(111)
 
+tabname = 'NNPDF31_nnlo_pch_as_0118_SF'
+iset, iF2, iFL, iF3 = 0, 1001, 1002, 1003
+F2_nnlo, FL_nnlo, F3_nnlo = get_stf(tabname, iset, iF2, iFL, iF3)
 
+tabname = 'NNPDF31_lo_as_0118_SF'
+label='NNPDF nnlo/nlo'
+iset, iF2, iFL, iF3 = 0, 1001, 1002, 1003
+F2, FL, F3 = get_stf(tabname, iset, iF2, iFL, iF3)
+ax.plot(X, np.array(F2_nnlo)/np.array(F2), label='NC F2 '+label, ls='-')
+ax.plot(X, np.array(FL_nnlo)/np.array(FL), label='FL '+label, ls='-')
+ax.plot(X, np.array(F3_nnlo)/np.array(F3), label='F3 '+label, ls='-')
+
+ax.legend()
+#ax.set_ylim(0,1.7)
+#ax.set_yscale('symlog')
+ax.set_xscale('log')
+#ax.semilogx()
+ax.set_ylabel(r'$R_x(x,Q^2='+str(Q2)+' GeV^2)$')
+ax.set_xlabel(r'$x$')
+
+py.tight_layout()
+py.savefig('ratioSF_comparison.pdf')
+
+"""
 
 
