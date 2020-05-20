@@ -25,7 +25,7 @@ class MCEG:
     :param veto:    user defined cuts
     """
 
-    def __init__(self,wdir,tabname,iset,iF2,iFL,iF3,sign,rs,fname,veto,seed,**kargs):
+    def __init__(self,wdir,tabname,iset,iF2,iFL,iF3,sign,rs,fname,veto,**kargs):
 
         self.wdir     = wdir
         self.tabname  = tabname
@@ -37,9 +37,6 @@ class MCEG:
         self.rs       = rs
         self.fname    = fname
         self.veto     = veto
-
-        self.seed = seed
-        np.random.seed(self.seed)
 
         self.stf=lhapdf.mkPDF(self.tabname,self.iset)
 
