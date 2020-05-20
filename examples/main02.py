@@ -23,9 +23,9 @@ def veto(x,y,Q2,W2):
 data={}
 data['tabname'] = tabname
 data['iset']    = iset   
-data['iF2']     = iF2    
-data['iFL']     = iFL    
-data['iF3']     = iF3    
+data['iF2']     = 908
+data['iFL']     = 909    
+data['iF3']     = 910    
 data['sign']    = 1 #--electron=1 positron=-1
 data['veto']    = veto
 
@@ -38,24 +38,25 @@ data['units'] = 'fb'
 #data['units'] = 'GeV^-2'
 
 data['mode']  = 'tot'
-print('%0.3e'%idis.get_cross_section(**data))
+val,err,Q = idis.get_cross_section(**data)
+print('%0.4e +/- %0.4e (%s) (Q=%f)'%(val,err,data['units'],Q))
 
 data['mode']  = 'xy'
 data['xmin']  = 0.01
 data['xmax']  = 0.02
 data['ymin']  = 0.7
 data['ymax']  = 0.8
+val,err,Q = idis.get_cross_section(**data)
+print('%0.4e +/- %0.4e (%s) (Q=%f)'%(val,err,data['units'],Q))
 
-print('%0.3e'%idis.get_cross_section(**data))
 
 data['mode']  = 'xQ2'
 data['xmin']  = 0.01
 data['xmax']  = 0.02
 data['Q2min'] = 5.0
 data['Q2max'] = 10.0
-
-print('%0.3e'%idis.get_cross_section(**data))
-
+val,err,Q = idis.get_cross_section(**data)
+print('%0.4e +/- %0.4e (%s) (Q=%f)'%(val,err,data['units'],Q))
 
 
 

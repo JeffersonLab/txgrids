@@ -12,6 +12,7 @@ QCD theory for inclusive reactions at EIC
 
    start
    grids
+   bench
    codes
    examples/index
    howto
