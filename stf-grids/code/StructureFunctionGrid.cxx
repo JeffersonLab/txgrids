@@ -27,7 +27,7 @@ int main() {
   LHAPDF::setPaths(path);
 
   // Open LHAPDF set
-  const string set = "NNPDF31_nnlo_pch_as_0118";
+  const string set = "NNPDF31_lo_as_0118";
   vector<LHAPDF::PDF*> dist = LHAPDF::mkPDFs(set);
 
   // Retrieve relevant parameters
