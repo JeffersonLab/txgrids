@@ -9,8 +9,6 @@ class CONVERTER:
 
     def __init__(self,name,iflavs):
 
-        self.newname='%s-new'%name
-        checkdir(self.newname)
         fnames=os.listdir(name)
         self.info   = [_ for _ in fnames if _.endswith('.info')][0]
         self.isets  = [_ for _ in fnames if _.endswith('.info')==False]
@@ -33,17 +31,31 @@ class CONVERTER:
                 L[i]='Flavors: ['
                 for iflav in self.iflavs: L[i]+='%d,'%iflav
                 L[i]=L[i].rstrip(',')+']'
-        self.savefile('%s/%s'%(self.newname,self.info),L)
+        self.savefile('%s/%s'%(self.name,self.info),L)
+
+    def RepresentsInt(self,s):
+        try: 
+            int(s)
+            return True
+        except ValueError:
+            return False
 
     def mod_isets(self):
         l=''
         for iflav in self.iflavs: l+='%d '%iflav
 
+        nflavs=len(self.iflavs)
+
         for iset in self.isets:
             L=open('%s/%s'%(self.name,iset)).readlines()
             L=[_.strip() for _ in L]
-            L[5]=l[:] 
-            self.savefile('%s/%s'%(self.newname,iset),L)
+            for i in range(len(L)):
+                row=L[i].split()
+                nl=len(row)
+                if nl==nflavs:
+                    if self.RepresentsInt(row[0]):
+                        L[i]=l
+            self.savefile('%s/%s'%(self.name,iset),L)
 
 if __name__=="__main__":
 
