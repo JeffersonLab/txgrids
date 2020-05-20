@@ -21,11 +21,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -86,10 +86,15 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../start.html">Gettin Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../grids.html">LHAPDF grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bench.html">Benchmarks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../codes.html">Codes</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">example programs</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="index.html">example programs</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">main00.py</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">main00.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gloals">Gloals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#code">Code</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="main01.html">main01.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="main02.html">main02.py</a></li>
 </ul>
@@ -162,34 +167,62 @@
             
   <div class="section" id="main00-py">
 <h1>main00.py<a class="headerlink" href="#main00-py" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="gloals">
+<h2>Gloals<a class="headerlink" href="#gloals" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>compute total cross section in <span class="math notranslate nohighlight">\(ep\)</span> reaction</li>
+</ul>
+</div>
+<div class="section" id="code">
+<h2>Code<a class="headerlink" href="#code" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+
 <span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span><span class="nn">os</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">theory.tools</span> <span class="kn">import</span> <span class="n">save</span><span class="p">,</span> <span class="n">load</span>
+<span class="kn">from</span> <span class="nn">theory.idis</span>  <span class="kn">import</span> <span class="n">IDIS</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">py</span>
-<span class="kn">import</span> <span class="nn">theory</span> <span class="kn">as</span> <span class="nn">thy</span>
+<span class="k">def</span> <span class="nf">get_tot_xsec</span><span class="p">(</span><span class="n">tabname</span><span class="p">,</span><span class="n">rs</span><span class="o">=</span><span class="mf">140.7</span><span class="p">,</span><span class="n">Q2min</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">W2min</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span><span class="n">neval</span><span class="o">=</span><span class="mi">100000</span><span class="p">):</span>
 
-<span class="kn">from</span> <span class="nn">theory</span> <span class="kn">import</span> <span class="n">params</span> <span class="k">as</span> <span class="n">par</span>
-<span class="kn">from</span> <span class="nn">theory</span> <span class="kn">import</span> <span class="n">nnpdf</span>
+    <span class="k">def</span> <span class="nf">veto</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">Q2</span><span class="p">,</span><span class="n">W2</span><span class="p">):</span>
+        <span class="k">if</span>   <span class="n">W2</span> <span class="o">&lt;</span> <span class="n">W2min</span>  <span class="p">:</span> <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="n">Q2</span> <span class="o">&lt;</span> <span class="n">Q2min</span>  <span class="p">:</span> <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">else</span>             <span class="p">:</span> <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="n">data</span><span class="o">=</span><span class="p">{}</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;tabname&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tabname</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;iset&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;iF2&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="mi">908</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;iFL&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="mi">909</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;iF3&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="mi">910</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;sign&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="mi">1</span> <span class="c1">#--electron=1 positron=-1</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;veto&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">veto</span>
+
+    <span class="n">idis</span><span class="o">=</span><span class="n">IDIS</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;neval&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">neval</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rs&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">rs</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;iw&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;fb&#39;</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="s1">&#39;tot&#39;</span>
+
+    <span class="n">val</span><span class="p">,</span><span class="n">err</span><span class="p">,</span><span class="n">Q</span> <span class="o">=</span> <span class="n">idis</span><span class="o">.</span><span class="n">get_cross_section</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;===============&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">tabname</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%0.4e</span><span class="s1"> +/- </span><span class="si">%0.4e</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">) (Q=</span><span class="si">%f</span><span class="s1">)&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">val</span><span class="p">,</span><span class="n">err</span><span class="p">,</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">],</span><span class="n">Q</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
 
 
-<span class="c1">#--setup beams energies</span>
-<span class="n">me</span><span class="p">,</span><span class="n">Ee</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="mf">18.0</span>
-<span class="n">mN</span><span class="p">,</span><span class="n">EN</span><span class="o">=</span><span class="n">par</span><span class="o">.</span><span class="n">MN</span><span class="p">,</span> <span class="mf">275.</span>
+<span class="k">if</span> <span class="vm">__name__</span><span class="o">==</span><span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 
-<span class="c1">#--get s=(pA+pB)^2</span>
-<span class="n">stot</span><span class="o">=</span><span class="n">par</span><span class="o">.</span><span class="n">get_stot</span><span class="p">(</span><span class="n">me</span><span class="p">,</span><span class="n">Ee</span><span class="p">,</span><span class="n">mN</span><span class="p">,</span><span class="n">EN</span><span class="p">)</span>
-
-<span class="n">proc</span><span class="o">=</span><span class="s1">&#39;NC&#39;</span>
-<span class="n">particle</span><span class="o">=</span><span class="mi">12</span>  <span class="c1">#--neutrino</span>
-
-<span class="n">x</span><span class="o">=</span><span class="mf">0.1</span>
-<span class="n">imem</span><span class="o">=</span><span class="mi">0</span>
-<span class="n">Q2</span><span class="o">=</span><span class="mf">10.0</span>
-
-<span class="k">print</span><span class="p">(</span><span class="n">thy</span><span class="o">.</span><span class="n">nnpdf</span><span class="o">.</span><span class="n">dsig_dx_dQ2</span><span class="p">(</span><span class="n">proc</span><span class="p">,</span><span class="n">particle</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">Q2</span><span class="p">,</span><span class="n">stot</span><span class="p">,</span><span class="n">units</span><span class="o">=</span><span class="s1">&#39;pb&#39;</span><span class="p">,</span><span class="n">imem</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">get_tot_xsec</span><span class="p">(</span><span class="s1">&#39;JAM4EIC&#39;</span><span class="p">,</span><span class="n">rs</span><span class="o">=</span><span class="mf">140.7</span><span class="p">,</span><span class="n">Q2min</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">W2min</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
+    <span class="n">get_tot_xsec</span><span class="p">(</span><span class="s1">&#39;NNPDF31_lo_as_0118_SF&#39;</span><span class="p">,</span><span class="n">rs</span><span class="o">=</span><span class="mf">140.7</span><span class="p">,</span><span class="n">Q2min</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">W2min</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
+    <span class="n">get_tot_xsec</span><span class="p">(</span><span class="s1">&#39;NNPDF31_nnlo_pch_as_0118_SF&#39;</span><span class="p">,</span><span class="n">rs</span><span class="o">=</span><span class="mf">140.7</span><span class="p">,</span><span class="n">Q2min</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">W2min</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
 </pre></div>
+</div>
 </div>
 </div>
 

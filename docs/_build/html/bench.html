@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Gettin Started &mdash; QCD theory for inclusive reactions at EIC  documentation</title>
+  <title>Benchmarks &mdash; QCD theory for inclusive reactions at EIC  documentation</title>
   
 
   
@@ -37,8 +37,8 @@
   <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="LHAPDF grids" href="grids.html" />
-    <link rel="prev" title="QCD theory for inclusive reactions at EIC" href="index.html" /> 
+    <link rel="next" title="Codes" href="codes.html" />
+    <link rel="prev" title="LHAPDF grids" href="grids.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -84,15 +84,13 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Gettin Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#dependencies">dependencies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#getting-the-code">getting the code</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#setup">setup</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#usage">usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#what-is-available">what is available</a></li>
+<li class="toctree-l1"><a class="reference internal" href="start.html">Gettin Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grids.html">LHAPDF grids</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Benchmarks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#nc-cross-sections">NC cross sections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#structure-functions">Structure functions</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="grids.html">LHAPDF grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="codes.html">Codes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/index.html">example programs</a></li>
 </ul>
@@ -140,13 +138,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Gettin Started</li>
+      <li>Benchmarks</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/start.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/bench.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -159,37 +157,51 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="gettin-started">
-<h1>Gettin Started<a class="headerlink" href="#gettin-started" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="dependencies">
-<h2>dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>python 2 or 3</li>
-<li>lhapdf 6</li>
-</ul>
+  <div class="section" id="benchmarks">
+<h1>Benchmarks<a class="headerlink" href="#benchmarks" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="nc-cross-sections">
+<h2>NC cross sections<a class="headerlink" href="#nc-cross-sections" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="26%" />
+<col width="26%" />
+<col width="11%" />
+<col width="11%" />
+<col width="26%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">name</th>
+<th class="head">values</th>
+<th class="head">theory</th>
+<th class="head"><span class="math notranslate nohighlight">\(\sqrt{S}\)</span></th>
+<th class="head">kin. cuts</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>NNPDF31_lo_as_0118_SF</td>
+<td><span class="math notranslate nohighlight">\(9.1826 \times 10^8 \pm 3.2447 \times 10^5 ({\rm fb})\)</span></td>
+<td>LO</td>
+<td><span class="math notranslate nohighlight">\(140.7{\rm GeV}\)</span></td>
+<td><span class="math notranslate nohighlight">\(Q^2_{\rm min}=1.0~({\rm GeV}^2)~~W^2_{\rm min}=10.0~({\rm GeV}^2)\)</span></td>
+</tr>
+<tr class="row-odd"><td>NNPDF31_nnlo_pch_as_0118_SF</td>
+<td><span class="math notranslate nohighlight">\(7.8199 \times 10^8 \pm 3.1779 \times 10^5 ({\rm fb})\)</span></td>
+<td>NNLO</td>
+<td><span class="math notranslate nohighlight">\(140.7{\rm GeV}\)</span></td>
+<td><span class="math notranslate nohighlight">\(Q^2_{\rm min}=1.0~({\rm GeV}^2)~~W^2_{\rm min}=10.0~({\rm GeV}^2)\)</span></td>
+</tr>
+<tr class="row-even"><td>JAM4EIC</td>
+<td><span class="math notranslate nohighlight">\(8.0504 \times 10^8 \pm 3.2625 \times 10^5 ({\rm fb})\)</span></td>
+<td>NLO</td>
+<td><span class="math notranslate nohighlight">\(140.7{\rm GeV}\)</span></td>
+<td><span class="math notranslate nohighlight">\(Q^2_{\rm min}=1.0~({\rm GeV}^2)~~W^2_{\rm min}=10.0~({\rm GeV}^2)\)</span></td>
+</tr>
+</tbody>
+</table>
 </div>
-<div class="section" id="getting-the-code">
-<h2>getting the code<a class="headerlink" href="#getting-the-code" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/JeffersonLab/txgrids
-</pre></div>
-</div>
-</div>
-<div class="section" id="setup">
-<h2>setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
-<p>use the script <code class="docutils literal notranslate"><span class="pre">setup.sh</span></code> to set paths for  lhapdf 6</p>
-</div>
-<div class="section" id="usage">
-<h2>usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
-<p>There are example programs inside the folder <code class="docutils literal notranslate"><span class="pre">examples</span></code>
-which you can use as templates.</p>
-</div>
-<div class="section" id="what-is-available">
-<h2>what is available<a class="headerlink" href="#what-is-available" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>LHAPDF grids for DIS structure functions</li>
-<li>A collection tools for DIS simulation</li>
-<li>Example scripts</li>
-</ul>
+<div class="section" id="structure-functions">
+<h2>Structure functions<a class="headerlink" href="#structure-functions" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/SF_comparison.png" src="_images/SF_comparison.png" />
 </div>
 </div>
 
@@ -201,10 +213,10 @@ which you can use as templates.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="grids.html" class="btn btn-neutral float-right" title="LHAPDF grids" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="codes.html" class="btn btn-neutral float-right" title="Codes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="QCD theory for inclusive reactions at EIC" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="grids.html" class="btn btn-neutral float-left" title="LHAPDF grids" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
