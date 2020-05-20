@@ -27,24 +27,26 @@ Structure function index convention
      - :math:`905,~906,~907`
 
    * - 
-     - :math:`F_2^{\gamma+\gamma Z+Z},~F_L^{\gamma+\gamma Z+Z},~F_3^{\gamma+\gamma Z+Z}`
+     - :math:`F_2^{\rm NC},~F_L^{\rm NC},~F_3^{\rm NC}`
      - :math:`908,~909,~910`
 
    * - 
-     - :math:`F_{2c}^{\gamma+\gamma Z+Z},~F_{Lc}^{\gamma+\gamma Z+Z},~F_{3c}^{\gamma+\gamma Z+Z}`
+     - :math:`F_{2c}^{\gamma},~F_{Lc}^{\gamma}`
      - :math:`911,~912,~913`
 
    * - 
-     - :math:`F_{2b}^{\gamma+\gamma Z+Z},~F_{Lb}^{\gamma+\gamma Z+Z},~F_{3b}^{\gamma+\gamma Z+Z}`
+     - :math:`F_{2c}^{\rm NC},~F_{Lc}^{\rm NC},~F_{3c}^{\rm NC}`
      - :math:`914,~915,~916`
 
    * - 
-     - :math:`F_{2c}^{\gamma},~F_{Lc}^{\gamma}`
+     - :math:`F_{2b}^{\gamma},~F_{Lb}^{\gamma}`
      - :math:`917,~918,~919`
 
    * - 
-     - :math:`F_{2b}^{\gamma},~F_{Lb}^{\gamma}`
+     - :math:`F_{2b}^{\rm NC},~F_{Lb}^{\rm NC},~F_{3b}^{\rm NC}`
      - :math:`920,~921,~922`
+
+
 
    * - :math:`~` 
      - 
@@ -95,15 +97,15 @@ Structure function index convention
      - :math:`955,~956,~957`
 
    * - 
-     - :math:`g_1^{\gamma+\gamma Z+Z},~g_2^{\gamma+\gamma Z+Z},~g_5^{\gamma+\gamma Z+Z}`
+     - :math:`g_1^{\rm NC},~g_2^{\rm NC},~g_5^{\rm NC}`
      - :math:`958,~959,~960`
 
    * - 
-     - :math:`g_{1c}^{\gamma+\gamma Z+Z},~g_{2c}^{\gamma+\gamma Z+Z},~g_{5c}^{\gamma+\gamma Z+Z}`
+     - :math:`g_{1c}^{\rm NC},~g_{2c}^{\rm NC},~g_{5c}^{\rm NC}`
      - :math:`961,~962,~963`
 
    * - 
-     - :math:`g_{1b}^{\gamma+\gamma Z+Z},~g_{2b}^{\gamma+\gamma Z+Z},~g_{5b}^{\gamma+\gamma Z+Z}`
+     - :math:`g_{1b}^{\rm NC},~g_{2b}^{\rm NC},~g_{5b}^{\rm NC}`
      - :math:`964,~965,~966`
 
    * - :math:`~` 
@@ -161,7 +163,7 @@ Only those rows with lhapdf name is actually available
 
    * - CJ
      - :math:`p`
-     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^-}_{2,L,3}`
+     - :math:`F^{\rm NC}_{2,L,3},~~~F^{W^-}_{2,L,3}`
      - 
      - 
      - 
@@ -170,7 +172,7 @@ Only those rows with lhapdf name is actually available
 
    * - 
      - :math:`d`
-     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^-}_{2,L,3}`
+     - :math:`F^{\rm NC}_{2,L,3},~~~F^{W^-}_{2,L,3}`
      - 
      - 
      - 
@@ -179,7 +181,7 @@ Only those rows with lhapdf name is actually available
 
    * - CT
      - :math:`p`
-     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^-}_{2,L,3}`
+     - :math:`F^{\rm NC}_{2,L,3},~~~F^{W^-}_{2,L,3}`
      - 
      - 
      - 
@@ -188,7 +190,7 @@ Only those rows with lhapdf name is actually available
 
    * - 
      - :math:`d`
-     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^-}_{2,L,3}`
+     - :math:`F^{\rm NC}_{2,L,3},~~~F^{W^-}_{2,L,3}`
      - 
      - 
      - 
@@ -197,7 +199,7 @@ Only those rows with lhapdf name is actually available
 
    * - JAM
      - :math:`p`
-     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3}`
+     - :math:`F^{\rm NC}_{2,L,3}`
      - :math:`{\rm  NLO(ZMFVS)}`
      - :math:`Q^2>1.69,~W^2>10`
      - JAM4EIC
@@ -215,7 +217,7 @@ Only those rows with lhapdf name is actually available
 
    * - 
      - :math:`d`
-     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^-}_{2,L,3}`
+     - :math:`F^{\rm NC}_{2,L,3},~~~F^{W^-}_{2,L,3}`
      - :math:`{\rm  NLO(ZMFVS)}`
      - :math:`Q^2>1.69,~W^2>10`
      - 
@@ -224,7 +226,7 @@ Only those rows with lhapdf name is actually available
 
    * - 
      - :math:`^3{\rm He}`
-     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^-}_{2,L,3}`
+     - :math:`F^{\rm NC}_{2,L,3},~~~F^{W^-}_{2,L,3}`
      - :math:`{\rm  NLO(ZMFVS)}`
      - :math:`Q^2>1.69,~W^2>10`
      - 
@@ -234,7 +236,7 @@ Only those rows with lhapdf name is actually available
 
    * - 
      - :math:`p`
-     - :math:`g^{\gamma+\gamma Z+ Z}_{1},~~~g^{W^-}_{1}`
+     - :math:`g^{\rm NC}_{1},~~~g^{W^-}_{1}`
      - :math:`{\rm  NLO(ZMFVS)}`
      - :math:`Q^2>1.69,~W^2>10`
      - 
@@ -243,7 +245,7 @@ Only those rows with lhapdf name is actually available
 
    * - 
      - :math:`d`
-     - :math:`g^{\gamma+\gamma Z+ Z}_{1},~~~g^{W^-}_{1}`
+     - :math:`g^{\rm NC}_{1},~~~g^{W^-}_{1}`
      - :math:`{\rm  NLO(ZMFVS)}`
      - :math:`Q^2>1.69,~W^2>10`
      - 
@@ -252,7 +254,7 @@ Only those rows with lhapdf name is actually available
 
    * - 
      - :math:`^3{\rm He}`
-     - :math:`g^{\gamma+\gamma Z+ Z}_{1},~~~g^{W^-}_{1}`
+     - :math:`g^{\rm NC}_{1},~~~g^{W^-}_{1}`
      - :math:`{\rm  NLO(ZMFVS)}`
      - :math:`Q^2>1.69,~W^2>10`
      - 
@@ -306,7 +308,7 @@ Only those rows with lhapdf name is actually available
 
    * - NNPDF
      - :math:`p`
-     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^{\pm}}_{2,L,3}`
+     - :math:`F^{\rm NC}_{2,L,3},~~~F^{W^{\pm}}_{2,L,3}`
      - :math:`{\rm LO}`
      - :math:`Q^2 > 3,~W^2 > 12.5`
      - NNPDF31_lo_as_0118_SF
@@ -315,7 +317,7 @@ Only those rows with lhapdf name is actually available
 
    * - NNPDF
      - :math:`p`
-     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^{\pm}}_{2,L,3}`
+     - :math:`F^{\rm NC}_{2,L,3},~~~F^{W^{\pm}}_{2,L,3}`
      - :math:`{\rm NNLO(FONLL~GM~VFNS)\!+\!TMC}`
      - :math:`Q^2 > 3,~W^2 > 12.5`
      - NNPDF31_nnlo_pch_as_0118_SF
@@ -324,7 +326,7 @@ Only those rows with lhapdf name is actually available
 
    * - nNNPDF
      - :math:`d`
-     - :math:`F^{\gamma+\gamma Z+ Z}_{2,L,3},~~~F^{W^{\pm}}_{2,L,3}`
+     - :math:`F^{\rm NC}_{2,L,3},~~~F^{W^{\pm}}_{2,L,3}`
      - 
      - 
      - 
