@@ -202,7 +202,7 @@ if __name__=="__main__":
     data['ymin']  = 0.7
     data['ymax']  = 0.8
     
-    print idis.get_cross_section(**data)
+    print(idis.get_cross_section(**data))
 
     #elif mode=='xQ2':
     #
