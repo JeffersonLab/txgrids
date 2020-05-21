@@ -274,7 +274,7 @@ Only those rows with lhapdf name is actually available
      - :math:`p`
      - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
      - Color dipole model + GBW
-     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.2`
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
      - KN20_p_GBW
      - more details in arXiv:2003.04157
      - in dev
@@ -283,7 +283,7 @@ Only those rows with lhapdf name is actually available
      - :math:`p`
      - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
      - Color dipole model + IP-sat
-     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.3`
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
      - KN20_p_IPsat
      - more details in arXiv:2003.04158
      - in dev
@@ -292,7 +292,7 @@ Only those rows with lhapdf name is actually available
      - :math:`d`
      - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
      - Color dipole model + KST + quark shadowing
-     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.4`
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
      - KN20_2D_KST_qShad
      - more details in arXiv:2003.04159
      - in dev
@@ -301,8 +301,476 @@ Only those rows with lhapdf name is actually available
      - :math:`d`
      - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
      - Color dipole model + GBW + quark shadowing
-     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.5`
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
      - KN20_2D_GBW_qShad
+     - more details in arXiv:2003.04160
+     - in dev
+      
+   * - 
+     - :math:`d`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + IP-sat + quark shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_2D_IPsat_qShad
+     - more details in arXiv:2003.04160
+     - in dev
+
+   * - 
+     - :math:`d`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + KST + quark and gluon (C0)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_2D_KST_qGC0Shad
+     - more details in arXiv:2003.04159
+     - in dev
+      
+   * - 
+     - :math:`d`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + GBW + quark and gluon (C0)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_2D_GBW_qGC0Shad
+     - more details in arXiv:2003.04160
+     - in dev
+      
+   * - 
+     - :math:`d`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + IP-sat + quark and gluon (C0)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_2D_IPsat_qGC0Shad
+     - more details in arXiv:2003.04160
+     - in dev
+
+   * - 
+     - :math:`d`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + KST + quark and gluon (Ceff)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_2D_KST_qGCeffShad
+     - more details in arXiv:2003.04159
+     - in dev
+      
+   * - 
+     - :math:`d`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + GBW + quark and gluon (Ceff)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_2D_GBW_qGCeffShad
+     - more details in arXiv:2003.04160
+     - in dev
+      
+   * - 
+     - :math:`d`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + IP-sat + quark and gluon (Ceff)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_2D_IPsat_qGCeffShad
+     - more details in arXiv:2003.04160
+     - in dev
+
+   * - 
+     - :math:`^3{\rm He}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + KST + quark shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_3He_KST_qShad
+     - more details in arXiv:2003.04159
+     - in dev
+      
+   * - 
+     - :math:`^3{\rm He}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + GBW + quark shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_3He_GBW_qShad
+     - more details in arXiv:2003.04160
+     - in dev
+      
+   * - 
+     - :math:`^3{\rm He}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + IP-sat + quark shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_3He_IPsat_qShad
+     - more details in arXiv:2003.04160
+     - in dev
+
+   * - 
+     - :math:`^3{\rm He}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + KST + quark and gluon (C0)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_3He_KST_qGC0Shad
+     - more details in arXiv:2003.04159
+     - in dev
+      
+   * - 
+     - :math:`^3{\rm He}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + GBW + quark and gluon (C0)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_3He_GBW_qGC0Shad
+     - more details in arXiv:2003.04160
+     - in dev
+      
+   * - 
+     - :math:`^3{\rm He}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + IP-sat + quark and gluon (C0)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_3He_IPsat_qGC0Shad
+     - more details in arXiv:2003.04160
+     - in dev
+
+   * - 
+     - :math:`^3{\rm He}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + KST + quark and gluon (Ceff)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_3He_KST_qGCeffShad
+     - more details in arXiv:2003.04159
+     - in dev
+      
+   * - 
+     - :math:`^3{\rm He}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + GBW + quark and gluon (Ceff)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_3He_GBW_qGCeffShad
+     - more details in arXiv:2003.04160
+     - in dev
+      
+   * - 
+     - :math:`^3{\rm He}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + IP-sat + quark and gluon (Ceff)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_3He_IPsat_qGCeffShad
+     - more details in arXiv:2003.04160
+     - in dev
+
+   * - 
+     - :math:`^40{\rm Ca}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + KST + quark shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_40Ca_KST_qShad
+     - more details in arXiv:2003.04159
+     - in dev
+      
+   * - 
+     - :math:`^40{\rm Ca}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + GBW + quark shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_40Ca_GBW_qShad
+     - more details in arXiv:2003.04160
+     - in dev
+      
+   * - 
+     - :math:`^40{\rm Ca}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + IP-sat + quark shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_40Ca_IPsat_qShad
+     - more details in arXiv:2003.04160
+     - in dev
+
+   * - 
+     - :math:`^40{\rm Ca}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + KST + quark and gluon (C0)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_40Ca_KST_qGC0Shad
+     - more details in arXiv:2003.04159
+     - in dev
+      
+   * - 
+     - :math:`^40{\rm Ca}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + GBW + quark and gluon (C0)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_40Ca_GBW_qGC0Shad
+     - more details in arXiv:2003.04160
+     - in dev
+      
+   * - 
+     - :math:`^40{\rm Ca}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + IP-sat + quark and gluon (C0)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_40Ca_IPsat_qGC0Shad
+     - more details in arXiv:2003.04160
+     - in dev
+
+   * - 
+     - :math:`^40{\rm Ca}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + KST + quark and gluon (Ceff)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_40Ca_KST_qGCeffShad
+     - more details in arXiv:2003.04159
+     - in dev
+      
+   * - 
+     - :math:`^40{\rm Ca}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + GBW + quark and gluon (Ceff)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_40Ca_GBW_qGCeffShad
+     - more details in arXiv:2003.04160
+     - in dev
+      
+   * - 
+     - :math:`^40{\rm Ca}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + IP-sat + quark and gluon (Ceff)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_40Ca_IPsat_qGCeffShad
+     - more details in arXiv:2003.04160
+     - in dev
+
+   * - 
+     - :math:`^197{\rm Au}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + KST + quark shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_197Au_KST_qShad
+     - more details in arXiv:2003.04159
+     - in dev
+      
+   * - 
+     - :math:`^197{\rm Au}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + GBW + quark shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_197Au_GBW_qShad
+     - more details in arXiv:2003.04160
+     - in dev
+      
+   * - 
+     - :math:`^197{\rm Au}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + IP-sat + quark shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_197Au_IPsat_qShad
+     - more details in arXiv:2003.04160
+     - in dev
+
+   * - 
+     - :math:`^197{\rm Au}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + KST + quark and gluon (C0)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_197Au_KST_qGC0Shad
+     - more details in arXiv:2003.04159
+     - in dev
+      
+   * - 
+     - :math:`^197{\rm Au}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + GBW + quark and gluon (C0)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_197Au_GBW_qGC0Shad
+     - more details in arXiv:2003.04160
+     - in dev
+      
+   * - 
+     - :math:`^197{\rm Au}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + IP-sat + quark and gluon (C0)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_197Au_IPsat_qGC0Shad
+     - more details in arXiv:2003.04160
+     - in dev
+
+   * - 
+     - :math:`^197{\rm Au}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + KST + quark and gluon (Ceff)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_197Au_KST_qGCeffShad
+     - more details in arXiv:2003.04159
+     - in dev
+      
+   * - 
+     - :math:`^197{\rm Au}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + GBW + quark and gluon (Ceff)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_197Au_GBW_qGCeffShad
+     - more details in arXiv:2003.04160
+     - in dev
+      
+   * - 
+     - :math:`^197{\rm Au}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + IP-sat + quark and gluon (Ceff)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_197Au_IPsat_qGCeffShad
+     - more details in arXiv:2003.04160
+     - in dev
+
+   * - 
+     - :math:`^207{\rm Pb}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + KST + quark shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_207Pb_KST_qShad
+     - more details in arXiv:2003.04159
+     - in dev
+      
+   * - 
+     - :math:`^207{\rm Pb}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + GBW + quark shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_207Pb_GBW_qShad
+     - more details in arXiv:2003.04160
+     - in dev
+      
+   * - 
+     - :math:`^207{\rm Pb}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + IP-sat + quark shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_207Pb_IPsat_qShad
+     - more details in arXiv:2003.04160
+     - in dev
+
+   * - 
+     - :math:`^207{\rm Pb}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + KST + quark and gluon (C0)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_207Pb_KST_qGC0Shad
+     - more details in arXiv:2003.04159
+     - in dev
+      
+   * - 
+     - :math:`^207{\rm Pb}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + GBW + quark and gluon (C0)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_207Pb_GBW_qGC0Shad
+     - more details in arXiv:2003.04160
+     - in dev
+      
+   * - 
+     - :math:`^207{\rm Pb}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + IP-sat + quark and gluon (C0)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_207Pb_IPsat_qGC0Shad
+     - more details in arXiv:2003.04160
+     - in dev
+
+   * - 
+     - :math:`^207{\rm Pb}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + KST + quark and gluon (Ceff)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_207Pb_KST_qGCeffShad
+     - more details in arXiv:2003.04159
+     - in dev
+      
+   * - 
+     - :math:`^207{\rm Pb}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + GBW + quark and gluon (Ceff)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_207Pb_GBW_qGCeffShad
+     - more details in arXiv:2003.04160
+     - in dev
+      
+   * - 
+     - :math:`^207{\rm Pb}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + IP-sat + quark and gluon (Ceff)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_207Pb_IPsat_qGCeffShad
+     - more details in arXiv:2003.04160
+     - in dev
+
+   * - 
+     - :math:`^238{\rm U}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + KST + quark shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_238U_KST_qShad
+     - more details in arXiv:2003.04159
+     - in dev
+      
+   * - 
+     - :math:`^238{\rm U}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + GBW + quark shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_238U_GBW_qShad
+     - more details in arXiv:2003.04160
+     - in dev
+      
+   * - 
+     - :math:`^238{\rm U}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + IP-sat + quark shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_238U_IPsat_qShad
+     - more details in arXiv:2003.04160
+     - in dev
+
+   * - 
+     - :math:`^238{\rm U}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + KST + quark and gluon (C0)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_238U_KST_qGC0Shad
+     - more details in arXiv:2003.04159
+     - in dev
+      
+   * - 
+     - :math:`^238{\rm U}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + GBW + quark and gluon (C0)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_238U_GBW_qGC0Shad
+     - more details in arXiv:2003.04160
+     - in dev
+      
+   * - 
+     - :math:`^238{\rm U}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + IP-sat + quark and gluon (C0)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_238U_IPsat_qGC0Shad
+     - more details in arXiv:2003.04160
+     - in dev
+
+   * - 
+     - :math:`^238{\rm U}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + KST + quark and gluon (Ceff)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_238U_KST_qGCeffShad
+     - more details in arXiv:2003.04159
+     - in dev
+      
+   * - 
+     - :math:`^238{\rm U}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + GBW + quark and gluon (Ceff)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_238U_GBW_qGCeffShad
+     - more details in arXiv:2003.04160
+     - in dev
+      
+   * - 
+     - :math:`^238{\rm U}`
+     - :math:`F^{\gamma}_{2,L},~~~F^{\gamma}_{c~2,L},~~~F^{\gamma}_{b~2,L}`
+     - Color dipole model + IP-sat + quark and gluon (Ceff)  shadowing
+     - :math:`0.1 < Q^2 < 1000, 10^{-6} < x < 0.1`
+     - KN20_238U_IPsat_qGCeffShad
      - more details in arXiv:2003.04160
      - in dev
 
@@ -342,6 +810,7 @@ Only those rows with lhapdf name is actually available
 .. _nocera: e.nocera@nikhef.nl
 .. _rojo: j.rojo@vu.nl
 .. _sato: nsato@jlab.org
+.. _krelina: michal.krelina@fjfi.cvut.cz
 
 
 Contact
@@ -387,6 +856,12 @@ Contact
      - :math:`d,^3{\rm \!He}`
      - 
      - `ethier`_ , `khalek`_
+
+
+   * - KN(Prague)
+     - :math:`d,^3{\rm \!He},^40{\rm \!Ca},^197{\rm \!Au},^207{\rm \!Pb},^238{\rm \!U}`
+     - 
+     - `krelina`_ 
 
 
 
