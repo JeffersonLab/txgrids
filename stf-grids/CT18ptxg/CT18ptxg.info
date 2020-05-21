@@ -5,13 +5,12 @@ Reference: arXiv:1912.10053
 Format: lhagrid1
 DataVersion:   1
 NumMembers:    1
-Particle:      p
 Flavors: [900, 901, 930, 931, 932]
 OrderQCD:     2
 FlavorScheme: variable
 NumFlavors: 5
 ErrorType: no error
-XMin:   1.000000e-06
+XMin:   1.000000E-06
 XMax:   1.000000E+00
 QMin:   1.295000E+00
 QMax:   3.152120E+02
