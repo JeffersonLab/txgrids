@@ -1,19 +1,11 @@
 #!/usr/bin/env python
-######################################
-# authors: N.Sato (nsato@jlab.org) 
-#
-# last update: 04-20-20
-#####################################
 import sys,os
 sys.path.append(os.path.dirname( os.path.dirname(os.path.abspath(__file__) ) ) )
 import numpy as np
 from theory.tools import save, load
 from theory.idis  import IDIS
 
-#--matplotlib
-
 tabname='JAM4EIC'             
-iset,iF2,iFL,iF3=0,90001,90002,90003  
 
 def veto(x,y,Q2,W2):
     if   W2 < 10          : return 0
@@ -22,7 +14,7 @@ def veto(x,y,Q2,W2):
 
 data={}
 data['tabname'] = tabname
-data['iset']    = iset   
+data['iset']    = 0 
 data['iF2']     = 908
 data['iFL']     = 909    
 data['iF3']     = 910    

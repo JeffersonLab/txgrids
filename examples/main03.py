@@ -25,9 +25,10 @@ def get_stf(X,Q2,tabname,iset,iF2,iFL,iF3):
 
 
 tabnames=[        
-           'NNPDF31_lo_as_0118_SF'
+           'CT18ptxg'
+          ,'NNPDF31_lo_as_0118_SF'
           ,'NNPDF31_nnlo_pch_as_0118_SF'
-          ,'JAM4EIC'      
+          ,'JAM4EIC'    
          ]
 
 data={}
@@ -84,7 +85,7 @@ for q2 in Q2:
     #ax.set_ylim(0,1.7)
 
 py.tight_layout()
-py.savefig('SF_comparison.png')
+py.savefig('SF_comparison.pdf')
 py.clf()
    
 
