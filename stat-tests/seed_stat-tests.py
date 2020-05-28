@@ -52,7 +52,8 @@ def veto00(x,y,Q2,W2):
     else                  : return 1
 
 
-stat_methods = ["Kolmogorov-Smirnov"]# "Mann-Whitney",
+# "Kolmogorov-Smirnov"]  # "Mann-Whitney",
+stat_methods = ["Kolmogorov-Smirnov"]
                 #"Kruskal-Wallis"]  # "Barlett" #"Fligner-Killeen" #"Ansari-Bradley"
 fig_composition = [3,2] # make room for 2 additional hists
 #-----------------------------------------------
@@ -89,7 +90,7 @@ for key in s.keys():
     s[key]['rs'] = rs
     s[key]['fname'] = 'mceg00'
     s[key]['veto'] = veto00
-    s[key]['fdata'] = wdir+"/"+s[key]['tabname']+"_data"+str(int(Nevents/1000))+"k.po"
+    s[key]['fdata'] = wdir+"/"+s[key]['tabname']+"_data"+str(int(Nevents/1000))+"k_"+str(s[key]['seed'])+".po"
 
 
 #--generate events
@@ -99,7 +100,7 @@ for key in s.keys():
         mceg=MCEG(**(s[key]))
         mceg.buil_mceg()
         s[key].update(mceg.gen_events(Nevents))
-        #save(s[key], s[key]['fdata'])
+        save(s[key], s[key]['fdata'])
     else:
         s[key] = load(s[key]['fdata'])
 
@@ -121,9 +122,9 @@ print "----------"
 
 #to tweak:
 #---
-NQ2bins = 50 # int(np.log10(Nevents)*25)
+NQ2bins = 10 # int(np.log10(Nevents)*25)
 print "NQ2bins = ", NQ2bins
-NXbins = 50  # int(np.log10(Nevents)*25)
+NXbins = 10 # int(np.log10(Nevents)*25)
 print "NXbins = ", NXbins
 choice_bins = 'min'
 #---
@@ -429,8 +430,12 @@ for iQ2 in range(0, NQ2bins):
         ax.title.set_text(r'$\sigma-lvl=$' +
                           str(round(hist_Z_score[i], 2))+"; x="+str(round(central_Xbins[iX], 2))+"; Q2="+str(round(central_Q2bins[iQ2], 2)))
 
-        ax.hist(smin_perQ2bin_perXbin[iQ2][iX][0], bins='fd', facecolor='red', histtype="step", alpha=1., label='min',ls='-',linewidth=1.5)
-        ax.hist(smax_perQ2bin_perXbin[iQ2][iX][0], bins='fd', facecolor='blue', histtype="step", alpha=1., label='min', ls='-', linewidth=1.5)
+        (n, bins, patches) = ax.hist(smin_perQ2bin_perXbin[iQ2][iX][0], bins='fd', facecolor='red', histtype="step", alpha=1., label='min', ls='-', linewidth=1.5)
+        ax.hist(smax_perQ2bin_perXbin[iQ2][iX][0], bins=bins, facecolor='blue',
+                histtype="step", alpha=1., label='min', ls='-', linewidth=1.5)
+
+        ax.set_xscale('log')
+        ax.set_yscale('log')
 
         plt.savefig("bins/Q2_"+str(iQ2)+"_X_"+str(iX)+"_p_"+str(round(hist_Z_score[i],2))+".pdf")
         plt.clf
