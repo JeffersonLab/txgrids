@@ -404,3 +404,27 @@ print "Kruskal-Wallis: stat = ", stat, " p-value = ", pvalue, "..."
 print "----------"
 #--------------------------------------------------------------------------------------------------------------------
 """
+
+os.system("rm -r bins")
+os.mkdir('bins/')
+i = 0
+for iQ2 in range(0, NQ2bins):
+    for iX in range(0, NXbins):
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        #plt.tight_layout(rect=[0, 0.08, 1., 0.95])
+        ax.title.set_text(r'$\sigma-lvl=$' +
+                          str(round(hist_Z_score[i], 2))+"; x="+str(round(central_Xbins[iX], 2))+"; Q2="+str(round(central_Q2bins[iQ2], 2)))
+
+        (n, bins, patches) = ax.hist(smin_perQ2bin_perXbin[iQ2][iX][0], bins='fd',
+                                     facecolor='red', histtype="step", alpha=1., label='min', ls='-', linewidth=1.5)
+        ax.hist(smax_perQ2bin_perXbin[iQ2][iX][0], bins=bins, facecolor='blue',
+                histtype="step", alpha=1., label='min', ls='-', linewidth=1.5)
+
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+
+        plt.savefig("bins/Q2_"+str(iQ2)+"_X_"+str(iX)+"_p_" +
+                    str(round(hist_Z_score[i], 2))+".pdf")
+        plt.clf
+        i += 1

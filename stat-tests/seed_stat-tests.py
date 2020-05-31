@@ -10,7 +10,7 @@ import sys,os
 sys.path.append(os.path.dirname( os.path.dirname(os.path.abspath(__file__) ) ) )
 import numpy as np
 from theory.tools import save, load
-from theory.seed_mceg  import MCEG
+from theory.mceg  import MCEG
 from ndtest import ndtest
 
 #--matplotlib
@@ -73,7 +73,7 @@ s['min']['iset'] = 0
 s['min']['iF2'] = 908
 s['min']['iFL'] = 909
 s['min']['iF3'] = 910
-s['min']['seed'] = 1
+#s['min']['seed'] = 1
 
 
 s['max']['tabname'] = 'NNPDF31_nnlo_pch_as_0118_SF'
@@ -81,8 +81,9 @@ s['max']['iset'] = 0
 s['max']['iF2'] = 908
 s['max']['iFL'] = 909
 s['max']['iF3'] = 910
-s['max']['seed'] = 1234567
+#s['max']['seed'] = 1234567
 
+seeds = {'min': 1, 'max': 212}
 #common keys
 for key in s.keys():
     s[key]['wdir']      = wdir
@@ -90,14 +91,17 @@ for key in s.keys():
     s[key]['rs'] = rs
     s[key]['fname'] = 'mceg00'
     s[key]['veto'] = veto00
-    s[key]['fdata'] = wdir+"/"+s[key]['tabname']+"_data"+str(int(Nevents/1000))+"k_"+str(s[key]['seed'])+".po"
+    s[key]['fdata'] = wdir+"/"+s[key]['tabname']+"_data"+str(int(Nevents/1000))+"k_"+str(seeds[key])+".po"
 
 
 #--generate events
 #output keys: ['Y', 'X', 'Q2', 'W', 'rs']
+
 for key in s.keys():
+    seed=seeds[key]
+    np.random.seed(1)
     if not os.path.isfile(s[key]['fdata']):
-        mceg=MCEG(**(s[key]))
+        mceg = MCEG(**(s[key]))
         mceg.buil_mceg()
         s[key].update(mceg.gen_events(Nevents))
         save(s[key], s[key]['fdata'])
@@ -237,6 +241,7 @@ for imethod, stat_method in enumerate(stat_methods): # ["Kolmogorov-Smirnov", "A
             hist_Nevents['min'].append(len(list(smin_perQ2bin_perXbin[iQ2][iX][0])))
             hist_Nevents['max'].append(len(list(smax_perQ2bin_perXbin[iQ2][iX][0])))
 
+    """
     #convert p-values to Z-scores
     hist_Z_score=[]
     for i in range(0, NQ2bins*NXbins):
@@ -248,15 +253,15 @@ for imethod, stat_method in enumerate(stat_methods): # ["Kolmogorov-Smirnov", "A
                 sigma_lvl = stats.norm.ppf(1-(hist_pvalues[i])/2)
 
             hist_Z_score.append(sigma_lvl)
-
+    """
     #hist_Z_score = stats.norm.ppf(1-(np.array(hist_pvalues))/2)
 
-    h = plt.hist2d(np.log(hist_Xbins), np.log(hist_Q2bins), weights=hist_Z_score, bins=[
+    h = plt.hist2d(np.log(hist_Xbins), np.log(hist_Q2bins), weights=hist_pvalues, bins=[
                 NXbins, NQ2bins], cmap='hot_r')
     #plt.clim(0, 1)
     plt.clim(0,5)
     cbar = plt.colorbar()
-    cbar.ax.set_xlabel(r"$\sigma-level$")  # , rotation=270)
+    cbar.ax.set_xlabel(r"$p-value$")  # , rotation=270)
     #cbar.ax.set_yscale('linear')  # , rotation=270)
 
     if (imethod+1)%2 == 0:
@@ -428,7 +433,7 @@ for iQ2 in range(0, NQ2bins):
         ax = fig.add_subplot(111)
         #plt.tight_layout(rect=[0, 0.08, 1., 0.95])
         ax.title.set_text(r'$\sigma-lvl=$' +
-                          str(round(hist_Z_score[i], 2))+"; x="+str(round(central_Xbins[iX], 2))+"; Q2="+str(round(central_Q2bins[iQ2], 2)))
+                          str(round(hist_pvalues[i], 2))+"; x="+str(round(central_Xbins[iX], 2))+"; Q2="+str(round(central_Q2bins[iQ2], 2)))
 
         (n, bins, patches) = ax.hist(smin_perQ2bin_perXbin[iQ2][iX][0], bins='fd', facecolor='red', histtype="step", alpha=1., label='min', ls='-', linewidth=1.5)
         ax.hist(smax_perQ2bin_perXbin[iQ2][iX][0], bins=bins, facecolor='blue',
@@ -437,7 +442,8 @@ for iQ2 in range(0, NQ2bins):
         ax.set_xscale('log')
         ax.set_yscale('log')
 
-        plt.savefig("bins/Q2_"+str(iQ2)+"_X_"+str(iX)+"_p_"+str(round(hist_Z_score[i],2))+".pdf")
+        plt.savefig("bins/Q2_"+str(iQ2)+"_X_"+str(iX)+"_p_" +
+                    str(round(hist_pvalues[i], 2))+".pdf")
         plt.clf
         i+=1
 
