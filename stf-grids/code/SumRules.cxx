@@ -23,9 +23,11 @@ int main()
   LHAPDF::setPaths(path);
 
   APFEL::SetPDFSet("NNPDF31_nnlo_pch_as_0118_rs_1.0");
+  //APFEL::SetPDFSet("NNPDF31_nnlo_pch_as_0118_rs_0.5");
+  //APFEL::SetPDFSet("NNPDF31_nnlo_pch_as_0118");
   APFEL::SetPerturbativeOrder(1);
   APFEL::SetNumberOfGrids(3);
-  APFEL::SetGridParameters(1,130,3,1e-9);
+  APFEL::SetGridParameters(1,130,3,1e-5);
   APFEL::SetGridParameters(2,60,5,1e-1);
   APFEL::SetGridParameters(3,20,5,8e-1);
 
