@@ -6,18 +6,22 @@ CXXFLAGS += -O3 -fPIC -std=c++11
 LHAPDFINCS = $(shell lhapdf-config --cppflags)
 LHAPDFLIBS = $(shell lhapdf-config --ldflags)
 
-# APFEL++
+# APFEL
 APFELINCS = $(shell apfel-config --cppflags)
 APFELLIBS = $(shell apfel-config --ldflags)
 
-# Now set up the compiler and link flags and libs
-CXXFLAGS += $(LHAPDFINCS) $(APFELINCS)
-LDFLAGS  += $(LHAPDFINCS) $(APFELINCS)
+# APFEL++
+APFELPPINCS = $(shell apfelxx-config --cppflags)
+APFELPPLIBS = $(shell apfelxx-config --ldflags)
 
-CLIBS += $(LHAPDFLIBS) $(APFELLIBS)
+# Now set up the compiler and link flags and libs
+CXXFLAGS += $(LHAPDFINCS) $(APFELINCS) $(APFELPPINCS)
+LDFLAGS  += $(LHAPDFINCS) $(APFELINCS) $(APFELPPINCS)
+
+CLIBS += $(LHAPDFLIBS) $(APFELLIBS) $(APFELPPLIBS)
 
 install : all
-all : PDFGrid StructureFunctionGrid SumRules
+all : TotalCrossSection PDFGrid StructureFunctionGrid SumRules 
 
 PDFGrid: PDFGrid.o 
 	$(CXX) $(LDFLAGS) -o $@ $< $(CLIBS)
@@ -26,6 +30,9 @@ StructureFunctionGrid: StructureFunctionGrid.o
 	$(CXX) $(LDFLAGS) -o $@ $< $(CLIBS)
 
 SumRules: SumRules.o 
+	$(CXX) $(LDFLAGS) -o $@ $< $(CLIBS)
+
+TotalCrossSection: TotalCrossSection.o 
 	$(CXX) $(LDFLAGS) -o $@ $< $(CLIBS)
 
 .SUFFIXES : .cxx .o .f .c
@@ -37,4 +44,4 @@ SumRules: SumRules.o
 	$(F77)  -c $< 
 
 clean:
-	rm -rf *.lo *.o *.la PDFGrid StructureFunctionGrid SumRules *~
+	rm -rf *.lo *.o *.la PDFGrid StructureFunctionGrid SumRules TotalCrossSection *~
