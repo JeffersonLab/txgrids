@@ -172,12 +172,12 @@ class IDIS:
         elif mode=='tot':
 
             self.Q2min = 1 
-            self.xmax  = 0.9
+            self.xmax = 1. #Was 0.9
             self.ymax  = 1
             self.xmin  = self.Q2min/(self.rs**2-par.M2)
-            self.iQ2max = False
+            self.iQ2max = False 
             self.iymin  = False
-            result = self.integ(self._tgrand_dxdy, nitn=10, neval=neval)
+            result = self.integ(self._tgrand_dxdQ2, nitn=10, neval=neval)
             #result = self.integ(self.tgrand_dxdQ2, nitn=10, neval=neval)
         
         return result.val*self._units(units),\

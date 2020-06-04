@@ -21,6 +21,7 @@ int main() {
   const double stot = pow(140.7, 2);
   const double Qmin = 1;
   const double Wmin = sqrt(10);
+  const double W2min = 10;
   const int    sgn  = 1;
 
   // Include new search path in LHAPDF
@@ -47,7 +48,7 @@ int main() {
   const double conv = 0.3893793721e12;
   
   // Integration accuracy
-  const double eps = 1e-7;
+  const double eps = 1e-5;
 
   // Integration bounds in ln(Q2)
   const double lnQ2min = 2 * log(Qmin);
@@ -64,18 +65,19 @@ int main() {
       // lnmax is required to avoid running out of
       // boudaries (x > 1).
       const double lnxmin = lnQ2 - log(stot - MN2);
-      const double lnxmax = log(1 / ( 1 + pow(Wmin / Q, 2) ));
+      const double lnxmax = log(1 / (1 + (W2min-MN2)/Q2 ));
 
       // Define integrand in ln(x)
       const auto dsigmadlnxdlnQ2 = [=] (double const& lnx) -> double
       {
-	const double x  = exp(lnx);
-	const double y  = Q2 / x / ( stot - MN2 );
-	const double F2 = dist->xfxQ(908, x, Q);
-	const double FL = dist->xfxQ(909, x, Q);
-	const double F3 = dist->xfxQ(910, x, Q);
+        const double x  = exp(lnx);
+        const double y  = Q2 / x / ( stot - MN2 );
+        const double W2 = MN2 + Q2 / x * (1 - x);
+        const double F2 = dist->xfxQ(908, x, Q);
+        const double FL = dist->xfxQ(909, x, Q);
+        const double F3 = dist->xfxQ(910, x, Q);
         const double F1 = ( ( 1 + 4 * MN2 / Q2 ) * F2 - FL ) / 2 / x;
-        const double factor = conv * 4 * M_PI * pow(alpha, 2) / x / y / Q2 / ( stot - MN2 ) / x;
+        const double factor = conv * 4 * M_PI * pow(alpha, 2) / x / y / Q2 / ( stot - MN2 ) / x; //TODO
 	// The factor x is the jacobian of the x
 	// integration due to the fact that dx = x *
 	// d(log(x)).
