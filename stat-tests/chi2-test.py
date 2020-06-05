@@ -45,8 +45,8 @@ Nevents = int(sys.argv[1])
 
 #to tweak:
 #-----------------------------------------------
-min_SF = 'NNPDF31_nnlo_pch_as_0118_SF'
-max_SF = 'NNPDF31_nnlo_pch_as_0118_SF'
+min_SF = 'NNPDF31_nnlo_pch_as_0118_rs_0.5_SF'
+max_SF = 'NNPDF31_nnlo_pch_as_0118_rs_1.0_SF'
 seeds = {'min': 2, 'max': 299999}
 
 #---binning
@@ -163,12 +163,12 @@ for key in hist_xsec.keys():
 
             if N==0:
                 non_empty[key][iQ2*NXbins+iX] = False
-                covmat[key][iQ2*NXbins+iX][iQ2*NXbins+iX] = np.nan
+                covmat[key][iQ2*NXbins+iX][iQ2*NXbins+iX] = 0.
             else:
                 non_empty[key][iQ2*NXbins+iX] = True
                 covmat[key][iQ2*NXbins+iX][iQ2*NXbins+iX] = (bin_xsec*np.sqrt(N))**2
 
-tot_non_empty = non_empty['min']*non_empty['max']
+tot_non_empty = non_empty['min']+non_empty['max']
 
 map_non_empty={}
 count=0
@@ -240,7 +240,7 @@ ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
 
 #----- min xsec hist
 ax = py.subplot(gs[1])
-ax.title.set_text(r'$\sigma^{min}_{tot}$'+' = %0.4e'%(s['max']['tot_xsec']) + r' [fb]')
+ax.title.set_text(r'$\sigma^{min}_{tot}$'+' = %0.4e'%(s['min']['tot_xsec']) + r' [fb]')
 h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_xsec['min'], bins=[np.log(Xbins), np.log(Q2bins)], cmap='hot_r')
 cbar = plt.colorbar()
 cbar.ax.set_xlabel(r"$\frac{1}{\sigma_{tot}}\frac{d\sigma_{min}}{dxdQ^2}$")
