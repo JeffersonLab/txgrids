@@ -45,9 +45,19 @@ Nevents = int(sys.argv[1])
 
 #to tweak:
 #-----------------------------------------------
-min_SF = 'NNPDF31_nnlo_pch_as_0118_rs_0.5_SF'
-max_SF = 'NNPDF31_nnlo_pch_as_0118_rs_1.0_SF'
-seeds = {'min': 2, 'max': 299999}
+
+#MCEG integration accuracy
+neval = 1000
+nitn = 1000
+
+#SFs
+min_SF = 'JAM4EIC'
+max_SF = 'JAM4EIC'
+
+#min_SF = 'NNPDF31_nnlo_pch_as_0118_rs_0.5_SF'
+#max_SF = 'NNPDF31_nnlo_pch_as_0118_rs_1.0_SF'
+
+seeds = {'min': 3, 'max': 4}
 
 #---binning
 NQ2bins = 50
@@ -94,7 +104,7 @@ for key in s.keys():
     s[key]['fdata'] = wdir+"/"+s[key]['tabname']+"_data"+str(int(Nevents/1000))+"k_seed"+str(seeds[key])+".po"
 
 
-lum = convert_lum(lum)
+lum = 10 #convert_lum(lum)
 #--generate events
 #output keys: ['Y', 'X', 'Q2', 'W', 'rs']
 
@@ -102,7 +112,7 @@ for key in s.keys():
     np.random.seed(seeds[key])
     if not os.path.isfile(s[key]['fdata']):
         mceg = MCEG(**(s[key]))
-        mceg.buil_mceg()
+        mceg.buil_mceg(neval=neval, nitn=nitn)
         s[key].update(mceg.gen_events(Nevents))
         s[key]['tot_xsec'] = mceg.get_xsectot()
         s[key]['tot_xsec'] *= units('fb')
@@ -138,16 +148,18 @@ elif choice_bins == 'max':
 
 
 non_empty = {'min': np.zeros(NXbins*NQ2bins)>1, 'max': np.zeros(NXbins*NQ2bins)>1}
-hist_xsec = {'min': np.zeros(NXbins*NQ2bins), 'max': np.zeros(NXbins*NQ2bins)}
-covmat = {'min': np.zeros((NXbins*NQ2bins, NXbins*NQ2bins)), 'max': np.zeros((NXbins*NQ2bins, NXbins*NQ2bins))}
+covmat_xsecs = {'min': np.zeros((NXbins*NQ2bins, NXbins*NQ2bins)), 'max': np.zeros((NXbins*NQ2bins, NXbins*NQ2bins))}
+
+hist_weights = {'min': np.zeros(NXbins*NQ2bins), 'max': np.zeros(NXbins*NQ2bins)}
+hist_xsecs = {'min': np.zeros(NXbins*NQ2bins), 'max': np.zeros(NXbins*NQ2bins)}
 hist_N = {'min': np.zeros(NXbins*NQ2bins), 'max': np.zeros(NXbins*NQ2bins)}
 
 #to get:
-#Nevents: hist_xsec['min']*s['max']['tot_xsec']*lum (per bin)
+#Nevents: hist_weights['min']*s['max']['tot_xsec']*lum (per bin)
 #tot xsec: s['min']['tot_xsec'] (in fb)
-#normalized xsec: hist_xsec['min'
+#normalized xsec: hist_weights['min'
 
-for key in hist_xsec.keys():
+for key in hist_weights.keys():
     for iQ2 in range(0, NQ2bins):
         for iX in range(0, NXbins):
 
@@ -155,18 +167,29 @@ for key in hist_xsec.keys():
             Q2_mask = np.where((s[key]['Q2'] > Q2bins[iQ2]) & (s[key]['Q2'] < Q2bins[iQ2+1]),True,False)
             mask=x_mask*Q2_mask
             
-            bin_xsec = np.sum(s[key]['W'][mask])
-            N = bin_xsec*s[key]['tot_xsec']*lum
+            weight = np.sum(s[key]['W'][mask])
+            xsec = weight*s[key]['tot_xsec'] # [fb]
+            N = float(int(xsec*lum)) 
 
-            hist_xsec[key][iQ2*NXbins+iX]=bin_xsec
+            hist_weights[key][iQ2*NXbins+iX] = weight
+            hist_xsecs[key][iQ2*NXbins+iX] = xsec
             hist_N[key][iQ2*NXbins+iX] = N
 
             if N==0:
                 non_empty[key][iQ2*NXbins+iX] = False
-                covmat[key][iQ2*NXbins+iX][iQ2*NXbins+iX] = 0.
+                covmat_xsecs[key][iQ2*NXbins+iX][iQ2*NXbins+iX] = 0.
             else:
                 non_empty[key][iQ2*NXbins+iX] = True
-                covmat[key][iQ2*NXbins+iX][iQ2*NXbins+iX] = (bin_xsec*np.sqrt(N))**2
+                covmat_xsecs[key][iQ2*NXbins+iX][iQ2*NXbins+iX] =(np.sqrt(N)/lum)**2
+                #covmat_weights[key][iQ2*NXbins+iX][iQ2*NXbins+iX] = (np.sqrt(N)/(s[key]['tot_xsec']*lum))**2
+            """
+            print key
+            print 'xsec = ', xsec
+            print 'Lum =',lum
+            print 'Nevents = ',N
+            print 'delta_xsec = ', (np.sqrt(N)/lum)
+            print ' '
+            """
 
 tot_non_empty = non_empty['min']+non_empty['max']
 
@@ -180,18 +203,19 @@ for iQ2 in range(0, NQ2bins):
 
 N_bins = np.count_nonzero(tot_non_empty)
 
-tot_covmat = np.matrix(np.zeros((N_bins, N_bins)))
+tot_covmat_xsecs = np.matrix(np.zeros((N_bins, N_bins)))
 
-xsec = {}
-for key in hist_xsec.keys():
-    xsec[key] = np.matrix(hist_xsec[key][tot_non_empty])
-    covmat[key] = covmat[key][tot_non_empty, :]
-    covmat[key] = covmat[key][:, tot_non_empty]
+weights = {}
+xsecs = {}
+for key in hist_xsecs.keys():
+    xsecs[key] = np.matrix(hist_xsecs[key][tot_non_empty])
+    covmat_xsecs[key] = covmat_xsecs[key][tot_non_empty, :]
+    covmat_xsecs[key] = covmat_xsecs[key][:, tot_non_empty]
 
-    covmat[key] = np.matrix(covmat[key])
-    tot_covmat += covmat[key]
+    covmat_xsecs[key] = np.matrix(covmat_xsecs[key])
+    tot_covmat_xsecs += covmat_xsecs[key]
 
-inv_covmat = np.linalg.inv(tot_covmat)
+inv_covmat_xsecs = np.linalg.inv(tot_covmat_xsecs)
 
 hist_chi2s = np.zeros(NXbins*NQ2bins)
 hist_Xs = np.zeros(NXbins*NQ2bins)
@@ -201,16 +225,16 @@ for iQ2 in range(0, NQ2bins):
         if tot_non_empty[iQ2*NXbins+iX]:
             ind = map_non_empty[iQ2*NXbins+iX]
 
-            max_d = xsec['max'][0,ind]
-            min_d = xsec['min'][0,ind]
+            max_d = xsecs['max'][0,ind]
+            min_d = xsecs['min'][0,ind]
 
-            hist_chi2s[iQ2*NXbins+iX] = (min_d-max_d)*inv_covmat[ind,ind]*(min_d-max_d)
+            hist_chi2s[iQ2*NXbins+iX] = (min_d-max_d)*inv_covmat_xsecs[ind,ind]*(min_d-max_d)
         
         hist_Xs[iQ2*NXbins+iX] = Xbins[iX]+(Xbins[iX+1]-Xbins[iX])/2.
         hist_Q2s[iQ2*NXbins+iX] = Q2bins[iQ2]+(Q2bins[iQ2+1]-Q2bins[iQ2])/2.
 
 
-tot_chi2 = (xsec['min']-xsec['max'])*inv_covmat*(xsec['min']-xsec['max']).T
+tot_chi2 = (xsecs['min']-xsecs['max'])*inv_covmat_xsecs*(xsecs['min']-xsecs['max']).T
 tot_chi2 /= N_bins
 
 nrows, ncols = 1, 3
@@ -227,7 +251,7 @@ ax = py.subplot(gs[0])
 #---- chi2 hist
 h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_chi2s, bins=[np.log(Xbins), np.log(Q2bins)], cmap='hot_r')
 
-ax.title.set_text(r'$\chi^2_{tot}/N_{bins} = '+str(round(tot_chi2, 2)) + r'$')
+ax.title.set_text(r'$\chi^2_{tot}/N_{bins}$ = '+' %0.4e'%tot_chi2)
 cbar = plt.colorbar()
 cbar.ax.set_xlabel(r"$\chi^2_{bin}$")
 ax.set_xlabel(r"$x$")
@@ -241,9 +265,10 @@ ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
 #----- min xsec hist
 ax = py.subplot(gs[1])
 ax.title.set_text(r'$\sigma^{min}_{tot}$'+' = %0.4e'%(s['min']['tot_xsec']) + r' [fb]')
-h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_xsec['min'], bins=[np.log(Xbins), np.log(Q2bins)], cmap='hot_r')
+h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_xsecs['min'], bins=[np.log(Xbins), np.log(Q2bins)], cmap='hot_r')
 cbar = plt.colorbar()
-cbar.ax.set_xlabel(r"$\frac{1}{\sigma_{tot}}\frac{d\sigma_{min}}{dxdQ^2}$")
+cbar.ax.set_xlabel(r"$\frac{d\sigma_{min}}{dxdQ^2}$")
+#cbar.ax.set_xlabel(r"$\frac{1}{\sigma_{tot}}\frac{d\sigma_{min}}{dxdQ^2}$")
 ax.set_xlabel(r"$x$")
 
 ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
@@ -254,9 +279,10 @@ ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
 #----- max Nevents hist
 ax = py.subplot(gs[2])
 ax.title.set_text(r'$\sigma^{max}_{tot}$'+' = %0.4e'%(s['max']['tot_xsec']) + r' [fb]')
-h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_xsec['max'], bins=[np.log(Xbins), np.log(Q2bins)], cmap='hot_r')
+h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_xsecs['max'], bins=[np.log(Xbins), np.log(Q2bins)], cmap='hot_r')
 cbar = plt.colorbar()
-cbar.ax.set_xlabel(r"$\frac{1}{\sigma_{tot}}\frac{d\sigma_{max}}{dxdQ^2}$")
+cbar.ax.set_xlabel(r"$\frac{d\sigma_{max}}{dxdQ^2}$")
+#cbar.ax.set_xlabel(r"$\frac{1}{\sigma_{tot}}\frac{d\sigma_{max}}{dxdQ^2}$")
 ax.set_xlabel(r"$x$")
 
 ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))

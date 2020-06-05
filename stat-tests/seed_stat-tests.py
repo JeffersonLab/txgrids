@@ -68,7 +68,7 @@ s['min']['iFL'] = 90002
 s['min']['iF3'] = 90003
 
 """
-s['min']['tabname'] = 'NNPDF31_nnlo_pch_as_0118_SF'
+s['min']['tabname'] = 'JAM4EIC'
 s['min']['iset'] = 0
 s['min']['iF2'] = 908
 s['min']['iFL'] = 909
@@ -76,14 +76,14 @@ s['min']['iF3'] = 910
 #s['min']['seed'] = 1
 
 
-s['max']['tabname'] = 'NNPDF31_nnlo_pch_as_0118_SF'
+s['max']['tabname'] = 'JAM4EIC'
 s['max']['iset'] = 0
 s['max']['iF2'] = 908
 s['max']['iFL'] = 909
 s['max']['iF3'] = 910
 #s['max']['seed'] = 1234567
 
-seeds = {'min': 1, 'max': 212}
+seeds = {'min': 1, 'max': 2}
 #common keys
 for key in s.keys():
     s[key]['wdir']      = wdir
@@ -91,15 +91,15 @@ for key in s.keys():
     s[key]['rs'] = rs
     s[key]['fname'] = 'mceg00'
     s[key]['veto'] = veto00
-    s[key]['fdata'] = wdir+"/"+s[key]['tabname']+"_data"+str(int(Nevents/1000))+"k_"+str(seeds[key])+".po"
+    s[key]['fdata'] = wdir+"/"+s[key]['tabname']+"_data"+str(int(Nevents/1000))+"k_seed"+str(seeds[key])+".po"
 
 
 #--generate events
 #output keys: ['Y', 'X', 'Q2', 'W', 'rs']
 
+
 for key in s.keys():
-    seed=seeds[key]
-    np.random.seed(1)
+    np.random.seed(seeds[key])
     if not os.path.isfile(s[key]['fdata']):
         mceg = MCEG(**(s[key]))
         mceg.buil_mceg()
@@ -126,9 +126,9 @@ print "----------"
 
 #to tweak:
 #---
-NQ2bins = 10 # int(np.log10(Nevents)*25)
+NQ2bins = 50 # int(np.log10(Nevents)*25)
 print "NQ2bins = ", NQ2bins
-NXbins = 10 # int(np.log10(Nevents)*25)
+NXbins = 50 # int(np.log10(Nevents)*25)
 print "NXbins = ", NXbins
 choice_bins = 'min'
 #---
@@ -194,9 +194,11 @@ for imethod, stat_method in enumerate(stat_methods): # ["Kolmogorov-Smirnov", "A
         pvalues_perQ2bin_perXbin.append([])
         for iX in range(0, NXbins):
             if [iQ2, iX] in empty_bins:
-                pvalue=1
+                pvalue=0
             else:
                 if stat_method == "Kolmogorov-Smirnov":
+                    n = len(smin_perQ2bin_perXbin[iQ2][iX][0])
+                    m = len(smax_perQ2bin_perXbin[iQ2][iX][0])
                     stat, pvalue = stats.ks_2samp(smin_perQ2bin_perXbin[iQ2][iX][0], smax_perQ2bin_perXbin[iQ2][iX][0])
                 elif stat_method == "Ansari-Bradley":
                     stat, pvalue = stats.ansari(smin_perQ2bin_perXbin[iQ2][iX][0], smax_perQ2bin_perXbin[iQ2][iX][0])
@@ -234,12 +236,12 @@ for imethod, stat_method in enumerate(stat_methods): # ["Kolmogorov-Smirnov", "A
     #reshaping
     for iQ2 in range(0, NQ2bins):
         for iX in range(0, NXbins):
-            #if [iQ2, iX] not in empty_bins:
-            hist_Xbins.append(central_Xbins[iX])
-            hist_Q2bins.append(central_Q2bins[iQ2])
-            hist_pvalues.append(pvalues_perQ2bin_perXbin[iQ2][iX])
-            hist_Nevents['min'].append(len(list(smin_perQ2bin_perXbin[iQ2][iX][0])))
-            hist_Nevents['max'].append(len(list(smax_perQ2bin_perXbin[iQ2][iX][0])))
+            if [iQ2, iX] not in empty_bins:
+                hist_Xbins.append(central_Xbins[iX])
+                hist_Q2bins.append(central_Q2bins[iQ2])
+                hist_pvalues.append(pvalues_perQ2bin_perXbin[iQ2][iX])
+                hist_Nevents['min'].append(len(list(smin_perQ2bin_perXbin[iQ2][iX][0])))
+                hist_Nevents['max'].append(len(list(smax_perQ2bin_perXbin[iQ2][iX][0])))
 
     """
     #convert p-values to Z-scores
@@ -258,8 +260,8 @@ for imethod, stat_method in enumerate(stat_methods): # ["Kolmogorov-Smirnov", "A
 
     h = plt.hist2d(np.log(hist_Xbins), np.log(hist_Q2bins), weights=hist_pvalues, bins=[
                 NXbins, NQ2bins], cmap='hot_r')
-    #plt.clim(0, 1)
-    plt.clim(0,5)
+    plt.clim(0, 1)
+    #plt.clim(0,5)
     cbar = plt.colorbar()
     cbar.ax.set_xlabel(r"$p-value$")  # , rotation=270)
     #cbar.ax.set_yscale('linear')  # , rotation=270)
@@ -427,20 +429,122 @@ print "----------"
 os.system("rm -r bins")
 os.mkdir('bins/')
 i=0
+"""
+min_counts=[]
+max_counts=[]
+for iQ2 in range(0, NQ2bins):
+    min_counts.append([])
+    max_counts.append([])
+    for iX in range(0, NXbins):
+        min_counts[iQ2].append(len(smin_perQ2bin_perXbin[iQ2][iX]))
+        max_counts[iQ2].append(len(smax_perQ2bin_perXbin[iQ2][iX]))
+"""
+n_s = len(s['min']['W'])
+m_s = len(s['max']['W'])
+
+min_kin = np.vstack([s['min']['X'], s['min']['Q2']])
+max_kin = np.vstack([s['max']['X'], s['max']['Q2']])
+
+kde_min = stats.gaussian_kde(min_kin, weights=s['min']['W'])#    ,bw_method=0.01)
+kde_max = stats.gaussian_kde(max_kin, weights=s['max']['W'])#    ,bw_method=0.01)
+
 for iQ2 in range(0, NQ2bins):
     for iX in range(0, NXbins):
+        if [iQ2, iX] in empty_bins: continue
+        print "bin iQ2:",iQ2,"/",NQ2bins,", iX:",iX,"/",NXbins
         fig = plt.figure()
         ax = fig.add_subplot(111)
         #plt.tight_layout(rect=[0, 0.08, 1., 0.95])
-        ax.title.set_text(r'$\sigma-lvl=$' +
-                          str(round(hist_pvalues[i], 2))+"; x="+str(round(central_Xbins[iX], 2))+"; Q2="+str(round(central_Q2bins[iQ2], 2)))
 
-        (n, bins, patches) = ax.hist(smin_perQ2bin_perXbin[iQ2][iX][0], bins='fd', facecolor='red', histtype="step", alpha=1., label='min', ls='-', linewidth=1.5)
-        ax.hist(smax_perQ2bin_perXbin[iQ2][iX][0], bins=bins, facecolor='blue',
-                histtype="step", alpha=1., label='min', ls='-', linewidth=1.5)
+        sminbin_max = max(smin_perQ2bin_perXbin[iQ2][iX][0])
+        sminbin_min = min(smin_perQ2bin_perXbin[iQ2][iX][0])
+
+        ax.title.set_text(r'$p-value=$' + str(round(hist_pvalues[i], 2))+"; x="+str(round(central_Xbins[iX], 2))+"; Q2="+str(round(central_Q2bins[iQ2], 2)))
+
+        print "min sum = ", sum(smin_perQ2bin_perXbin[iQ2][iX][0])
+        print "max sum = ", sum(smax_perQ2bin_perXbin[iQ2][iX][0])
+
+        (n_min, bins, patches) = ax.hist(np.array(smin_perQ2bin_perXbin[iQ2][iX][0]), bins='fd', density=True, facecolor='blue',
+                                         edgecolor='blue', histtype="step", alpha=1., label='min', ls='-', linewidth=1.5)
+        (n_max, tmp1, tmp2) = ax.hist(np.array(smax_perQ2bin_perXbin[iQ2][iX][0]), bins=bins, density=True, facecolor='red', edgecolor='red',
+                                         histtype="step", alpha=1., label='min', ls='-', linewidth=1.5)
+
+        #plt.cla()
 
         ax.set_xscale('log')
         ax.set_yscale('log')
+        
+        #kde1_min = stats.gaussian_kde(smin_perQ2bin_perXbin[iQ2][iX][0])
+        #kde1_max = stats.gaussian_kde(smax_perQ2bin_perXbin[iQ2][iX][0])
+
+        # 1D 
+        n = m = 1000
+
+        #bins_min = np.linspace(min(smin_perQ2bin_perXbin[iQ2][iX][0]), max(smin_perQ2bin_perXbin[iQ2][iX][0]), n)
+
+        #pdf_min = kde1_min.pdf(bins_min)
+        #pdf_max = kde1_max.pdf(bins_min)
+        #ax.plot(bins_min, pdf_min, color='blue', ls='--')
+        #ax.plot(bins_min, pdf_max, color='red', ls='--')
+
+        n = len(smax_perQ2bin_perXbin[iQ2][iX][0])
+        m = len(smin_perQ2bin_perXbin[iQ2][iX][0])
+        ##kde_samp_min = kde1_min.resample(n)
+        ##kde_samp_max = kde1_max.resample(m)
+
+        ###stat, pvalue = stats.ks_2samp(kde_samp_min[0], kde_samp_max[0])
+        ###chisq, pval = stats.chisquare(pdf_min, pdf_max)
+
+        ####print "orig = ", hist_pvalues[i], " kde = ", pvalue, " chi2 = ",chisq/n
+
+        #ax.hist(kde_samp_min[0], bins=bins, facecolor='green', edgecolor='green', density=True,
+        #                             histtype="step", alpha=1., label='kde-min', ls='--', linewidth=1.5)
+
+        #ax.hist(kde_samp_max[0], bins=bins, facecolor='orange', edgecolor='orange', density=True,
+        #        histtype="step", alpha=1., label='kde-max', ls='--', linewidth=1.5)
+
+
+        # 2D
+        """
+        test = np.array(s['max']['X'])
+        test_x_ind = np.where((test > Xbins[iX]) & (test < Xbins[iX+1]))
+        test_W = s['max']['W'][test_x_ind]
+        ax.hist(test_W, bins=bins, density=True, facecolor='red', edgecolor='red',
+                histtype="step", alpha=1., label='min', ls='--', linewidth=3.)
+
+
+        #kde_min = stats.gaussian_kde(test_min)
+        #kde_max = stats.gaussian_kde(test_max)
+
+        n = m = len(bins)-1 #len(smin_perQ2bin_perXbin[iQ2][iX][0])
+
+        bins_X = np.linspace(Xbins[iX], Xbins[iX+1], n)
+        bins_Q2 = np.linspace(Q2bins[iQ2], Q2bins[iQ2+1], n)
+
+        kin_bins = np.vstack([bins_X,bins_Q2])
+
+        #bins_xsec = np.linspace(sminbin_min, sminbin_max, n)
+
+        #print n_min
+        #/kde_min.pdf(kin_bins)
+        bin_width = (bins[1:]-bins[:-1])/2.
+        nbin = len(smin_perQ2bin_perXbin[iQ2][iX][0])
+        ax.plot(bins[:-1], kde_min.pdf(kin_bins), color='blue', ls='--')
+        ax.plot(bins[:-1], kde_max.pdf(kin_bins), color='red', ls='--')
+
+
+
+        n = len(smax_perQ2bin_perXbin[iQ2][iX][0])
+        m = len(smin_perQ2bin_perXbin[iQ2][iX][0])
+        kde_samp_min = kde_min.resample(n)
+        kde_samp_max = kde_max.resample(m)
+
+        (n, bins, patches) = ax.hist(kde_samp_min[0], bins='fd', facecolor='blue', edgecolor='blue',
+                histtype="step", alpha=1., label='kde-min', ls='--', linewidth=1.5)
+
+        ax.hist(kde_samp_max[0], bins=bins, facecolor='red', edgecolor='red',
+                histtype="step", alpha=1., label='kde-max', ls='--', linewidth=1.5)
+        """
 
         plt.savefig("bins/Q2_"+str(iQ2)+"_X_"+str(iX)+"_p_" +
                     str(round(hist_pvalues[i], 2))+".pdf")
