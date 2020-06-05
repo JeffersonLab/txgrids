@@ -27,7 +27,7 @@ int main() {
   LHAPDF::setPaths(path);
 
   // Open LHAPDF set
-  const string set = "NNPDF31_lo_as_0118";
+  const string set = "nNNPDF20_nlo_as_0118_Au197";
   vector<LHAPDF::PDF*> dist = LHAPDF::mkPDFs(set);
 
   // Retrieve relevant parameters
@@ -86,10 +86,10 @@ int main() {
   APFEL::SetPoleMasses(mc,mb,mt);
   APFEL::SetLHgridParameters(150, 75, xmin, 0.1, 1, 100, Q2min, Q2max);
   APFEL::EnableTargetMassCorrections(true);
-  APFEL::LHAPDFgridStructureFunctions(dist.size()-1, Qin, set + "_SF");
+  APFEL::LHAPDFgridStructureFunctions(0, Qin, set + "_NC_Wm_Wp_SF");
 
   // Test produced grid
-  vector<LHAPDF::PDF*> disttest = LHAPDF::mkPDFs(set + "_SF");
+  vector<LHAPDF::PDF *> disttest = LHAPDF::mkPDFs(set + "_NC_Wm_Wp_SF");
   const vector<double> xtest{0.00001, 0.0001, 0.001, 0.01, 0.1, 0.3, 0.5, 0.7, 0.9};
   const vector<double> Qtest{2, 5, 10, 20, 100, 1000, 10000};
   APFEL::SetReplica(0);
@@ -101,7 +101,7 @@ int main() {
     {
       APFEL::ComputeStructureFunctionsAPFEL(Qin, q);
       for (auto const& x: xtest)
-	cout << q << "  " << x << "  " << disttest[0]->xfxQ(1001, x, q) << "  " << APFEL::F2total(x) << "  " << disttest[0]->xfxQ(1001, x, q) / APFEL::F2total(x) << endl;
+	cout << q << "  " << x << "  " << disttest[0]->xfxQ(908, x, q) << "  " << APFEL::F2total(x) << "  " << disttest[0]->xfxQ(908, x, q) / APFEL::F2total(x) << endl;
       cout << "\n";
     }
   APFEL::CleanUp();
