@@ -124,7 +124,19 @@ class MCEG:
 
     def _load_mceg(self):
         file = open('%s/%s.po'%(self.wdir,self.fname), 'rb')
-        self.integ = pickle.load(file) 
+        self.integ = pickle.load(file)
+
+    def get_xsectot(self):
+        """
+        :param lum:  str e.g.  '10:fb-1' 
+        :return: total number of events for a given 
+                 of the current generator and input luminosity
+        """
+        self._load_mceg()
+        tot = 0
+        for X, wgt in self.integ.random():
+            tot += wgt*self._f(X)
+        return tot
 
     def get_ntot(self,lum):
         """
