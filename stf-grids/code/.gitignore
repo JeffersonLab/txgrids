@@ -1,6 +1,8 @@
 SumRules.o
 StructureFunctionGrid.o
 PDFGrid.o
+TotalCrossSection.o
 SumRules
 StructureFunctionGrid
 PDFGrid
+TotalCrossSection
