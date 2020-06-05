@@ -11,10 +11,9 @@ import pylab  as py
 from matplotlib.lines import Line2D
 from matplotlib.colors import LogNorm
 
-from theory.tools import save, load
+from theory.tools import checkdir,save,load
 from theory.idis  import IDIS
 
-from tools import checkdir,save,load
 tabname='JAM4EIC'             
 
 def veto(x,y,Q2,W2):
