@@ -47,8 +47,8 @@ lum_arg = float(sys.argv[1])
 #-----------------------------------------------
 
 #MCEG integration accuracy
-neval = 10000  # (neval/2) ~ batch_size
-nitn = 1000
+neval = 10000  # default should be: 10000  # (neval/2) ~ batch_size
+nitn = 1000  # default should be: 1000
 min_Q = 0.1
 
 #SFs
@@ -112,6 +112,7 @@ for key in s.keys():
     if not os.path.isfile(s[key]['fdata']):
         mceg = MCEG(**(s[key]))
         mceg.buil_mceg(neval=neval, nitn=nitn, min_Q=min_Q)
+
         s[key]['tot_xsec'] = mceg.get_xsectot()
         s[key]['tot_xsec'] *= units('fb')
 
@@ -121,6 +122,8 @@ for key in s.keys():
         s[key]['quality_xsec'] = mceg.get_quality()
 
         Nevents = int(lum_arg*s[key]['tot_xsec'])
+        
+        s[key]['Nevents'] = Nevents
         
         s[key].update(mceg.gen_events(Nevents))
 
@@ -148,11 +151,11 @@ Xbins_smax = np.logspace(np.log10(np.min(s['max']['X'])), np.log10(np.max(s['max
 if choice_bins == 'min':
     Q2bins = Q2bins_smin
     Xbins = Xbins_smin
-    resultpath = 'plots/chi2-test_perxQ2_'+str(NXbins)+"-"+str(NQ2bins)+'sminbins_'+str(Nevents/1000)+'k-events.pdf'
+    resultpath = 'plots/chi2-test_perxQ2_'+str(NXbins)+"-"+str(NQ2bins)+'sminbins_'+str(s[key]['Nevents']/1000)+'k-events.pdf'
 elif choice_bins == 'max':
     Q2bins = Q2bins_smax
     Xbins = Xbins_smax
-    resultpath = 'plots/chi2-test_perxQ2_'+str(NXbins)+"-"+str(NQ2bins)+'smaxbins_'+str(Nevents/1000)+'k-events.pdf'
+    resultpath = 'plots/chi2-test_perxQ2_'+str(NXbins)+"-"+str(NQ2bins)+'smaxbins_'+str(s[key]['Nevents']/1000)+'k-events.pdf'
 
 
 non_empty = {'min': np.zeros(NXbins*NQ2bins)>1, 'max': np.zeros(NXbins*NQ2bins)>1}
@@ -163,7 +166,7 @@ hist_xsecs = {'min': np.zeros(NXbins*NQ2bins), 'max': np.zeros(NXbins*NQ2bins)}
 hist_N = {'min': np.zeros(NXbins*NQ2bins), 'max': np.zeros(NXbins*NQ2bins)}
 
 #to get:
-#Nevents: hist_weights['min']*s['max']['tot_xsec']*lum (per bin)
+#s[key]['Nevents']: hist_weights['min']*s['max']['tot_xsec']*lum (per bin)
 #tot xsec: s['min']['tot_xsec'] (in fb)
 #normalized xsec: hist_weights['min'
 
@@ -195,7 +198,7 @@ for key in hist_weights.keys():
             print key
             print 'xsec = ', xsec
             print 'Lum =',lum
-            print 'Nevents = ',N
+            print 's[key]['Nevents'] = ',N
             print 'delta_xsec = ', (np.sqrt(N)/lum)
             print ' '
             """
@@ -286,7 +289,7 @@ ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
 ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
 ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
 
-#----- max Nevents hist
+#----- max s[key]['Nevents'] hist
 ax = py.subplot(gs[2])
 ax.title.set_text(r'$\sigma^{max}_{tot}$'+' = %0.2e' % (s['max']['tot_xsec']) + r'$\pm$'+'%0.2e' % (s['max']['var_xsec'])+r' [fb]')
 h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_xsecs['max'], bins=[np.log(Xbins), np.log(Q2bins)], cmap='hot_r')
