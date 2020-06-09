@@ -96,7 +96,7 @@ class MCEG:
         result = self.integ(self._f, nitn=nitn, neval=neval)
         return result
 
-    def buil_mceg(self, neval=1000, nitn=10):
+    def buil_mceg(self, neval=1000, nitn=10,min_Q=0.5):
         """
         build the vegas integrator as MCEG
         """
@@ -106,26 +106,28 @@ class MCEG:
         while 1:
             print('trial %d' % cnt)
             result = self._vegas_integrate(neval=neval, nitn=nitn)
-            if result.Q < 0.2:
+            if result.Q < min_Q:
+                print 'Q = ',result.Q,'<',min_Q,' | neval=',neval,' | nitn=',nitn, ' | trying again with neval*10...'
                 neval *= 10
             else:
                 break
             cnt += 1
-            if cnt == 1:
-                break
+            #if cnt == 1:
+            #    break
         print(result.summary())
 
-        sigtot = result.val
-        Q = result.Q
+        self.sigtot = result.val
+        self.Q = result.Q
+        self.var=result.var
 
-        if Q < 0.1:
+        if self.Q < 0.1:
             msg = '(bad) '
         else:
             msg = '(good)'
 
         print('\n')
-        print('sig tot = %.2e GeV^-2' % sigtot)
-        print('Q       = %.2f %s    ' % (Q, msg))
+        print('sig tot = %.2e GeV^-2' % self.sigtot)
+        print('Q       = %.2f %s    ' % (self.Q, msg))
 
         mceg_name = '%s/%s.po' % (self.wdir, self.fname)
         print('saving mceg at %s' % mceg_name)
@@ -139,14 +141,22 @@ class MCEG:
 
     def get_xsectot(self):
         """
-        :return: total number of events for a given 
-                 of the current generator and input luminosity
+        :return: total cross section
+        """
         """
         self._load_mceg()
         tot = 0
         for X, wgt in self.integ.random():
             tot += wgt*self._f(X)
-        return tot
+        """
+        return self.sigtot
+
+    def get_xsecvar(self):
+        return self.var
+
+    def get_quality(self):
+        return self.Q
+
 
     def get_ntot(self, lum):
         """
@@ -181,6 +191,7 @@ class MCEG:
 
         self._load_mceg()
         bsize = self._get_batch_size()
+        print "batch size = ",bsize
         nruns = nevents/bsize+1
 
         X, Y, W = [], [], []
