@@ -38,17 +38,18 @@ def units(units):
 wdir='.stats-tests'
 
 if len(sys.argv) < 1:
-    print "usage: ./stat-tests.py <Nevents>"
+    print "usage: ./stat-tests.py <Luminosity (fb^-1)>"
     exit(1)
 
-Nevents = int(sys.argv[1])
+lum_arg = float(sys.argv[1])
 
 #to tweak:
 #-----------------------------------------------
 
 #MCEG integration accuracy
-neval = 1000
+neval = 10000  # (neval/2) ~ batch_size
 nitn = 1000
+min_Q = 0.1
 
 #SFs
 min_SF = 'JAM4EIC'
@@ -57,20 +58,20 @@ max_SF = 'JAM4EIC'
 #min_SF = 'NNPDF31_nnlo_pch_as_0118_rs_0.5_SF'
 #max_SF = 'NNPDF31_nnlo_pch_as_0118_rs_1.0_SF'
 
-seeds = {'min': 3, 'max': 4}
+seeds = {'min': 1, 'max': 2}
 
 #---binning
-NQ2bins = 50
+NQ2bins = 20
 print "NQ2bins = ", NQ2bins
-NXbins = 50
+NXbins = 20
 print "NXbins = ", NXbins
 choice_bins = 'min'
 #---
 
 #--physical params and cuts
 rs= 140.7
-lum='10:fb-1'
-lum_label= r'$\mathcal{L} = 10\,fb^{-1}$'
+lum=str(lum_arg)+':fb-1'
+lum_label = r'$\mathcal{L} = '+str(lum_arg)+r'\,fb^{-1}$'
 sign=1 #--electron=1 positron=-1
 cuts_label = r"$ W^2 > 10\,\,,\,\, Q^2> 1$"
 def veto00(x,y,Q2,W2):
@@ -101,10 +102,8 @@ for key in s.keys():
     s[key]['rs'] = rs
     s[key]['fname'] = 'mceg00'
     s[key]['veto'] = veto00
-    s[key]['fdata'] = wdir+"/"+s[key]['tabname']+"_data"+str(int(Nevents/1000))+"k_seed"+str(seeds[key])+".po"
+    s[key]['fdata'] = wdir+"/"+s[key]['tabname']+"_data_lum"+str(lum_arg)+"_seed"+str(seeds[key])+".po"
 
-
-lum = 10 #convert_lum(lum)
 #--generate events
 #output keys: ['Y', 'X', 'Q2', 'W', 'rs']
 
@@ -112,10 +111,19 @@ for key in s.keys():
     np.random.seed(seeds[key])
     if not os.path.isfile(s[key]['fdata']):
         mceg = MCEG(**(s[key]))
-        mceg.buil_mceg(neval=neval, nitn=nitn)
-        s[key].update(mceg.gen_events(Nevents))
+        mceg.buil_mceg(neval=neval, nitn=nitn, min_Q=min_Q)
         s[key]['tot_xsec'] = mceg.get_xsectot()
         s[key]['tot_xsec'] *= units('fb')
+
+        s[key]['var_xsec'] = mceg.get_xsecvar()
+        s[key]['var_xsec'] = s[key]['var_xsec']**0.5*units('fb')
+
+        s[key]['quality_xsec'] = mceg.get_quality()
+
+        Nevents = int(lum_arg*s[key]['tot_xsec'])
+        
+        s[key].update(mceg.gen_events(Nevents))
+
         save(s[key], s[key]['fdata'])
     else:
         s[key] = load(s[key]['fdata'])
@@ -169,7 +177,7 @@ for key in hist_weights.keys():
             
             weight = np.sum(s[key]['W'][mask])
             xsec = weight*s[key]['tot_xsec'] # [fb]
-            N = float(int(xsec*lum)) 
+            N = float(int(xsec*lum_arg))
 
             hist_weights[key][iQ2*NXbins+iX] = weight
             hist_xsecs[key][iQ2*NXbins+iX] = xsec
@@ -180,7 +188,8 @@ for key in hist_weights.keys():
                 covmat_xsecs[key][iQ2*NXbins+iX][iQ2*NXbins+iX] = 0.
             else:
                 non_empty[key][iQ2*NXbins+iX] = True
-                covmat_xsecs[key][iQ2*NXbins+iX][iQ2*NXbins+iX] =(np.sqrt(N)/lum)**2
+                covmat_xsecs[key][iQ2*NXbins+iX][iQ2*NXbins +
+                                                 iX] = (np.sqrt(N)/lum_arg)**2 + (weight*s[key]['var_xsec'])**2
                 #covmat_weights[key][iQ2*NXbins+iX][iQ2*NXbins+iX] = (np.sqrt(N)/(s[key]['tot_xsec']*lum))**2
             """
             print key
@@ -242,7 +251,8 @@ gs = gridspec.GridSpec(nrows, ncols)
 fig = py.figure(figsize=(ncols*5, nrows*3.5))
 
 fig.suptitle(r'\hspace{-15pt}$\textrm{min: '+s['min']['tabname'].replace("_", "\_") + r'}$,' +
-             r' $\textrm{max: '+s['max']['tabname'].replace("_", "\_") + r'}$', fontsize=10, y=0.98)
+             r' $\textrm{max: '+s['max']['tabname'].replace("_", "\_") + r'}$, '+
+             lum_label, fontsize=10, y=0.98)
 
 fig.subplots_adjust(top=0.85, bottom=0.15)
 
@@ -264,7 +274,7 @@ ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
 
 #----- min xsec hist
 ax = py.subplot(gs[1])
-ax.title.set_text(r'$\sigma^{min}_{tot}$'+' = %0.4e'%(s['min']['tot_xsec']) + r' [fb]')
+ax.title.set_text(r'$\sigma^{min}_{tot}$'+' = %0.2e' % (s['min']['tot_xsec']) + r'$\pm$'+'%0.2e' % (s['min']['var_xsec'])+r' [fb]')
 h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_xsecs['min'], bins=[np.log(Xbins), np.log(Q2bins)], cmap='hot_r')
 cbar = plt.colorbar()
 cbar.ax.set_xlabel(r"$\frac{d\sigma_{min}}{dxdQ^2}$")
@@ -278,7 +288,7 @@ ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
 
 #----- max Nevents hist
 ax = py.subplot(gs[2])
-ax.title.set_text(r'$\sigma^{max}_{tot}$'+' = %0.4e'%(s['max']['tot_xsec']) + r' [fb]')
+ax.title.set_text(r'$\sigma^{max}_{tot}$'+' = %0.2e' % (s['max']['tot_xsec']) + r'$\pm$'+'%0.2e' % (s['max']['var_xsec'])+r' [fb]')
 h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_xsecs['max'], bins=[np.log(Xbins), np.log(Q2bins)], cmap='hot_r')
 cbar = plt.colorbar()
 cbar.ax.set_xlabel(r"$\frac{d\sigma_{max}}{dxdQ^2}$")
@@ -290,7 +300,7 @@ ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
 ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
 ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
 
-plt.savefig("chi2-test.pdf")
+plt.savefig("chi2-test-"+str(lum_arg)+"fb-1.pdf")
 
 
 
