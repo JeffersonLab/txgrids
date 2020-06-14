@@ -1,0 +1,10 @@
+- nitn: number of independent calculation of the integral (estimate of quality)
+- neval: number of the evaluation of the integral (accuracy)
+these inputs are enough for the MC to calculate the cross section or estimate of the integral and uncertainty.
+
+Once the integral is computed, it can be saved, and you can sample from it as much events as you want.
+BUT Luminosity should be the input and not the Nevents
+
+I was fixing the lumi in the code to 10fb^-1 for instance, and asking Nevents=10k or 100k...
+that's not the way it should happen, only lumi should be given as input, and then Nevents are computed via the total cross section given by the MC evaluation of the integral
+I reached a good quality of accuracy for MC, and i should fix these settings now.
