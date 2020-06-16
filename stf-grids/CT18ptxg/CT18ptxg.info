@@ -5,7 +5,7 @@ Reference: arXiv:1912.10053
 Format: lhagrid1
 DataVersion:   1
 NumMembers:    1
-Flavors: [900, 901, 930, 931, 932, 908]
+Flavors: [900, 901, 902, 903, 904, 905, 906, 907, 908, 909, 910, 930, 931, 932]
 OrderQCD:     2
 FlavorScheme: variable
 NumFlavors: 5
