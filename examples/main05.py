@@ -281,7 +281,7 @@ for q2 in Q2:
     #ax.set_ylim(0,12)
     ax.semilogx()
     if cnt==1: ax.legend(loc=2)
-    if cnt==1: ax.text(0.7,0.7,r'$F_2^{W^+}$',size=40,transform=ax.transAxes)
+    if cnt==1: ax.text(0.7,0.7,r'$xF_2^{W^+}$',size=40,transform=ax.transAxes)
     ax.set_ylabel(r'$Q^2=%0.1f~{\rm GeV^2}$'%q2,size=20)
     if cnt==7: ax.set_xlabel(r'$x$',size=20)
 
@@ -293,7 +293,7 @@ for q2 in Q2:
         ax.plot(X,FL,color=data['color'][tabname])
     #ax.set_ylim(0,2.5)
     ax.semilogx()
-    if cnt==2: ax.text(0.7,0.7,r'$F_L^{W^+}$',size=40,transform=ax.transAxes)
+    if cnt==2: ax.text(0.7,0.7,r'$xF_L^{W^+}$',size=40,transform=ax.transAxes)
     if cnt==8: ax.set_xlabel(r'$x$',size=20)
 
     cnt+=1
@@ -304,7 +304,7 @@ for q2 in Q2:
         ax.plot(X,F3,color=data['color'][tabname])
     ax.semilogx()
     #ax.set_ylim(0,20)
-    if cnt==3: ax.text(0.7,0.7,r'$F_3^{W^+}$',size=40,transform=ax.transAxes)
+    if cnt==3: ax.text(0.7,0.7,r'$xF_3^{W^+}$',size=40,transform=ax.transAxes)
     if cnt==9: ax.set_xlabel(r'$x$',size=20)
 
 
@@ -332,7 +332,7 @@ for q2 in Q2:
     #ax.set_ylim(0,12)
     ax.semilogx()
     if cnt==1: ax.legend(loc=2)
-    if cnt==1: ax.text(0.7,0.7,r'$F_2^{W^-}$',size=40,transform=ax.transAxes)
+    if cnt==1: ax.text(0.7,0.7,r'$xF_2^{W^-}$',size=40,transform=ax.transAxes)
     ax.set_ylabel(r'$Q^2=%0.1f~{\rm GeV^2}$'%q2,size=20)
     if cnt==7: ax.set_xlabel(r'$x$',size=20)
 
@@ -344,7 +344,7 @@ for q2 in Q2:
         ax.plot(X,FL,color=data['color'][tabname])
     #ax.set_ylim(0,2.5)
     ax.semilogx()
-    if cnt==2: ax.text(0.7,0.7,r'$F_L^{W^-}$',size=40,transform=ax.transAxes)
+    if cnt==2: ax.text(0.7,0.7,r'$xF_L^{W^-}$',size=40,transform=ax.transAxes)
     if cnt==8: ax.set_xlabel(r'$x$',size=20)
 
     cnt+=1
@@ -353,9 +353,9 @@ for q2 in Q2:
         if 'W3m' not in data[tabname][q2]: continue
         F3=data[tabname][q2]['W3m']
         ax.plot(X,F3,color=data['color'][tabname])
-    #ax.semilogx()
-    ax.set_ylim(0,20)
-    if cnt==3: ax.text(0.7,0.7,r'$F_3^{W^-}$',size=40,transform=ax.transAxes)
+    ax.semilogx()
+    #ax.set_ylim(0,20)
+    if cnt==3: ax.text(0.7,0.7,r'$xF_3^{W^-}$',size=40,transform=ax.transAxes)
     if cnt==9: ax.set_xlabel(r'$x$',size=20)
 
 
