@@ -122,20 +122,6 @@ def plot_stf(target):
                     F=np.array([x*stf.xfxQ2(idx,x,q2) for x in X])
                     data[tabname][q2][idx].append(F)
 
-
-    #--collect data from different groups 
-    #for tabname in tabnames:
-    #    data[tabname] = {}
-    #    nrep = data['nrep'][tabname]
-    #    idxs = data['idx'][tabname]
-    #    for q2 in Q2:
-    #        data[tabname][q2] = {_:[] for _ in idxs}
-    #        for i in range(nrep+1): 
-    #            stf=lhapdf.mkPDF(tabname,i)
-    #            for idx in idxs:
-    #                F=np.array([x*stf.xfxQ2(idx,x,q2) for x in X])
-    #                data[tabname][q2][idx].append(F)
-  
     #--plot data
  
     #--all channels 
