@@ -8,10 +8,10 @@ matplotlib.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
 matplotlib.rc('text',usetex=True)
 import pylab  as py
 from theory.tools import checkdir,save,load
+import pandas as pd
+from scipy.interpolate import griddata
 
-
-def main00():
-
+def gen_grid():
     L=open('src/xQ2binTable-xiaoxuan-060220.dat').readlines()
     L=[_.strip() for _ in L]
     L=[_ for _ in L if _!='']
@@ -53,6 +53,12 @@ def main00():
             if W2<W2min: continue
             #--bin passes the filters
             grid0.append([x,q2])
+
+    return grid0, grid
+
+def main00():
+
+    grid0, grid=gen_grid()
  
     BINS=[] 
     for bin0 in grid0:
@@ -101,8 +107,6 @@ def main00():
         q2max=np.amax(q2)
         ax.plot([xmin,xmax,xmax,xmin,xmin],[q2min,q2min,q2max,q2max,q2min])
 
-        
-
 
     ax.set_ylabel(r'$Q^2$',size=20)
     ax.set_xlabel(r'$x_{\rm bj}$',size=20)
@@ -110,15 +114,104 @@ def main00():
     ax.semilogy()
     py.tight_layout()
     checkdir('gallery')
-    py.savefig('gallery/main04.pdf')
+    py.savefig('gallery/main00.pdf')
+
+def main01():
+
+    scale=300
+
+    nrows,ncols=1,1
+    fig = py.figure(figsize=(ncols*5,nrows*4))
+    ax=py.subplot(nrows,ncols,1)
+
+    fname = 'tables/expdata/10026.xlsx'
+    tab   = pd.read_excel(fname)
+    tab   = tab.to_dict(orient='list')
+    val   = np.array(tab['value'])
+    stat  = np.array(tab['stat_u'])
+    syst  = np.array(tab['syst_u'])
+    alpha = np.sqrt(syst**2)
+    LX0   = np.log(tab['X'])
+    LQ20  = np.log(tab['Q2'])
+    rel=alpha/val
+    for i in range(len(tab['X'])):
+        ax.plot(tab['X'][i],tab['Q2'][i],'ko',alpha=0.2,markersize=scale*rel[i],mfc='None')
 
 
+    grid0, grid=gen_grid()
+    rel_list=[]
+    data=[]
+    for kin in grid0:
+        x,q2=kin
+        alpha_bin=griddata((LX0,LQ20),alpha,(np.log(x) ,np.log(q2)), fill_value=0, method='cubic')
+        val_bin=griddata((LX0,LQ20),val,(np.log(x) ,np.log(q2)), fill_value=0, method='cubic')
+        rel=alpha_bin/val_bin
+        if np.isnan(rel)==False:
+            ax.plot(x,q2,'ro',markersize=scale*rel,mfc='None')
+            rel_list.append(rel)
+            data.append([x,q2,rel])
 
+    for kin in grid0:
+        x,q2=kin
+        alpha_bin=griddata((LX0,LQ20),alpha,(np.log(x) ,np.log(q2)), fill_value=0, method='cubic')
+        val_bin=griddata((LX0,LQ20),val,(np.log(x) ,np.log(q2)), fill_value=0, method='cubic')
+        rel=alpha_bin/val_bin
+        if np.isnan(rel)==True:
+            rel=np.amax(rel_list)
+            ax.plot(x,q2,'bo',markersize=scale*rel,mfc='None')
+            data.append([x,q2,rel])
 
+    checkdir('data')
+    np.save('data/xQ2binTable-xiaoxuan-060220+syst.npy',data)
+
+    ax.set_ylabel(r'$Q^2$',size=20)
+    ax.set_xlabel(r'$x_{\rm bj}$',size=20)
+    ax.semilogx()
+    ax.semilogy()
+    py.tight_layout()
+    checkdir('gallery')
+    py.savefig('gallery/main01.pdf')
 
 
 if __name__== "__main__":
 
-    main00()
+    #main00()
+    main01()
 
 
+
+
+##-deprecated
+#fname = 'tables/expdata/10016.xlsx'
+#tab   = pd.read_excel(fname)
+#tab   = tab.to_dict(orient='list')
+#val   = np.array(tab['value'])
+#stat  = np.array(tab['stat_u'])
+#syst  = np.array(tab['syst_u'])
+#alpha = np.sqrt(stat**2+syst**2)
+#LX0   = np.log(tab['X'])
+#LQ20  = np.log(tab['Q2'])
+#ax.plot(tab['X'],tab['Q2'],'k.')
+
+#fname = 'tables/expdata/10010.xlsx'
+#tab   = pd.read_excel(fname)
+#tab   = tab.to_dict(orient='list')
+#val   = np.array(tab['value'])
+#stat  = np.array(tab['stat_u'])
+#syst  = np.array(tab['syst_u'])
+#alpha = np.sqrt(stat**2+syst**2)
+#LX0   = np.log(tab['X'])
+#LQ20  = np.log(tab['Q2'])
+#ax.plot(tab['X'],tab['Q2'],'k.')
+
+
+#fname = 'tables/expdata/10020.xlsx'
+#tab   = pd.read_excel(fname)
+#tab   = tab.to_dict(orient='list')
+#val   = np.array(tab['value'])
+#stat  = np.array(tab['stat_u'])
+#syst  = np.array(tab['syst_u'])
+#alpha = np.sqrt(stat**2+syst**2)
+#LX0   = np.log(tab['X'])
+#LQ20  = np.log(tab['Q2'])
+#ax.plot(tab['X'],tab['Q2'],'k.')
