@@ -277,6 +277,7 @@ for key in hist_xsecs.keys():
 inv_covmat_xsecs = np.linalg.inv(tot_covmat_xsecs)
 
 hist_chi2s = np.zeros(NXbins*NQ2bins)
+hist_zscores = np.zeros(NXbins*NQ2bins)
 hist_Xs = np.zeros(NXbins*NQ2bins)
 hist_Q2s = np.zeros(NXbins*NQ2bins)
 print("--Filling histograms--")
@@ -289,6 +290,11 @@ for iQ2 in range(0, NQ2bins):
             min_d = xsecs['min'][0,ind]
 
             hist_chi2s[iQ2*NXbins+iX] = (min_d-max_d)*inv_covmat_xsecs[ind,ind]*(min_d-max_d)
+            hist_zscores[iQ2*NXbins+iX] = np.sqrt(hist_chi2s[iQ2*NXbins+iX])
+            if hist_zscores[iQ2*NXbins+iX]<1:
+                hist_zscores[iQ2*NXbins+iX]=-1
+            else:
+                hist_zscores[iQ2*NXbins+iX] = int(hist_zscores[iQ2*NXbins+iX])
 
         hist_Xs[iQ2*NXbins+iX] = Xbins_cv[iX]
         hist_Q2s[iQ2*NXbins+iX] = Q2bins_cv[iQ2]
@@ -299,12 +305,16 @@ for iQ2 in range(0, NQ2bins):
 tot_chi2 = (xsecs['min']-xsecs['max'])*inv_covmat_xsecs*(xsecs['min']-xsecs['max']).T
 tot_chi2 /= N_bins
 
+hist_zscores[hist_zscores >= 5] = 5
 
 #replace all 0 bins with nan for the hist to be properly colored:
 for key in hist_xsecs.keys():
     hist_weights[key][hist_weights[key]==0] = np.nan
     hist_xsecs[key][hist_xsecs[key]==0] = np.nan
     hist_chi2s[hist_chi2s==0] = np.nan
+    hist_zscores[hist_zscores == 0] = np.nan
+
+hist_zscores[hist_zscores == -1] = 0
 
 title_xpos = 0.5
 title_ypos = 1.04
@@ -525,6 +535,8 @@ plt.savefig("chi2-test-"+str(lum_arg)+"fb-1.pdf")
 plt.cla()
 plt.clf()
 
+
+#---- Chi2 hist alone with values written per bin
 fig, ax = plt.subplots()
 ax.set_aspect("equal")
 
@@ -549,3 +561,45 @@ for iQ2 in range(0, NQ2bins):
                     color="w", ha="center", va="center", fontweight="bold", fontsize=6)
 
 plt.savefig("chi2-test-"+str(lum_arg)+"fb-1_values.pdf")
+plt.cla()
+plt.clf()
+
+#---- Zscore hist alone with discrete colors
+fig, ax = plt.subplots()
+ax.set_aspect("equal")
+
+cmap = matplotlib.colors.ListedColormap(#['#3535FD', 
+        ['#2A00D5', '#63009E', '#A1015D', '#D80027', '#FE0002'])
+
+# define the bins and normalize
+bounds = np.linspace(0, 5, 6)
+norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
+
+h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_zscores, bins=[
+               np.log(Xbins), np.log(Q2bins)], cmap=cmap)
+
+ax2 = fig.add_axes([0.85, 0.1, 0.03, 0.8])
+
+cbar = matplotlib.colorbar.ColorbarBase(ax2, cmap=cmap, norm=norm,
+    spacing='uniform', ticks=bounds, boundaries=bounds, format='%1i')
+
+cbar.ax.set_yticklabels(['0', '1', '2', '3', '4', r'$>$ 5', ' '])
+
+#cbar = plt.colorbar()
+cbar.ax.set_xlabel(r"${\rm z-score}$")
+ax.set_xlabel(r"$x$")
+ax.set_ylabel(r"$Q^2$")
+ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
+ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
+ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
+ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
+ax.tick_params(which='major', direction="in", length=7)
+ax.tick_params(which='minor', direction="in", length=4)
+
+for iQ2 in range(0, NQ2bins):
+    for iX in range(0, NXbins):
+        if tot_non_empty[iQ2*NXbins+iX]:
+            ax.text(np.log(hist_Xs[iQ2*NXbins+iX]), np.log(hist_Q2s[iQ2*NXbins+iX]), '{:.2f}'.format(np.sqrt(hist_chi2s[iQ2*NXbins+iX])),
+                    color="w", ha="center", va="center", fontweight="bold", fontsize=6)
+
+plt.savefig("Zscore-test-"+str(lum_arg)+"fb-1_values.pdf")
