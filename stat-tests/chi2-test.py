@@ -16,7 +16,7 @@ sys.path.append(os.path.dirname( os.path.dirname(os.path.abspath(__file__) ) ) )
 import numpy as np
 from theory.tools import save, load, convert_lum
 from theory.mceg  import MCEG
-from ndtest import ndtest
+from expdata.driver import gen_grid
 
 #--matplotlib
 import matplotlib
@@ -65,29 +65,16 @@ max_SF = 'NNPDF31_nnlo_pch_as_0118_rs_1.0_SF'
 
 seeds = {'min': 3, 'max': 4}
 
-#---binning
+#--- acceptance/purity based binning
+kin0, kin = gen_grid("../expdata/")
+Xbins = sorted(set(np.array(kin)[:, 0]))
+Q2bins = sorted(set(np.array(kin)[:, 1]))
 
-#acceptance/purity based binning
-Q2bins=[]
-Xbins=[]
-purity_bins = np.load("../expdata/data/xQ2binTable-xiaoxuan-060220.npy")    
-(Nbins, Na, Nb) = purity_bins.shape
-for i in range(Nbins):
-    for j in range(Na):
-        x = purity_bins[i, j, 0]
-        q2 = purity_bins[i, j, 1]
+Xbins_cv = sorted(set(np.array(kin0)[:, 0]))[:-1]
+Q2bins_cv = sorted(set(np.array(kin0)[:, 1]))[:-1]
 
-        Xbins.append(x)
-        Q2bins.append(q2)
-
-Xbins = sorted(set(Xbins))
-Q2bins = sorted(set(Q2bins))
-
-NQ2bins=len(Q2bins)-1
-NXbins=len(Xbins)-1
-
-Q2bins=np.array(Q2bins)
-Xbins=np.array(Xbins)
+NQ2bins = len(Q2bins)-1
+NXbins = len(Xbins)-1
 
 """ #user defined binning
 NQ2bins = 50
@@ -109,7 +96,11 @@ elif choice_bins == 'max':
     Q2bins = Q2bins_smax
     Xbins = Xbins_smax
 """
-#---
+
+
+#--- systematics uncertainties
+sys_bins = np.load("../expdata/data/xQ2binTable-xiaoxuan-060220+syst.npy")
+
 
 #--physical params and cuts
 rs= 140.7
@@ -149,7 +140,7 @@ for key in s.keys():
 
 #--generate events
 #output keys: ['Y', 'X', 'Q2', 'W', 'rs']
-
+print("--Getting Events--")
 for key in s.keys():
     np.random.seed(seeds[key])
     if not os.path.isfile(s[key]['fdata']):
@@ -195,12 +186,12 @@ hist_N = {'min': np.zeros(NXbins*NQ2bins), 'max': np.zeros(NXbins*NQ2bins)}
 
 hist_statunc = {'min': np.zeros(NXbins*NQ2bins), 'max': np.zeros(NXbins*NQ2bins)}
 hist_MCunc = {'min': np.zeros(NXbins*NQ2bins), 'max': np.zeros(NXbins*NQ2bins)}
-
+hist_sysunc = {'min': np.zeros(NXbins*NQ2bins), 'max': np.zeros(NXbins*NQ2bins)}
 #to get:
 #s[key]['Nevents']: hist_weights['min']*s['max']['tot_xsec']*lum (per bin)
 #tot xsec: s['min']['tot_xsec'] (in fb)
-#normalized xsec: hist_weights['min'
-
+#normalized xsec: hist_weights['min']
+print("--Building covariance matrix--")
 for key in hist_weights.keys():
     for iQ2 in range(0, NQ2bins):
         for iX in range(0, NXbins):
@@ -222,14 +213,27 @@ for key in hist_weights.keys():
                 covmat_xsecs[key][iQ2*NXbins+iX][iQ2*NXbins+iX] = 0.
                 hist_statunc[key][iQ2*NXbins+iX] = 0.
                 hist_MCunc[key][iQ2*NXbins+iX] = 0.
+                hist_sysunc[key][iQ2*NXbins+iX] = 0.
             else:
                 non_empty[key][iQ2*NXbins+iX] = True
-                covmat_xsecs[key][iQ2*NXbins+iX][iQ2*NXbins +
-                                                 iX] = (np.sqrt(N)/lum_arg)**2 + (weight*s[key]['var_xsec'])**2
-                #covmat_weights[key][iQ2*NXbins+iX][iQ2*NXbins+iX] = (np.sqrt(N)/(s[key]['tot_xsec']*lum))**2
 
                 hist_statunc[key][iQ2*NXbins+iX] = np.sqrt(N)/lum_arg
                 hist_MCunc[key][iQ2*NXbins+iX] = weight*s[key]['var_xsec']
+
+                relative_sys = np.where(
+                    (sys_bins[:, 0] == Xbins_cv[iX]) & (sys_bins[:, 1] == Q2bins_cv[iQ2]))
+                if np.any(relative_sys): #if bin has sys uncertainty
+                    relative_sys = sys_bins[relative_sys][0, 2]
+                else: #if bin doesn't have sys uncertainty
+                    relative_sys = 0
+
+                hist_sysunc[key][iQ2*NXbins+iX] = xsec*relative_sys
+
+                covmat_xsecs[key][iQ2*NXbins+iX][iQ2*NXbins+iX] = (hist_statunc[key][iQ2*NXbins+iX])**2 + (
+                    hist_MCunc[key][iQ2*NXbins+iX])**2 + (hist_sysunc[key][iQ2*NXbins+iX])**2
+                #covmat_weights[key][iQ2*NXbins+iX][iQ2*NXbins+iX] = (np.sqrt(N)/(s[key]['tot_xsec']*lum))**2
+
+
 
             """
             print key
@@ -247,6 +251,7 @@ for key in hist_weights.keys():
 
 tot_non_empty = non_empty['min']+non_empty['max']
 
+print("--Filtering out empty bins--")
 map_non_empty={}
 count=0
 for iQ2 in range(0, NQ2bins):
@@ -271,9 +276,10 @@ for key in hist_xsecs.keys():
 
 inv_covmat_xsecs = np.linalg.inv(tot_covmat_xsecs)
 
-hist_chi2s = np.empty(NXbins*NQ2bins)
+hist_chi2s = np.zeros(NXbins*NQ2bins)
 hist_Xs = np.zeros(NXbins*NQ2bins)
 hist_Q2s = np.zeros(NXbins*NQ2bins)
+print("--Filling histograms--")
 for iQ2 in range(0, NQ2bins):
     for iX in range(0, NXbins):
         if tot_non_empty[iQ2*NXbins+iX]:
@@ -284,9 +290,11 @@ for iQ2 in range(0, NQ2bins):
 
             hist_chi2s[iQ2*NXbins+iX] = (min_d-max_d)*inv_covmat_xsecs[ind,ind]*(min_d-max_d)
 
-        hist_Xs[iQ2*NXbins+iX] = Xbins[iX]+(Xbins[iX+1]-Xbins[iX])/2.
-        hist_Q2s[iQ2*NXbins+iX] = Q2bins[iQ2]+(Q2bins[iQ2+1]-Q2bins[iQ2])/2.
+        hist_Xs[iQ2*NXbins+iX] = Xbins_cv[iX]
+        hist_Q2s[iQ2*NXbins+iX] = Q2bins_cv[iQ2]
 
+        ##hist_Xs[iQ2*NXbins+iX] = Xbins[iX]+(Xbins[iX+1]-Xbins[iX])/2.
+        ##hist_Q2s[iQ2*NXbins+iX] = Q2bins[iQ2]+(Q2bins[iQ2+1]-Q2bins[iQ2])/2.
 
 tot_chi2 = (xsecs['min']-xsecs['max'])*inv_covmat_xsecs*(xsecs['min']-xsecs['max']).T
 tot_chi2 /= N_bins
@@ -300,8 +308,8 @@ for key in hist_xsecs.keys():
 
 title_xpos = 0.5
 title_ypos = 1.04
-nrows, ncols = 2, 3
-widths=[2,1,1]
+nrows, ncols = 2, 4
+widths=[2,1,1,1]
 heights=[1,1]
 gs = gridspec.GridSpec(nrows, ncols, width_ratios=widths,
                        height_ratios=heights)
@@ -314,6 +322,9 @@ fig.suptitle(r'\hspace{-15pt}$\textrm{min: '+s['min']['tabname'].replace("_", "\
 fig.subplots_adjust(top=0.85, bottom=0.15)
 
 ax = py.subplot(gs[:,0])
+
+print("--Plotting--")
+print("--hist1--")
 
 #---- chi2 hist
 h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_chi2s, bins=[
@@ -337,6 +348,7 @@ ax.tick_params(which='major', direction="in",length=7)
 ax.tick_params(which='minor', direction="in",length=4)
 
 #----- max xsec hist
+print("--hist2--")
 ax = py.subplot(gs[0,1])
 ax.text(title_xpos, title_ypos, r'$\sigma^{max}_{tot}$'+' = %0.2e' % (s['max']['tot_xsec']) + r'$\pm$'+'%0.2e' % (s['max']['var_xsec'])+r' [fb]',
         horizontalalignment='center',
@@ -359,7 +371,9 @@ ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
 ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
 ax.tick_params(which='major', direction="in", length=7)
 ax.tick_params(which='minor', direction="in", length=4)
+
 #----- min xsec hist
+print("--hist3--")
 ax = py.subplot(gs[1,1])
 ax.text(title_xpos, title_ypos, r'$\sigma^{min}_{tot}$'+' = %0.2e' % (s['min']['tot_xsec']) + r'$\pm$'+'%0.2e' % (s['min']['var_xsec'])+r' [fb]',
         horizontalalignment='center',
@@ -380,11 +394,58 @@ ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
 ax.tick_params(which='major', direction="in", length=7)
 ax.tick_params(which='minor', direction="in", length=4)
 
-#----- max stat unc hist
+#----- max sys unc hist
+print("--hist4--")
 ax = py.subplot(gs[0,2])
-ax.text(title_xpos, title_ypos, r'$\delta^{max,stat}_{tot}$'+' = %0.2e' %
-        ((np.sqrt(s['max']['Nevents'])/lum_arg)
-         * 100./s['max']['tot_xsec']) + r' \%',
+ax.text(title_xpos, title_ypos, r'Sys Unc (max)', #r'$\delta^{max,sys}_{tot}$'+' = %0.2e' %
+        #((np.sqrt(s['max']['Nevents'])/lum_arg)
+        # * 100./s['max']['tot_xsec']) + r' \%',
+        horizontalalignment='center',
+        verticalalignment='center',
+        transform=ax.transAxes,
+        fontsize=10)
+h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_sysunc['max']*100./hist_xsecs['max'], bins=[
+               np.log(Xbins), np.log(Q2bins)], cmap='viridis')
+cbar = plt.colorbar()
+cbar.ax.set_xlabel(r"$\delta^{max}_{sys} [\%]$")
+#cbar.ax.set_xlabel(r"$\frac{1}{\sigma_{tot}}\frac{d\sigma_{max}}{dxdQ^2}$")
+#ax.set_xlabel(r"$x$")
+
+ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
+ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
+ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
+ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
+ax.tick_params(which='major', direction="in", length=7)
+ax.tick_params(which='minor', direction="in", length=4)
+
+#----- min sys unc hist
+print("--hist5--")
+ax = py.subplot(gs[1,2])
+ax.text(title_xpos, title_ypos, r'Sys Unc (min)',#r'$\delta^{min,sys}_{tot}$'+' = %0.2e' % ((np.sqrt(s["min"]['Nevents'])/lum_arg) * 100./s['min']['tot_xsec']) + r' \%',
+        horizontalalignment='center',
+        verticalalignment='center',
+        transform=ax.transAxes,
+        fontsize=10)
+h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_sysunc['min']*100./hist_xsecs['min'], bins=[
+               np.log(Xbins), np.log(Q2bins)], cmap='viridis')
+cbar = plt.colorbar()
+cbar.ax.set_xlabel(r"$\delta^{min}_{sys} [\%]$")
+#cbar.ax.set_xlabel(r"$\frac{1}{\sigma_{tot}}\frac{d\sigma_{max}}{dxdQ^2}$")
+ax.set_xlabel(r"$x$")
+
+ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
+ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
+ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
+ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
+ax.tick_params(which='major', direction="in", length=7)
+ax.tick_params(which='minor', direction="in", length=4)
+
+#----- max stat unc hist
+print("--hist6--")
+ax = py.subplot(gs[0,3])
+ax.text(title_xpos, title_ypos, r'Stat Unc (max)', #r'$\delta^{max,stat}_{tot}$'+' = %0.2e' %
+        #((np.sqrt(s['max']['Nevents'])/lum_arg)
+        # * 100./s['max']['tot_xsec']) + r' \%',
         horizontalalignment='center',
         verticalalignment='center',
         transform=ax.transAxes,
@@ -402,11 +463,13 @@ ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
 ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
 ax.tick_params(which='major', direction="in", length=7)
 ax.tick_params(which='minor', direction="in", length=4)
+
 #----- min stat unc hist
-ax = py.subplot(gs[1,2])
-ax.text(title_xpos, title_ypos, r'$\delta^{min,stat}_{tot}$'+' = %0.2e' %
-        ((np.sqrt(s["min"]['Nevents'])/lum_arg)
-         * 100./s['min']['tot_xsec']) + r' \%',
+print("--hist7--")
+ax = py.subplot(gs[1,3])
+ax.text(title_xpos, title_ypos, r'Stat Unc (min)', #r'$\delta^{min,stat}_{tot}$'+' = %0.2e' %
+        #((np.sqrt(s["min"]['Nevents'])/lum_arg)
+        # * 100./s['min']['tot_xsec']) + r' \%',
         horizontalalignment='center',
         verticalalignment='center',
         transform=ax.transAxes,
@@ -459,3 +522,29 @@ ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
 """
 
 plt.savefig("chi2-test-"+str(lum_arg)+"fb-1.pdf")
+plt.cla()
+plt.clf()
+
+fig, ax = plt.subplots()
+ax.set_aspect("equal")
+
+
+h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_chi2s, bins=[
+               np.log(Xbins), np.log(Q2bins)], cmap='viridis', norm=matplotlib.colors.LogNorm())
+cbar = plt.colorbar()
+cbar.ax.set_xlabel(r"$\chi^2_{bin}$")
+ax.set_xlabel(r"$x$")
+ax.set_ylabel(r"$Q^2$")
+ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
+ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
+ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
+ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
+ax.tick_params(which='major', direction="in", length=7)
+ax.tick_params(which='minor', direction="in", length=4)
+
+for iQ2 in range(0, NQ2bins):
+    for iX in range(0, NXbins):
+        ax.text(np.log(hist_Xs[iQ2*NXbins+iX]), np.log(hist_Q2s[iQ2*NXbins+iX]), '{:.2f}'.format(hist_chi2s[iQ2*NXbins+iX]),
+                color="w", ha="center", va="center", fontweight="bold", fontsize=6)
+
+plt.savefig("chi2-test-"+str(lum_arg)+"fb-1_values.pdf")
