@@ -11,8 +11,8 @@ from theory.tools import checkdir,save,load
 import pandas as pd
 from scipy.interpolate import griddata
 
-def gen_grid():
-    L=open('src/xQ2binTable-xiaoxuan-060220.dat').readlines()
+def gen_grid(path=""):
+    L=open(path+'src/xQ2binTable-xiaoxuan-060220.dat').readlines()
     L=[_.strip() for _ in L]
     L=[_ for _ in L if _!='']
     #for _ in L: print(_)    
