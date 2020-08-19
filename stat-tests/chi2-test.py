@@ -544,7 +544,8 @@ ax.tick_params(which='minor', direction="in", length=4)
 
 for iQ2 in range(0, NQ2bins):
     for iX in range(0, NXbins):
-        ax.text(np.log(hist_Xs[iQ2*NXbins+iX]), np.log(hist_Q2s[iQ2*NXbins+iX]), '{:.2f}'.format(hist_chi2s[iQ2*NXbins+iX]),
-                color="w", ha="center", va="center", fontweight="bold", fontsize=6)
+        if tot_non_empty[iQ2*NXbins+iX]:
+            ax.text(np.log(hist_Xs[iQ2*NXbins+iX]), np.log(hist_Q2s[iQ2*NXbins+iX]), '{:.2f}'.format(hist_chi2s[iQ2*NXbins+iX]),
+                    color="w", ha="center", va="center", fontweight="bold", fontsize=6)
 
 plt.savefig("chi2-test-"+str(lum_arg)+"fb-1_values.pdf")
