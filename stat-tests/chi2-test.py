@@ -175,8 +175,8 @@ if __name__ == "__main__":
 
     #--- kinematic cuts
     def veto00(x,y,Q2,W2):
-        if   W2 < W2min       : return 0
-        elif Q2 < Q2min       : return 0
+        if   W2 < 10       : return 0
+        elif Q2 < 1       : return 0
         else                  : return 1
         
     #--Getting events
