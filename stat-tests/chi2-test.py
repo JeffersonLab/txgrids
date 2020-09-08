@@ -29,7 +29,7 @@ from  matplotlib import rc
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text',usetex=True)
 
-def GetEvents(lum_arg,veto,sign):
+def GetEvents(lum_arg,veto,sign,rep=0):
     """
     sign: --electron=1 positron=-1
 
@@ -37,13 +37,13 @@ def GetEvents(lum_arg,veto,sign):
     Sample = {'min':{}, 'max':{}}
 
     Sample['min']['tabname'] = min_SF
-    Sample['min']['iset'] = 0
+    Sample['min']['iset'] = rep
     Sample['min']['iF2'] = 908
     Sample['min']['iFL'] = 909
     Sample['min']['iF3'] = 910
 
     Sample['max']['tabname'] = max_SF
-    Sample['max']['iset'] = 0
+    Sample['max']['iset'] = rep
     Sample['max']['iF2'] = 908
     Sample['max']['iFL'] = 909
     Sample['max']['iF3'] = 910
@@ -224,335 +224,172 @@ def GetCovMat(Bins, hist_CrossSection):
     
     return CovMat
 
+def GetAnalysis(Bins, hist_CrossSection):
+    hist_Analysis={}
+    hist_Analysis['chi2s'] = np.zeros(Bins['Nx']*Bins['NQ2'])
+    hist_Analysis['zscores'] = np.zeros(Bins['Nx']*Bins['NQ2'])
+    hist_Analysis['x'] = np.zeros(Bins['Nx']*Bins['NQ2'])
+    hist_Analysis['Q2'] = np.zeros(Bins['Nx']*Bins['NQ2'])
+
+    hist_Analysis['xsecs'] = {}
+    for key in hist_CrossSection['xsecs'].keys():
+        hist_Analysis['xsecs'][key] = np.matrix(hist_CrossSection['xsecs'][key][hist_CrossSection['non_empty']['total']])
+
+    print("--Filling hist_Analysis--")
+    for iQ2 in range(0, Bins['NQ2']):
+        for iX in range(0, Bins['Nx']):
+            if hist_CrossSection['non_empty']['total'][iQ2*Bins['Nx']+iX]:
+                ind = hist_CrossSection['non_empty']['map'][iQ2*Bins['Nx']+iX]
+
+                max_d = hist_Analysis['xsecs']['max'][0,ind]
+                min_d = hist_Analysis['xsecs']['min'][0,ind]
+
+                hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX] = (min_d-max_d)*inv_covmat_xsecs[ind,ind]*(min_d-max_d)
+                hist_Analysis['zscores'][iQ2*Bins['Nx']+iX] = np.sqrt(hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX])
+                if hist_Analysis['zscores'][iQ2*Bins['Nx']+iX]<1:
+                    hist_Analysis['zscores'][iQ2*Bins['Nx']+iX]=-1
+                else:
+                    hist_Analysis['zscores'][iQ2*Bins['Nx']+iX] = int(hist_Analysis['zscores'][iQ2*Bins['Nx']+iX])
+
+            hist_Analysis['x'][iQ2*Bins['Nx']+iX] = Bins['x_cv'][iX]
+            hist_Analysis['Q2'][iQ2*Bins['Nx']+iX] = Bins['Q2_cv'][iQ2]
+
+            ##hist_Analysis['x'][iQ2*Bins['Nx']+iX] = Bins['x'][iX]+(Bins['x'][iX+1]-Bins['x'][iX])/2.
+            ##hist_Analysis['Q2'][iQ2*Bins['Nx']+iX] = Bins['Q2'][iQ2]+(Bins['Q2'][iQ2+1]-Bins['Q2'][iQ2])/2.
+
+    hist_Analysis['tot_chi2'] = (hist_Analysis['xsecs']['min']-hist_Analysis['xsecs']['max'])*inv_covmat_xsecs*(hist_Analysis['xsecs']['min']-hist_Analysis['xsecs']['max']).T
+    hist_Analysis['tot_chi2'] /= Bins['total']
+
+    hist_Analysis['zscores'][hist_Analysis['zscores'] >= 5] = 5
+
+    #replace all 0 bins with nan for the hist to be properly colored:
+    for key in hist_CrossSection['xsecs'].keys():
+        hist_CrossSection['weights'][key][hist_CrossSection['weights'][key]==0] = np.nan
+        hist_CrossSection['xsecs'][key][hist_CrossSection['xsecs'][key]==0] = np.nan
+        hist_Analysis['chi2s'][hist_Analysis['chi2s']==0] = np.nan
+        hist_Analysis['zscores'][hist_Analysis['zscores'] == 0] = np.nan
+
+    hist_Analysis['zscores'][hist_Analysis['zscores'] == -1] = 0
+
+    return hist_Analysis
+
 def units(units):
     one=0.3893793721 #--GeV2 mbarn
     if   units=='GeV^-2':return 1
     elif units=='fb'    :return one*1e12 
     else: sys.exit('%s conversion not available')
 
-
-if __name__ == "__main__":
-        
-    wdir='.stats-tests'
-
-    if len(sys.argv) < 1:
-        print "usage: ./stat-tests.py <Luminosity (fb^-1)>"
-        exit(1)
-
-    lum_arg = float(sys.argv[1])
-
-    #--physical params and cuts
-    #lum = str(lum_arg)+':fb-1'
-    lum_label = r'$\mathcal{L} = '+str(lum_arg)+r'\,fb^{-1}$'
-    cuts_label = r"$ W^2 > 10\,\,,\,\, Q^2> 1$"
-
-    #to tweak:
-    #-----------------------------------------------
-
-    #MCEG integration accuracy
-    neval = 10000  # default should be: 10000  # (neval/2) ~ batch_size
-    nitn = 1000  # default should be: 1000
-    min_Q = 0.1
-
-    #SFs
-    min_SF = 'NNPDF31_nnlo_pch_as_0118_rs_0.5_SF'
-    max_SF = 'NNPDF31_nnlo_pch_as_0118_rs_1.0_SF'
-
-    seeds = {'min': 3, 'max': 4}
-
-    rs = 140.7
-    #-----------------------------------------------
-
-    #--- acceptance/purity based binning
-    Bins=GetBins()
-
-    #--- kinematic cuts
-    def veto00(x,y,Q2,W2):
-        if   W2 < 10       : return 0
-        elif Q2 < 1        : return 0
-        else               : return 1
-        
-    #--Getting events
-    Sample = GetEvents(lum_arg,veto00,sign=1)
-
-    #--Getting CrossSections
-    hist_CrossSection = GetCrossSections(Bins,sys_path="../expdata/data/xQ2binTable-xiaoxuan-060220+syst.npy")
-
-    #--Getting CovMat
-    CovMat = GetCovMat(Bins, hist_CrossSection)
-    inv_covmat_xsecs = np.linalg.inv(CovMat['xsecs']['total'])
-
-    hist_chi2s = np.zeros(Bins['Nx']*Bins['NQ2'])
-    hist_zscores = np.zeros(Bins['Nx']*Bins['NQ2'])
-    hist_Xs = np.zeros(Bins['Nx']*Bins['NQ2'])
-    hist_Q2s = np.zeros(Bins['Nx']*Bins['NQ2'])
-
-    xsecs = {}
-    for key in hist_CrossSection['xsecs'].keys():
-        xsecs[key] = np.matrix(hist_CrossSection['xsecs'][key][hist_CrossSection['non_empty']['total']])
-
-    print("--Filling histograms--")
-    for iQ2 in range(0, Bins['NQ2']):
-        for iX in range(0, Bins['Nx']):
-            if hist_CrossSection['non_empty']['total'][iQ2*Bins['Nx']+iX]:
-                ind = hist_CrossSection['non_empty']['map'][iQ2*Bins['Nx']+iX]
-
-                max_d = xsecs['max'][0,ind]
-                min_d = xsecs['min'][0,ind]
-
-                hist_chi2s[iQ2*Bins['Nx']+iX] = (min_d-max_d)*inv_covmat_xsecs[ind,ind]*(min_d-max_d)
-                hist_zscores[iQ2*Bins['Nx']+iX] = np.sqrt(hist_chi2s[iQ2*Bins['Nx']+iX])
-                if hist_zscores[iQ2*Bins['Nx']+iX]<1:
-                    hist_zscores[iQ2*Bins['Nx']+iX]=-1
-                else:
-                    hist_zscores[iQ2*Bins['Nx']+iX] = int(hist_zscores[iQ2*Bins['Nx']+iX])
-
-            hist_Xs[iQ2*Bins['Nx']+iX] = Bins['x_cv'][iX]
-            hist_Q2s[iQ2*Bins['Nx']+iX] = Bins['Q2_cv'][iQ2]
-
-            ##hist_Xs[iQ2*Bins['Nx']+iX] = Bins['x'][iX]+(Bins['x'][iX+1]-Bins['x'][iX])/2.
-            ##hist_Q2s[iQ2*Bins['Nx']+iX] = Bins['Q2'][iQ2]+(Bins['Q2'][iQ2+1]-Bins['Q2'][iQ2])/2.
-
-    tot_chi2 = (xsecs['min']-xsecs['max'])*inv_covmat_xsecs*(xsecs['min']-xsecs['max']).T
-    tot_chi2 /= Bins['total']
-
-    hist_zscores[hist_zscores >= 5] = 5
-
-    #replace all 0 bins with nan for the hist to be properly colored:
-    for key in hist_CrossSection['xsecs'].keys():
-        hist_CrossSection['weights'][key][hist_CrossSection['weights'][key]==0] = np.nan
-        hist_CrossSection['xsecs'][key][hist_CrossSection['xsecs'][key]==0] = np.nan
-        hist_chi2s[hist_chi2s==0] = np.nan
-        hist_zscores[hist_zscores == 0] = np.nan
-
-    hist_zscores[hist_zscores == -1] = 0
-
-    title_xpos = 0.5
-    title_ypos = 1.04
-    nrows, ncols = 2, 4
-    widths=[2,1,1,1]
-    heights=[1,1]
+def plt_SetGridSpec(size):
+    nrows, ncols = size
+    widths = [2, 1, 1, 1]
+    heights = [1, 1]
     gs = gridspec.GridSpec(nrows, ncols, width_ratios=widths,
-                        height_ratios=heights)
-    fig = py.figure(figsize=(ncols*5, nrows*3.5))#, constrained_layout=True)
+                           height_ratios=heights)
+    fig = py.figure(figsize=(ncols*5, nrows*3.5))  # , constrained_layout=True)
 
     fig.suptitle(r'\hspace{-15pt}$\textrm{min: '+Sample['min']['tabname'].replace("_", "\_") + r'}$,' +
-                r' $\textrm{max: '+Sample['max']['tabname'].replace("_", "\_") + r'}$, '+
-                lum_label, fontsize=10, y=0.98)
+                 r' $\textrm{max: '+Sample['max']['tabname'].replace("_", "\_") + r'}$, ' +
+                 lum_label, fontsize=10, y=0.98)
 
     fig.subplots_adjust(top=0.85, bottom=0.15)
 
-    ax = py.subplot(gs[:,0])
+    return gs,fig
 
-    print("--Plotting--")
-    print("--hist1--")
+def plt_chi2s(gs_ind, title_pos, Bins, hist_Analysis):
+    print("--chi2 histogram plotted--")
+
+    title_xpos, title_ypos = title_pos
 
     #---- chi2 hist
-    h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_chi2s, bins=[
-                np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis',norm=matplotlib.colors.LogNorm())
+    ax = py.subplot(gs[:, gs_ind])
+    h = plt.hist2d(np.log(hist_Analysis['x']), np.log(hist_Analysis['Q2']), weights=hist_Analysis['chi2s'], bins=[
+        np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis', norm=matplotlib.colors.LogNorm())
 
-    ax.text(title_xpos, title_ypos+0.02, r'$\chi^2_{tot}/N_{bins}$ = '+' %0.4e' % tot_chi2,
-        horizontalalignment='center',
-        verticalalignment='center',
-        transform=ax.transAxes,
-        fontsize=15)
+    ax.text(title_xpos, title_ypos+0.02, r'$\chi^2_{tot}/N_{bins}$ = '+' %0.4e' % hist_Analysis['tot_chi2'],
+            horizontalalignment='center',
+            verticalalignment='center',
+            transform=ax.transAxes,
+            fontsize=15)
+
     cbar = plt.colorbar()
     cbar.ax.set_xlabel(r"$\chi^2_{bin}$")
     ax.set_xlabel(r"$x$")
     ax.set_ylabel(r"$Q^2$")
 
     ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
-    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
+    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$',
+                        r'$10^{-2}$', r'$10^{-1}$'])
     ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
     ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
-    ax.tick_params(which='major', direction="in",length=7)
-    ax.tick_params(which='minor', direction="in",length=4)
+    ax.tick_params(which='major', direction="in", length=7)
+    ax.tick_params(which='minor', direction="in", length=4)
 
-    #----- max xsec hist
-    print("--hist2--")
-    ax = py.subplot(gs[0,1])
-    ax.text(title_xpos, title_ypos, r'$\sigma^{max}_{tot}$'+' = %0.2e' % (Sample['max']['tot_xsec']) + r'$\pm$'+'%0.2e' % (Sample['max']['var_xsec'])+r' [fb]',
+def plt_xsecs(gs_ind, key, title_pos, Bins, hist_Analysis, Sample):
+
+    print("--xsec["+key+"] histogram plotted--")
+
+    title_xpos, title_ypos = title_pos
+    ax = py.subplot(gs[gs_ind[0], gs_ind[1]])
+    ax.text(title_xpos, title_ypos, r'$\sigma^{'+key+'}_{tot}$'+' = %0.2e' % (Sample[key]['tot_xsec']) + r'$\pm$'+'%0.2e' % (Sample[key]['var_xsec'])+r' [fb]',
             horizontalalignment='center',
             verticalalignment='center',
             transform=ax.transAxes,
             fontsize=10)
 
-    h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_CrossSection['xsecs']['max'], bins=[
-                np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis', norm=matplotlib.colors.LogNorm())
+    h = plt.hist2d(np.log(hist_Analysis['x']), np.log(hist_Analysis['Q2']), weights=hist_CrossSection['xsecs'][key], bins=[
+        np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis', norm=matplotlib.colors.LogNorm())
 
     cbar = plt.colorbar()
-    cbar.ax.set_xlabel(r"$\frac{d\sigma_{max}}{dxdQ^2}$")
+    cbar.ax.set_xlabel(r"$\frac{d\sigma_{"+key+"}}{dxdQ^2}$")
 
     #cbar.ax.set_xlabel(r"$\frac{1}{\sigma_{tot}}\frac{d\sigma_{max}}{dxdQ^2}$")
     #ax.set_xlabel(r"$x$")
 
     ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
-    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
+    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$',
+                        r'$10^{-2}$', r'$10^{-1}$'])
     ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
     ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
     ax.tick_params(which='major', direction="in", length=7)
     ax.tick_params(which='minor', direction="in", length=4)
 
-    #----- min xsec hist
-    print("--hist3--")
-    ax = py.subplot(gs[1,1])
-    ax.text(title_xpos, title_ypos, r'$\sigma^{min}_{tot}$'+' = %0.2e' % (Sample['min']['tot_xsec']) + r'$\pm$'+'%0.2e' % (Sample['min']['var_xsec'])+r' [fb]',
-            horizontalalignment='center',
-            verticalalignment='center',
-            transform=ax.transAxes,
-            fontsize=10)
-    h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_CrossSection['xsecs']['min'], bins=[
-                np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis', norm=matplotlib.colors.LogNorm())
-    cbar = plt.colorbar()
-    cbar.ax.set_xlabel(r"$\frac{d\sigma_{min}}{dxdQ^2}$")
-    #cbar.ax.set_xlabel(r"$\frac{1}{\sigma_{tot}}\frac{d\sigma_{min}}{dxdQ^2}$")
-    ax.set_xlabel(r"$x$")
+def plt_unc(gs_ind, unctype, key, title_pos, Bins, hist_Analysis, hist_CrossSection):
 
-    ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
-    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
-    ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
-    ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
-    ax.tick_params(which='major', direction="in", length=7)
-    ax.tick_params(which='minor', direction="in", length=4)
+    print("--"+unctype+"["+key+"] histogram plotted--")
+    title_xpos, title_ypos = title_pos
 
-    #----- max sys unc hist
-    print("--hist4--")
-    ax = py.subplot(gs[0,2])
-    ax.text(title_xpos, title_ypos, r'Sys Unc (max)', #r'$\delta^{max,sys}_{tot}$'+' = %0.2e' %
+    uncname = unctype.replace('unc', '')
+
+    ax = py.subplot(gs[gs_ind[0], gs_ind[1]])
+    ax.text(title_xpos, title_ypos, r''+uncname+' Unc ('+key+')',  # r'$\delta^{max,sys}_{tot}$'+' = %0.2e' %
             #((np.sqrt(Sample['max']['Nevents'])/lum_arg)
             # * 100./Sample['max']['tot_xsec']) + r' \%',
             horizontalalignment='center',
             verticalalignment='center',
             transform=ax.transAxes,
             fontsize=10)
-    h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_CrossSection['sysunc']['max']*100./hist_CrossSection['xsecs']['max'], bins=[
-                np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis')
+    h = plt.hist2d(np.log(hist_Analysis['x']), np.log(hist_Analysis['Q2']), weights=hist_CrossSection[unctype]
+                   [key]*100./hist_CrossSection['xsecs'][key], bins=[np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis')
     cbar = plt.colorbar()
-    cbar.ax.set_xlabel(r"$\delta^{max}_{sys} [\%]$")
+    cbar.ax.set_xlabel(r"$\delta^{"+key+"}_{"+uncname+"} [\%]$")
     #cbar.ax.set_xlabel(r"$\frac{1}{\sigma_{tot}}\frac{d\sigma_{max}}{dxdQ^2}$")
     #ax.set_xlabel(r"$x$")
 
     ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
-    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
+    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$',
+                        r'$10^{-2}$', r'$10^{-1}$'])
     ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
     ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
     ax.tick_params(which='major', direction="in", length=7)
     ax.tick_params(which='minor', direction="in", length=4)
 
-    #----- min sys unc hist
-    print("--hist5--")
-    ax = py.subplot(gs[1,2])
-    ax.text(title_xpos, title_ypos, r'Sys Unc (min)',#r'$\delta^{min,sys}_{tot}$'+' = %0.2e' % ((np.sqrt(Sample["min"]['Nevents'])/lum_arg) * 100./Sample['min']['tot_xsec']) + r' \%',
-            horizontalalignment='center',
-            verticalalignment='center',
-            transform=ax.transAxes,
-            fontsize=10)
-    h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_CrossSection['sysunc']['min']*100./hist_CrossSection['xsecs']['min'], bins=[
-                np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis')
-    cbar = plt.colorbar()
-    cbar.ax.set_xlabel(r"$\delta^{min}_{sys} [\%]$")
-    #cbar.ax.set_xlabel(r"$\frac{1}{\sigma_{tot}}\frac{d\sigma_{max}}{dxdQ^2}$")
-    ax.set_xlabel(r"$x$")
-
-    ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
-    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
-    ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
-    ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
-    ax.tick_params(which='major', direction="in", length=7)
-    ax.tick_params(which='minor', direction="in", length=4)
-
-    #----- max stat unc hist
-    print("--hist6--")
-    ax = py.subplot(gs[0,3])
-    ax.text(title_xpos, title_ypos, r'Stat Unc (max)', #r'$\delta^{max,stat}_{tot}$'+' = %0.2e' %
-            #((np.sqrt(Sample['max']['Nevents'])/lum_arg)
-            # * 100./Sample['max']['tot_xsec']) + r' \%',
-            horizontalalignment='center',
-            verticalalignment='center',
-            transform=ax.transAxes,
-            fontsize=10)
-    h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_CrossSection['statunc']['max']*100./hist_CrossSection['xsecs']['max'], bins=[
-                np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis')
-    cbar = plt.colorbar()
-    cbar.ax.set_xlabel(r"$\delta^{max}_{stat} [\%]$")
-    #cbar.ax.set_xlabel(r"$\frac{1}{\sigma_{tot}}\frac{d\sigma_{max}}{dxdQ^2}$")
-    #ax.set_xlabel(r"$x$")
-
-    ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
-    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
-    ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
-    ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
-    ax.tick_params(which='major', direction="in", length=7)
-    ax.tick_params(which='minor', direction="in", length=4)
-
-    #----- min stat unc hist
-    print("--hist7--")
-    ax = py.subplot(gs[1,3])
-    ax.text(title_xpos, title_ypos, r'Stat Unc (min)', #r'$\delta^{min,stat}_{tot}$'+' = %0.2e' %
-            #((np.sqrt(Sample["min"]['Nevents'])/lum_arg)
-            # * 100./Sample['min']['tot_xsec']) + r' \%',
-            horizontalalignment='center',
-            verticalalignment='center',
-            transform=ax.transAxes,
-            fontsize=10)
-    h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_CrossSection['statunc']['min']*100./hist_CrossSection['xsecs']['min'], bins=[
-                np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis')
-    cbar = plt.colorbar()
-    cbar.ax.set_xlabel(r"$\delta^{min}_{stat} [\%]$")
-    #cbar.ax.set_xlabel(r"$\frac{1}{\sigma_{tot}}\frac{d\sigma_{max}}{dxdQ^2}$")
-    ax.set_xlabel(r"$x$")
-
-    ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
-    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
-    ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
-    ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
-    ax.tick_params(which='major', direction="in", length=7)
-    ax.tick_params(which='minor', direction="in", length=4)
-    """
-    #----- max MC unc hist
-    ax = py.subplot(gs[0,3])
-    ax.set_title(r'$\delta^{max,MC}_{tot}$'+' = %0.2e' %
-                    ((Sample['max']['var_xsec'])*100./Sample['max']['tot_xsec']) + r' \%')
-    h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_CrossSection['MCunc']['max']*100./hist_CrossSection['xsecs']['max'], bins=[np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis')
-    cbar = plt.colorbar()
-    cbar.ax.set_xlabel(r"$\delta^{max}_{MC} [\%]$")
-    #cbar.ax.set_xlabel(r"$\frac{1}{\sigma_{tot}}\frac{d\sigma_{max}}{dxdQ^2}$")
-    ax.set_xlabel(r"$x$")
-
-    ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
-    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
-    ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
-    ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
-
-
-    #----- min MC unc hist
-    ax = py.subplot(gs[1,3])
-    ax.set_title(r'$\delta^{min,MC}_{tot}$'+' = %0.2e' %
-                    ((Sample['min']['var_xsec'])*100./Sample['min']['tot_xsec']) + r' \%')
-    h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_CrossSection['MCunc']['min']*100./hist_CrossSection['xsecs']['min'], bins=[np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis')
-    cbar = plt.colorbar()
-    cbar.ax.set_xlabel(r"$\delta^{min}_{MC} [\%]$")
-    #cbar.ax.set_xlabel(r"$\frac{1}{\sigma_{tot}}\frac{d\sigma_{max}}{dxdQ^2}$")
-    ax.set_xlabel(r"$x$")
-
-    ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
-    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
-    ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
-    ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
-
-    """
-
-    plt.savefig("chi2-test-"+str(lum_arg)+"fb-1.pdf")
-    plt.cla()
-    plt.clf()
-
-
-    #---- Chi2 hist alone with values written per bin
+def plt_Detailedchi2s(Bins, hist_Analysis):
+    print("--Detailed chi2 histogram plotted--")
     fig, ax = plt.subplots()
     ax.set_aspect("equal")
 
 
-    h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_chi2s, bins=[
+    h = plt.hist2d(np.log(hist_Analysis['x']), np.log(hist_Analysis['Q2']), weights=hist_Analysis['chi2s'], bins=[
                 np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis', norm=matplotlib.colors.LogNorm())
     cbar = plt.colorbar()
     cbar.ax.set_xlabel(r"$\chi^2_{bin}$")
@@ -568,14 +405,11 @@ if __name__ == "__main__":
     for iQ2 in range(0, Bins['NQ2']):
         for iX in range(0, Bins['Nx']):
             if hist_CrossSection['non_empty']['total'][iQ2*Bins['Nx']+iX]:
-                ax.text(np.log(hist_Xs[iQ2*Bins['Nx']+iX]), np.log(hist_Q2s[iQ2*Bins['Nx']+iX]), '{:.2f}'.format(hist_chi2s[iQ2*Bins['Nx']+iX]),
+                ax.text(np.log(hist_Analysis['x'][iQ2*Bins['Nx']+iX]), np.log(hist_Analysis['Q2'][iQ2*Bins['Nx']+iX]), '{:.2f}'.format(hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX]),
                         color="w", ha="center", va="center", fontweight="bold", fontsize=6)
 
-    plt.savefig("chi2-test-"+str(lum_arg)+"fb-1_values.pdf")
-    plt.cla()
-    plt.clf()
-
-    #---- Zscore hist alone with discrete colors
+def plt_DetailedZscore(Bins, hist_Analysis):
+    print("--Detailed Zscore histogram plotted--")
     fig, ax = plt.subplots()
     ax.set_aspect("equal")
 
@@ -586,7 +420,7 @@ if __name__ == "__main__":
     bounds = np.linspace(0, 5, 6)
     norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
 
-    h = plt.hist2d(np.log(hist_Xs), np.log(hist_Q2s), weights=hist_zscores, bins=[
+    h = plt.hist2d(np.log(hist_Analysis['x']), np.log(hist_Analysis['Q2']), weights=hist_Analysis['zscores'], bins=[
                 np.log(Bins['x']), np.log(Bins['Q2'])], cmap=cmap)
 
     ax2 = fig.add_axes([0.85, 0.1, 0.03, 0.8])
@@ -610,7 +444,100 @@ if __name__ == "__main__":
     for iQ2 in range(0, Bins['NQ2']):
         for iX in range(0, Bins['Nx']):
             if hist_CrossSection['non_empty']['total'][iQ2*Bins['Nx']+iX]:
-                ax.text(np.log(hist_Xs[iQ2*Bins['Nx']+iX]), np.log(hist_Q2s[iQ2*Bins['Nx']+iX]), '{:.2f}'.format(np.sqrt(hist_chi2s[iQ2*Bins['Nx']+iX])),
+                ax.text(np.log(hist_Analysis['x'][iQ2*Bins['Nx']+iX]), np.log(hist_Analysis['Q2'][iQ2*Bins['Nx']+iX]), '{:.2f}'.format(np.sqrt(hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX])),
                         color="w", ha="center", va="center", fontweight="bold", fontsize=6)
 
-    plt.savefig("Zscore-test-"+str(lum_arg)+"fb-1_values.pdf")
+if __name__ == "__main__":
+        
+    wdir='.stats-tests'
+
+    if len(sys.argv) < 1:
+        print "usage: ./stat-tests.py <Luminosity (fb^-1)>"
+        exit(1)
+
+    lum_arg = float(sys.argv[1])
+
+    #--physical params and cuts
+    #lum = str(lum_arg)+':fb-1'
+    lum_label = r'$\mathcal{L} = '+str(lum_arg)+r'\,fb^{-1}$'
+    cuts_label = r"$ W^2 > 10\,\,,\,\, Q^2> 1$"
+
+    #to tweak:
+    #-----------------------------------------------
+    #MCEG integration accuracy
+    neval = 10000  # default should be: 10000  # (neval/2) ~ batch_size
+    nitn = 1000  # default should be: 1000
+    min_Q = 0.1
+
+    #SFs
+    min_SF = 'NNPDF31_nnlo_pch_as_0118_rs_0.5_SF'
+    max_SF = 'NNPDF31_nnlo_pch_as_0118_rs_1.0_SF'
+
+    seeds = {'min': 3, 'max': 4}
+    rep = 0
+    rs = 140.7
+    #-----------------------------------------------
+
+    #--- acceptance/purity based binning
+    Bins=GetBins()
+
+    #--- kinematic cuts
+    def veto00(x,y,Q2,W2):
+        if   W2 < 10       : return 0
+        elif Q2 < 1        : return 0
+        else               : return 1
+        
+    #--Getting events
+    Sample = GetEvents(lum_arg,veto00,sign=1,rep=rep)
+
+    #--Getting CrossSections
+    hist_CrossSection = GetCrossSections(Bins,sys_path="../expdata/data/xQ2binTable-xiaoxuan-060220+syst.npy")
+
+    #--Getting CovMat
+    CovMat = GetCovMat(Bins, hist_CrossSection)
+    inv_covmat_xsecs = np.linalg.inv(CovMat['xsecs']['total'])
+
+    #--Getting Analysis: Chi2s and Z-scores
+    hist_Analysis = GetAnalysis(Bins, hist_CrossSection)
+
+    #--Plotting-----------------------------------------------
+    #---------------------------------------------------------
+    print("\n--Plotting--")
+
+    #--General settings
+    gs,fig=plt_SetGridSpec((2, 4))
+
+    #---- Chi2 hist + sys unc + stat unc 
+    title_pos=(0.5,1.04)
+
+    plt_chi2s(0, title_pos, Bins, hist_Analysis)
+
+    plt_xsecs([0,1],'max', title_pos, Bins, hist_Analysis, Sample)
+    plt_xsecs([1,1],'min', title_pos, Bins, hist_Analysis, Sample)
+
+    plt_unc([0,2],'sysunc','max', title_pos, Bins, hist_Analysis, hist_CrossSection)
+    plt_unc([1,2],'sysunc','min', title_pos, Bins, hist_Analysis, hist_CrossSection)
+
+    plt_unc([0,3],'statunc','max', title_pos, Bins, hist_Analysis, hist_CrossSection)
+    plt_unc([1,3],'statunc','min', title_pos, Bins, hist_Analysis, hist_CrossSection)
+
+    plt.savefig("chi2-overview-"+str(lum_arg)+"fb-1.pdf")
+    plt.cla()
+    plt.clf()
+
+
+    #---- Chi2 hist alone with values written per bin
+    print " "
+    plt_Detailedchi2s(Bins, hist_Analysis)
+
+    plt.savefig("chi2-detailed-"+str(lum_arg)+"fb-1.pdf")
+    plt.cla()
+    plt.clf()
+
+    #---- Zscore hist alone with discrete colors
+    print " "
+    plt_DetailedZscore(Bins,hist_Analysis)
+
+    plt.savefig("Zscore-detailed-"+str(lum_arg)+"fb-1.pdf")
+    plt.cla()
+    plt.clf()
