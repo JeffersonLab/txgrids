@@ -55,7 +55,7 @@ def GetEvents(lum_arg,veto,sign,rep=0):
         Sample[key]['rs'] = rs
         Sample[key]['fname'] = 'mceg00'
         Sample[key]['veto'] = veto
-        Sample[key]['fdata'] = wdir+"/"+Sample[key]['tabname']+"_data_lum"+str(lum_arg)+"_seed"+str(seeds[key])+".po"
+        Sample[key]['fdata'] = wdir+"/"+Sample[key]['tabname']+"_EVENTS_lum"+str(lum_arg)+"_seed"+str(seeds[key])+"_pdfrep"+str(rep)+".po"
 
     #--generate events
     #output keys: ['Y', 'X', 'Q2', 'W', 'rs']
@@ -488,8 +488,10 @@ if __name__ == "__main__":
         else               : return 1
         
     #--Getting events
-    Sample = GetEvents(lum_arg,veto00,sign=1,rep=rep)
+    for rep in range(1,101):
+        Sample = GetEvents(lum_arg,veto00,sign=1,rep=rep)
 
+    exit(1)
     #--Getting CrossSections
     hist_CrossSection = GetCrossSections(Bins,sys_path="../expdata/data/xQ2binTable-xiaoxuan-060220+syst.npy")
 
