@@ -451,11 +451,12 @@ if __name__ == "__main__":
         
     wdir='.stats-tests'
 
-    if len(sys.argv) < 1:
-        print "usage: ./stat-tests.py <Luminosity (fb^-1)>"
+    if len(sys.argv) < 2:
+        print "usage: ./stat-tests.py <Luminosity (fb^-1)> <pdf_replica>"
         exit(1)
 
     lum_arg = float(sys.argv[1])
+    rep = int(sys.argv[2])
 
     #--physical params and cuts
     #lum = str(lum_arg)+':fb-1'
@@ -474,7 +475,6 @@ if __name__ == "__main__":
     max_SF = 'NNPDF31_nnlo_pch_as_0118_rs_1.0_SF'
 
     seeds = {'min': 3, 'max': 4}
-    rep = 0
     rs = 140.7
     #-----------------------------------------------
 
@@ -488,10 +488,8 @@ if __name__ == "__main__":
         else               : return 1
         
     #--Getting events
-    for rep in range(1,101):
-        Sample = GetEvents(lum_arg,veto00,sign=1,rep=rep)
+    Sample = GetEvents(lum_arg,veto00,sign=1,rep=rep)
 
-    exit(1)
     #--Getting CrossSections
     hist_CrossSection = GetCrossSections(Bins,sys_path="../expdata/data/xQ2binTable-xiaoxuan-060220+syst.npy")
 
@@ -523,7 +521,7 @@ if __name__ == "__main__":
     plt_unc([0,3],'statunc','max', title_pos, Bins, hist_Analysis, hist_CrossSection)
     plt_unc([1,3],'statunc','min', title_pos, Bins, hist_Analysis, hist_CrossSection)
 
-    plt.savefig("chi2-overview-"+str(lum_arg)+"fb-1.pdf")
+    plt.savefig("chi2-overview-"+str(lum_arg)+"fb-1_pdfrep"+str(rep)+".pdf")
     plt.cla()
     plt.clf()
 
@@ -532,7 +530,7 @@ if __name__ == "__main__":
     print " "
     plt_Detailedchi2s(Bins, hist_Analysis)
 
-    plt.savefig("chi2-detailed-"+str(lum_arg)+"fb-1.pdf")
+    plt.savefig("chi2-detailed-"+str(lum_arg)+"fb-1_pdfrep"+str(rep)+".pdf")
     plt.cla()
     plt.clf()
 
@@ -540,6 +538,6 @@ if __name__ == "__main__":
     print " "
     plt_DetailedZscore(Bins,hist_Analysis)
 
-    plt.savefig("Zscore-detailed-"+str(lum_arg)+"fb-1.pdf")
+    plt.savefig("Zscore-detailed-"+str(lum_arg)+"fb-1_pdfrep"+str(rep)+".pdf")
     plt.cla()
     plt.clf()
