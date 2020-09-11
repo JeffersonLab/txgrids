@@ -7,6 +7,7 @@
  '''
 
 import sys,os
+from os import walk
 sys.path.append(os.path.dirname( os.path.dirname(os.path.abspath(__file__) ) ) )
 import numpy as np
 from theory.tools import save, load, convert_lum
@@ -74,7 +75,7 @@ def units(units):
     elif units=='fb'    :return one*1e12 
     else: sys.exit('%s conversion not available')
 
-def plt_SetGridSpec(size):
+def plt_SetGridSpec(size,tabnames):
     nrows, ncols = size
     widths = [2, 1, 1, 1]
     heights = [1, 1]
@@ -82,8 +83,8 @@ def plt_SetGridSpec(size):
                            height_ratios=heights)
     fig = py.figure(figsize=(ncols*5, nrows*3.5))  # , constrained_layout=True)
 
-    fig.suptitle(r'\hspace{-15pt}$\textrm{min: '+Sample['min']['tabname'].replace("_", "\_") + r'}$,' +
-                 r' $\textrm{max: '+Sample['max']['tabname'].replace("_", "\_") + r'}$, ' +
+    fig.suptitle(r'\hspace{-15pt}$\textrm{min: '+tabnames[0].replace("_", "\_") + r'}$,' +
+                 r' $\textrm{max: '+tabnames[1].replace("_", "\_") + r'}$, ' +
                  lum_label, fontsize=10, y=0.98)
 
     fig.subplots_adjust(top=0.85, bottom=0.15)
@@ -178,7 +179,8 @@ def plt_unc(gs_ind, unctype, key, title_pos, Bins, hist_Analysis, hist_CrossSect
     ax.tick_params(which='major', direction="in", length=7)
     ax.tick_params(which='minor', direction="in", length=4)
 
-def plt_Detailedchi2s(Bins, hist_Analysis):
+
+def plt_Detailedchi2s(Bins, hist_Analysis, hist_CrossSection):
     print("--Detailed chi2 histogram plotted--")
     fig, ax = plt.subplots()
     ax.set_aspect("equal")
@@ -203,7 +205,8 @@ def plt_Detailedchi2s(Bins, hist_Analysis):
                 ax.text(np.log(hist_Analysis['x'][iQ2*Bins['Nx']+iX]), np.log(hist_Analysis['Q2'][iQ2*Bins['Nx']+iX]), '{:.2f}'.format(hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX]),
                         color="w", ha="center", va="center", fontweight="bold", fontsize=6)
 
-def plt_DetailedZscore(Bins, hist_Analysis):
+
+def plt_DetailedZscore(Bins, hist_Analysis, hist_CrossSection):
     print("--Detailed Zscore histogram plotted--")
     fig, ax = plt.subplots()
     ax.set_aspect("equal")
@@ -242,6 +245,47 @@ def plt_DetailedZscore(Bins, hist_Analysis):
                 ax.text(np.log(hist_Analysis['x'][iQ2*Bins['Nx']+iX]), np.log(hist_Analysis['Q2'][iQ2*Bins['Nx']+iX]), '{:.2f}'.format(np.sqrt(hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX])),
                         color="w", ha="center", va="center", fontweight="bold", fontsize=6)
 
+
+def plt_DetailedZscore_witherrors(Bins, hist_Analysis, non_empty_bins):
+    print("--Detailed Zscore with Errors histogram plotted--")
+    fig, ax = plt.subplots()
+    ax.set_aspect("equal")
+
+    cmap = matplotlib.colors.ListedColormap(#['#3535FD', 
+            ['#2A00D5', '#63009E', '#A1015D', '#D80027', '#FE0002'])
+
+    # define the bins and normalize
+    bounds = np.linspace(0, 5, 6)
+    norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
+
+    h = plt.hist2d(np.log(hist_Analysis['x']), np.log(hist_Analysis['Q2']), weights=hist_Analysis['zscores'], bins=[
+                np.log(Bins['x']), np.log(Bins['Q2'])], cmap=cmap)
+
+    ax2 = fig.add_axes([0.85, 0.1, 0.03, 0.8])
+
+    cbar = matplotlib.colorbar.ColorbarBase(ax2, cmap=cmap, norm=norm,
+        spacing='uniform', ticks=bounds, boundaries=bounds, format='%1i')
+
+    cbar.ax.set_yticklabels(['0', '1', '2', '3', '4', r'$>$ 5', ' '])
+
+    #cbar = plt.colorbar()
+    cbar.ax.set_xlabel(r"${\rm z-score}$")
+    ax.set_xlabel(r"$x$")
+    ax.set_ylabel(r"$Q^2$")
+    ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
+    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
+    ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
+    ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
+    ax.tick_params(which='major', direction="in", length=7)
+    ax.tick_params(which='minor', direction="in", length=4)
+
+    for iQ2 in range(0, Bins['NQ2']):
+        for iX in range(0, Bins['Nx']):
+            if non_empty_bins[iQ2*Bins['Nx']+iX]:
+                ax.text(np.log(hist_Analysis['x'][iQ2*Bins['Nx']+iX]), np.log(hist_Analysis['Q2'][iQ2*Bins['Nx']+iX]), '{:.2f}'.format(
+                    hist_Analysis['zscores_f'][iQ2*Bins['Nx']+iX])+"\n"+r'$\pm$'+'{:.1f}'.format(hist_Analysis['std_zscores'][iQ2*Bins['Nx']+iX]),
+                        color="w", ha="center", va="center", fontweight="bold", fontsize=5)
+
 if __name__ == "__main__":
 
     #--- Getting arguments from user
@@ -264,7 +308,7 @@ if __name__ == "__main__":
 
     sub_sub_wdir = ""
     if rep != -1:
-        sub_wdir+"pdfrep" + str(rep)+"/"
+        sub_sub_wdir = sub_wdir+"pdfrep" + str(rep)+"/"
         if not os.path.isdir(sub_sub_wdir): os.system("mkdir "+sub_sub_wdir)
 
     Sample_path = sub_sub_wdir+"Sample.p"
@@ -306,75 +350,129 @@ if __name__ == "__main__":
         if   W2 < 10       : return 0
         elif Q2 < 1        : return 0
         else               : return 1
-        
-    #--Getting events
-    if not os.path.isfile(Sample_path):
-        print(Sample_path+" doesn't exist, please run chi2-test_generate.py first.")
-        exit(1)
+    
+    if rep != -1:
+        #--Getting events
+        if not os.path.isfile(Sample_path):
+            print(Sample_path+" doesn't exist, please run chi2-test_generate.py first.")
+            exit(1)
+        else:
+            Sample = load_obj(Sample_path)
+
+        #--Getting CrossSections
+        if not os.path.isfile(hist_CrossSection_path):
+            print(hist_CrossSection_path+" doesn't exist, please run chi2-test_generate.py first.")
+            exit(1)
+        else:
+            hist_CrossSection = load_obj(hist_CrossSection_path)
+
+        #--Getting Analysis: Chi2s and Z-scores
+        if not os.path.isfile(hist_Analysis_path):
+            print(hist_Analysis_path+" doesn't exist, please run chi2-test_generate.py first.")
+            exit(1)
+        else:
+            hist_Analysis = load_obj(hist_Analysis_path)
+
+        #--Plotting-----------------------------------------------
+        #---------------------------------------------------------
+        print("--Plotting--")
+
+        #--General settings
+        gs, fig = plt_SetGridSpec((2, 4), (min_SF, max_SF))
+
+        #---- Chi2 hist + sys unc + stat unc 
+        title_pos=(0.5,1.04)
+
+        plt_chi2s(0, title_pos, Bins, hist_Analysis)
+
+
+        plt_xsecs([0,1],'max', title_pos, Bins, hist_Analysis, Sample)
+        plt_xsecs([1,1],'min', title_pos, Bins, hist_Analysis, Sample)
+
+        plt_unc([0,2],'sysunc','max', title_pos, Bins, hist_Analysis, hist_CrossSection)
+        plt_unc([1,2],'sysunc','min', title_pos, Bins, hist_Analysis, hist_CrossSection)
+
+        plt_unc([0,3],'statunc','max', title_pos, Bins, hist_Analysis, hist_CrossSection)
+        plt_unc([1,3],'statunc','min', title_pos, Bins, hist_Analysis, hist_CrossSection)
+
+        plt.savefig(sub_wdir+"chi2-overview-"+str(lum_arg)+"fb-1_pdfrep"+str(rep)+".pdf")
+        plt.cla()
+        plt.clf()
+
+
+        #---- Chi2 hist alone with values written per bin
+        print " "
+        plt_Detailedchi2s(Bins, hist_Analysis,hist_CrossSection)
+
+        plt.savefig(sub_wdir+"chi2-detailed-"+str(lum_arg)+"fb-1_pdfrep"+str(rep)+".pdf")
+        plt.cla()
+        plt.clf()
+
+        #---- Zscore hist alone with discrete colors
+        print " "
+        plt_DetailedZscore(Bins,hist_Analysis,hist_CrossSection)
+
+        plt.savefig(sub_wdir+"Zscore-detailed-"+str(lum_arg)+"fb-1_pdfrep"+str(rep)+".pdf")
+        plt.cla()
+        plt.clf()
+
     else:
-        Sample = load_obj(Sample_path)
+        (_, dirnames, filenames) = walk(sub_wdir).next()
+        tot_hist_Analysis = {}
+        tot_hist_Analysis['chi2s'] = np.zeros(Bins['Nx']*Bins['NQ2'])
+        tot_hist_Analysis['zscores'] = np.zeros(Bins['Nx']*Bins['NQ2'])
+        tot_hist_Analysis['std_chi2s'] = np.zeros(Bins['Nx']*Bins['NQ2'])
+        tot_hist_Analysis['std_zscores'] = np.zeros(Bins['Nx']*Bins['NQ2'])
+        tot_hist_Analysis['x'] = np.zeros(Bins['Nx']*Bins['NQ2'])
+        tot_hist_Analysis['Q2'] = np.zeros(Bins['Nx']*Bins['NQ2'])
 
-    #--Getting CrossSections
-    if not os.path.isfile(hist_CrossSection_path):
-        print(hist_CrossSection_path+" doesn't exist, please run chi2-test_generate.py first.")
-        exit(1)
-    else:
-        load_obj(hist_CrossSection_path)
+        non_empty_bins = np.zeros(Bins['Nx']*Bins['NQ2']) > 1
 
-    #--Getting CovMat
-    if not os.path.isfile(CovMat_path):
-        print(CovMat_path+" doesn't exist, please run chi2-test_generate.py first.")
-        exit(1)
-    else:
-        load_obj(CovMat_path)
+        for dirname in dirnames:
+            hist_Analysis = load_obj(sub_wdir+"/"+dirname+"/hist_Analysis.p")
+            tot_hist_Analysis['chi2s'] += hist_Analysis['chi2s']
+            tot_hist_Analysis['zscores'] += np.sqrt(hist_Analysis['chi2s'])
 
-    inv_covmat_xsecs = np.linalg.inv(CovMat['xsecs']['total'])
+            hist_CrossSection = load_obj(sub_wdir+"/"+dirname+"/hist_CrossSection.p")
+            non_empty_bins += hist_CrossSection['non_empty']['total']
 
-    #--Getting Analysis: Chi2s and Z-scores
-    if not os.path.isfile(hist_Analysis_path):
-        hist_Analysis = GetAnalysis(Bins, hist_CrossSection)
-        save_obj(hist_Analysis,hist_Analysis_path)
-    else:
-        load_obj(hist_Analysis_path)
+        tot_hist_Analysis['chi2s'] /= len(dirnames)
+        tot_hist_Analysis['zscores'] /= len(dirnames)
+        tot_hist_Analysis['zscores_f'] = np.copy(tot_hist_Analysis['zscores'])
 
-    #--Plotting-----------------------------------------------
-    #---------------------------------------------------------
-    print("\n--Plotting--")
+        for dirname in dirnames:
+            hist_Analysis = load_obj(sub_wdir+"/"+dirname+"/hist_Analysis.p")
+            tot_hist_Analysis['std_chi2s'] += (hist_Analysis['chi2s']-tot_hist_Analysis['chi2s'])**2
+            tot_hist_Analysis['std_zscores'] += (np.sqrt(hist_Analysis['chi2s'])-tot_hist_Analysis['zscores'])**2
 
-    #--General settings
-    gs,fig=plt_SetGridSpec((2, 4))
+        tot_hist_Analysis['std_chi2s'] /= len(dirnames)
+        tot_hist_Analysis['std_chi2s'] = np.sqrt(tot_hist_Analysis['std_chi2s'])
 
-    #---- Chi2 hist + sys unc + stat unc 
-    title_pos=(0.5,1.04)
+        tot_hist_Analysis['std_zscores'] /= len(dirnames)
+        tot_hist_Analysis['std_zscores'] = np.sqrt(tot_hist_Analysis['std_zscores'])
 
-    plt_chi2s(0, title_pos, Bins, hist_Analysis)
+        #--- for plotting purposes
+        for iQ2 in range(0, Bins['NQ2']):
+            for iX in range(0, Bins['Nx']):
+                if tot_hist_Analysis['zscores'][iQ2*Bins['Nx']+iX]<1:
+                    tot_hist_Analysis['zscores'][iQ2*Bins['Nx']+iX]=-1
+                else:
+                    if not np.isnan(tot_hist_Analysis['zscores'][iQ2*Bins['Nx']+iX]):
+                        tot_hist_Analysis['zscores'][iQ2*Bins['Nx']+iX] = int(tot_hist_Analysis['zscores'][iQ2*Bins['Nx']+iX])
 
-    plt_xsecs([0,1],'max', title_pos, Bins, hist_Analysis, Sample)
-    plt_xsecs([1,1],'min', title_pos, Bins, hist_Analysis, Sample)
+                tot_hist_Analysis['x'][iQ2*Bins['Nx']+iX] = Bins['x_cv'][iX]
+                tot_hist_Analysis['Q2'][iQ2*Bins['Nx']+iX] = Bins['Q2_cv'][iQ2]
 
-    plt_unc([0,2],'sysunc','max', title_pos, Bins, hist_Analysis, hist_CrossSection)
-    plt_unc([1,2],'sysunc','min', title_pos, Bins, hist_Analysis, hist_CrossSection)
+        tot_hist_Analysis['zscores'][tot_hist_Analysis['zscores'] >= 5] = 5
 
-    plt_unc([0,3],'statunc','max', title_pos, Bins, hist_Analysis, hist_CrossSection)
-    plt_unc([1,3],'statunc','min', title_pos, Bins, hist_Analysis, hist_CrossSection)
+        tot_hist_Analysis['chi2s'][tot_hist_Analysis['chi2s']==0] = np.nan
+        tot_hist_Analysis['zscores'][tot_hist_Analysis['zscores'] == 0] = np.nan
 
-    plt.savefig("chi2-overview-"+str(lum_arg)+"fb-1_pdfrep"+str(rep)+".pdf")
-    plt.cla()
-    plt.clf()
+        tot_hist_Analysis['zscores'][tot_hist_Analysis['zscores'] == -1] = 0
 
+        plt_DetailedZscore_witherrors(Bins, tot_hist_Analysis, non_empty_bins)
 
-    #---- Chi2 hist alone with values written per bin
-    print " "
-    plt_Detailedchi2s(Bins, hist_Analysis)
-
-    plt.savefig("chi2-detailed-"+str(lum_arg)+"fb-1_pdfrep"+str(rep)+".pdf")
-    plt.cla()
-    plt.clf()
-
-    #---- Zscore hist alone with discrete colors
-    print " "
-    plt_DetailedZscore(Bins,hist_Analysis)
-
-    plt.savefig("Zscore-detailed-"+str(lum_arg)+"fb-1_pdfrep"+str(rep)+".pdf")
-    plt.cla()
-    plt.clf()
+        plt.savefig(sub_wdir+"ZscoreWithError-detailed-" +
+                    str(lum_arg)+"fb-1_pdfrep"+str(rep)+".pdf")
+        plt.cla()
+        plt.clf()
