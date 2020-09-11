@@ -1,0 +1,47 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[latin1]{inputenc}
+
+\title{Getting started}
+\author{Veloci Raptor}
+\date{03/14/15}
+
+\begin{document}
+PDG: https://pdg.lbl.gov/2018/reviews/rpp2018-rev-statistics.pdf
+\\\\
+The p-value (we'll call it p) is defined as follows:
+\begin{align}
+p(t_{obs}) & = \int_{t_{obs}}^{\infty}f(t|H_0)dt \equiv Pr(t \geq t_{obs}) \,\,\, \text{(See PDG, eq.39.45)} \\
+& \equiv 1 - Pr(t \leq t_{obs}) \equiv 1 - \int_{-\infty}^{t_{obs}}f(t|H_0)dt \\
+& \equiv 1 - \Phi(t_{obs})
+\end{align}
+where f is the p.d.f. of the sample is determined by the hypothesis $H_0$ and where $\Phi$ is defined as the cumulative distribution function (CDF).
+\\\\
+With the inverse of eq.3 above:
+\begin{equation}
+t_{obs} = \Phi^{-1}(1-p(t_{obs}))
+\end{equation}
+So what the PDG is saying in eq.39.46 is simply the special definition:
+\begin{equation}
+t_{obs} = 0 + Z*1 = Z = \Phi_n^{-1}(1-p(t_{obs}))
+\end{equation}
+where regardless of what $\Phi$ is, the Z significance is defined with $\Phi_n$ to be and I quote ``the cumulative distribution of the standard Gaussian'' so that $f_n=\mathcal{G}(\mu=0,\sigma=1)$.
+\\\\
+Now, why in our case I'm saying that $Z'=(\mu_{H1} -  \mu_{H0})/\sigma_{H0} = \sqrt{\chi^2}$ is equivalent to $\Phi_n^{-1}(1-p(t_{obs})) $? 
+
+\\\\
+Because:
+\begin{itemize}
+\item I'm assuming $f(t|H_0)$ to be gaussian with $\mu_{H0} = Obs(\text{central-replica})$ and $\sigma_{H0} = (\sigma^2_{sys}+\sigma^2_{stat})^{0.5}$. hence I'll call $\Phi \equiv \Phi_g$
+\item for $t_{obs} = \mu_{H1} \equiv \mu_{H0} + Z'\sigma_{H0}$ we get:
+\begin{align}
+t_{obs} &= \Phi_g^{-1}(1-p(t_{obs}))\\
+\mu_{H0} + Z'\sigma_{H0} & = \mu_{H0} + \sigma_{H0}\Phi_n^{-1}(1-p(t_{obs}))\\
+ Z' \equiv Z &= \Phi_n^{-1}(1-p(t_{obs}))
+\end{align}
+\end{itemize}
+
+
+\end{document}

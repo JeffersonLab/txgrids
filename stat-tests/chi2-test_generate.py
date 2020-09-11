@@ -96,9 +96,9 @@ def GetEvents(path,lum_arg,veto,sign,rep=0):
 
     return Sample
 
-def GetBins():
+def GetBins(pwd=""):
     Bins = {}
-    kin0, kin = gen_grid("../expdata/")
+    kin0, kin = gen_grid(pwd+"../expdata/")
     Bins['x'] = sorted(set(np.array(kin)[:, 0]))
     Bins['Q2'] = sorted(set(np.array(kin)[:, 1]))
 
@@ -281,179 +281,11 @@ def units(units):
     elif units=='fb'    :return one*1e12 
     else: sys.exit('%s conversion not available')
 
-def plt_SetGridSpec(size):
-    nrows, ncols = size
-    widths = [2, 1, 1, 1]
-    heights = [1, 1]
-    gs = gridspec.GridSpec(nrows, ncols, width_ratios=widths,
-                           height_ratios=heights)
-    fig = py.figure(figsize=(ncols*5, nrows*3.5))  # , constrained_layout=True)
-
-    fig.suptitle(r'\hspace{-15pt}$\textrm{min: '+Sample['min']['tabname'].replace("_", "\_") + r'}$,' +
-                 r' $\textrm{max: '+Sample['max']['tabname'].replace("_", "\_") + r'}$, ' +
-                 lum_label, fontsize=10, y=0.98)
-
-    fig.subplots_adjust(top=0.85, bottom=0.15)
-
-    return gs,fig
-
-def plt_chi2s(gs_ind, title_pos, Bins, hist_Analysis):
-    print("--chi2 histogram plotted--")
-
-    title_xpos, title_ypos = title_pos
-
-    #---- chi2 hist
-    ax = py.subplot(gs[:, gs_ind])
-    h = plt.hist2d(np.log(hist_Analysis['x']), np.log(hist_Analysis['Q2']), weights=hist_Analysis['chi2s'], bins=[
-        np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis', norm=matplotlib.colors.LogNorm())
-
-    ax.text(title_xpos, title_ypos+0.02, r'$\chi^2_{tot}/N_{bins}$ = '+' %0.4e' % hist_Analysis['tot_chi2'],
-            horizontalalignment='center',
-            verticalalignment='center',
-            transform=ax.transAxes,
-            fontsize=15)
-
-    cbar = plt.colorbar()
-    cbar.ax.set_xlabel(r"$\chi^2_{bin}$")
-    ax.set_xlabel(r"$x$")
-    ax.set_ylabel(r"$Q^2$")
-
-    ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
-    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$',
-                        r'$10^{-2}$', r'$10^{-1}$'])
-    ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
-    ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
-    ax.tick_params(which='major', direction="in", length=7)
-    ax.tick_params(which='minor', direction="in", length=4)
-
-def plt_xsecs(gs_ind, key, title_pos, Bins, hist_Analysis, Sample):
-
-    print("--xsec["+key+"] histogram plotted--")
-
-    title_xpos, title_ypos = title_pos
-    ax = py.subplot(gs[gs_ind[0], gs_ind[1]])
-    ax.text(title_xpos, title_ypos, r'$\sigma^{'+key+'}_{tot}$'+' = %0.2e' % (Sample[key]['tot_xsec']) + r'$\pm$'+'%0.2e' % (Sample[key]['var_xsec'])+r' [fb]',
-            horizontalalignment='center',
-            verticalalignment='center',
-            transform=ax.transAxes,
-            fontsize=10)
-
-    h = plt.hist2d(np.log(hist_Analysis['x']), np.log(hist_Analysis['Q2']), weights=hist_CrossSection['xsecs'][key], bins=[
-        np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis', norm=matplotlib.colors.LogNorm())
-
-    cbar = plt.colorbar()
-    cbar.ax.set_xlabel(r"$\frac{d\sigma_{"+key+"}}{dxdQ^2}$")
-
-    #cbar.ax.set_xlabel(r"$\frac{1}{\sigma_{tot}}\frac{d\sigma_{max}}{dxdQ^2}$")
-    #ax.set_xlabel(r"$x$")
-
-    ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
-    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$',
-                        r'$10^{-2}$', r'$10^{-1}$'])
-    ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
-    ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
-    ax.tick_params(which='major', direction="in", length=7)
-    ax.tick_params(which='minor', direction="in", length=4)
-
-def plt_unc(gs_ind, unctype, key, title_pos, Bins, hist_Analysis, hist_CrossSection):
-
-    print("--"+unctype+"["+key+"] histogram plotted--")
-    title_xpos, title_ypos = title_pos
-
-    uncname = unctype.replace('unc', '')
-
-    ax = py.subplot(gs[gs_ind[0], gs_ind[1]])
-    ax.text(title_xpos, title_ypos, r''+uncname+' Unc ('+key+')',  # r'$\delta^{max,sys}_{tot}$'+' = %0.2e' %
-            #((np.sqrt(Sample['max']['Nevents'])/lum_arg)
-            # * 100./Sample['max']['tot_xsec']) + r' \%',
-            horizontalalignment='center',
-            verticalalignment='center',
-            transform=ax.transAxes,
-            fontsize=10)
-    h = plt.hist2d(np.log(hist_Analysis['x']), np.log(hist_Analysis['Q2']), weights=hist_CrossSection[unctype]
-                   [key]*100./hist_CrossSection['xsecs'][key], bins=[np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis')
-    cbar = plt.colorbar()
-    cbar.ax.set_xlabel(r"$\delta^{"+key+"}_{"+uncname+"} [\%]$")
-    #cbar.ax.set_xlabel(r"$\frac{1}{\sigma_{tot}}\frac{d\sigma_{max}}{dxdQ^2}$")
-    #ax.set_xlabel(r"$x$")
-
-    ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
-    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$',
-                        r'$10^{-2}$', r'$10^{-1}$'])
-    ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
-    ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
-    ax.tick_params(which='major', direction="in", length=7)
-    ax.tick_params(which='minor', direction="in", length=4)
-
-def plt_Detailedchi2s(Bins, hist_Analysis):
-    print("--Detailed chi2 histogram plotted--")
-    fig, ax = plt.subplots()
-    ax.set_aspect("equal")
-
-
-    h = plt.hist2d(np.log(hist_Analysis['x']), np.log(hist_Analysis['Q2']), weights=hist_Analysis['chi2s'], bins=[
-                np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis', norm=matplotlib.colors.LogNorm())
-    cbar = plt.colorbar()
-    cbar.ax.set_xlabel(r"$\chi^2_{bin}$")
-    ax.set_xlabel(r"$x$")
-    ax.set_ylabel(r"$Q^2$")
-    ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
-    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
-    ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
-    ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
-    ax.tick_params(which='major', direction="in", length=7)
-    ax.tick_params(which='minor', direction="in", length=4)
-
-    for iQ2 in range(0, Bins['NQ2']):
-        for iX in range(0, Bins['Nx']):
-            if hist_CrossSection['non_empty']['total'][iQ2*Bins['Nx']+iX]:
-                ax.text(np.log(hist_Analysis['x'][iQ2*Bins['Nx']+iX]), np.log(hist_Analysis['Q2'][iQ2*Bins['Nx']+iX]), '{:.2f}'.format(hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX]),
-                        color="w", ha="center", va="center", fontweight="bold", fontsize=6)
-
-def plt_DetailedZscore(Bins, hist_Analysis):
-    print("--Detailed Zscore histogram plotted--")
-    fig, ax = plt.subplots()
-    ax.set_aspect("equal")
-
-    cmap = matplotlib.colors.ListedColormap(#['#3535FD', 
-            ['#2A00D5', '#63009E', '#A1015D', '#D80027', '#FE0002'])
-
-    # define the bins and normalize
-    bounds = np.linspace(0, 5, 6)
-    norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
-
-    h = plt.hist2d(np.log(hist_Analysis['x']), np.log(hist_Analysis['Q2']), weights=hist_Analysis['zscores'], bins=[
-                np.log(Bins['x']), np.log(Bins['Q2'])], cmap=cmap)
-
-    ax2 = fig.add_axes([0.85, 0.1, 0.03, 0.8])
-
-    cbar = matplotlib.colorbar.ColorbarBase(ax2, cmap=cmap, norm=norm,
-        spacing='uniform', ticks=bounds, boundaries=bounds, format='%1i')
-
-    cbar.ax.set_yticklabels(['0', '1', '2', '3', '4', r'$>$ 5', ' '])
-
-    #cbar = plt.colorbar()
-    cbar.ax.set_xlabel(r"${\rm z-score}$")
-    ax.set_xlabel(r"$x$")
-    ax.set_ylabel(r"$Q^2$")
-    ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
-    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
-    ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
-    ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
-    ax.tick_params(which='major', direction="in", length=7)
-    ax.tick_params(which='minor', direction="in", length=4)
-
-    for iQ2 in range(0, Bins['NQ2']):
-        for iX in range(0, Bins['Nx']):
-            if hist_CrossSection['non_empty']['total'][iQ2*Bins['Nx']+iX]:
-                ax.text(np.log(hist_Analysis['x'][iQ2*Bins['Nx']+iX]), np.log(hist_Analysis['Q2'][iQ2*Bins['Nx']+iX]), '{:.2f}'.format(np.sqrt(hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX])),
-                        color="w", ha="center", va="center", fontweight="bold", fontsize=6)
-
 if __name__ == "__main__":
 
     #--- Getting arguments from user
     if len(sys.argv) < 2:
-        print "usage: ./stat-tests.py <Luminosity (fb^-1)> <pdf_replica>"
+        print "usage: ./chi2-test_generate.py <Luminosity (fb^-1)> <pdf_replica>"
         exit(1)
 
     lum_arg = float(sys.argv[1])
@@ -476,6 +308,11 @@ if __name__ == "__main__":
     hist_CrossSection_path = sub_sub_wdir+"hist_CrossSection.p"
     CovMat_path = sub_sub_wdir+"CovMat.p"
     hist_Analysis_path = sub_sub_wdir+"hist_Analysis.p"
+
+    Sample = {}
+    hist_CrossSection = {}
+    CovMat = {}
+    hist_Analysis = {}
     #----
 
     #--physical params and cuts
@@ -499,7 +336,7 @@ if __name__ == "__main__":
     #-----------------------------------------------
 
     #--- acceptance/purity based binning
-    Bins=GetBins()
+    Bins=GetBins(pwd)
 
     #--- kinematic cuts
     def veto00(x,y,Q2,W2):
@@ -512,21 +349,21 @@ if __name__ == "__main__":
         Sample = GetEvents(sub_sub_wdir, lum_arg, veto00, sign=1, rep=rep)
         save_obj(Sample,Sample_path)
     else:
-        load_obj(Sample_path)
+        Sample = load_obj(Sample_path)
 
     #--Getting CrossSections
     if not os.path.isfile(hist_CrossSection_path):
         hist_CrossSection = GetCrossSections(Bins, sys_path=pwd+"../expdata/data/xQ2binTable-xiaoxuan-060220+syst.npy")
         save_obj(hist_CrossSection,hist_CrossSection_path)
     else:
-        load_obj(hist_CrossSection_path)
+        hist_CrossSection = load_obj(hist_CrossSection_path)
 
     #--Getting CovMat
     if not os.path.isfile(CovMat_path):
         CovMat = GetCovMat(Bins, hist_CrossSection)
         save_obj(CovMat,CovMat_path)
     else:
-        load_obj(CovMat_path)
+        CovMat = load_obj(CovMat_path)
 
     inv_covmat_xsecs = np.linalg.inv(CovMat['xsecs']['total'])
 
@@ -535,6 +372,6 @@ if __name__ == "__main__":
         hist_Analysis = GetAnalysis(Bins, hist_CrossSection)
         save_obj(hist_Analysis,hist_Analysis_path)
     else:
-        load_obj(hist_Analysis_path)
+        hist_Analysis = load_obj(hist_Analysis_path)
 
     print("All data has been generated here: "+sub_sub_wdir)

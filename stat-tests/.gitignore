@@ -1,4 +1,5 @@
 # Ignore everything in this directory
 .stats-tests/*
+output
 # Except this file
 !.gitignore
