@@ -246,10 +246,16 @@ def plt_DetailedZscore(Bins, hist_Analysis, hist_CrossSection):
                         color="w", ha="center", va="center", fontweight="bold", fontsize=6)
 
 
-def plt_DetailedZscore_witherrors(Bins, hist_Analysis, non_empty_bins):
+def plt_DetailedZscore_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins):
     print("--Detailed Zscore with Errors histogram plotted--")
+
     fig, ax = plt.subplots()
+
     ax.set_aspect("equal")
+
+    fig.suptitle(r'\hspace{-15pt}$\textrm{min: '+tabnames[0].replace("_", "\_") + r'}$, \\' +
+             r' $\textrm{max: '+tabnames[1].replace("_", "\_") + r'}$, \\' +
+                 r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, "+lum_label, fontsize=10, y=0.98)
 
     cmap = matplotlib.colors.ListedColormap(#['#3535FD', 
             ['#2A00D5', '#63009E', '#A1015D', '#D80027', '#FE0002'])
@@ -439,6 +445,7 @@ if __name__ == "__main__":
         tot_hist_Analysis['chi2s'] /= len(dirnames)
         tot_hist_Analysis['zscores'] /= len(dirnames)
         tot_hist_Analysis['zscores_f'] = np.copy(tot_hist_Analysis['zscores'])
+        tot_hist_Analysis['Nrep'] = np.copy(len(dirnames))
 
         for dirname in dirnames:
             hist_Analysis = load_obj(sub_wdir+"/"+dirname+"/hist_Analysis.p")
@@ -470,9 +477,9 @@ if __name__ == "__main__":
 
         tot_hist_Analysis['zscores'][tot_hist_Analysis['zscores'] == -1] = 0
 
-        plt_DetailedZscore_witherrors(Bins, tot_hist_Analysis, non_empty_bins)
+        plt_DetailedZscore_witherrors((min_SF,max_SF), Bins, tot_hist_Analysis, non_empty_bins)
 
         plt.savefig(sub_wdir+"ZscoreWithError-detailed-" +
-                    str(lum_arg)+"fb-1_pdfrep"+str(rep)+".pdf")
+                    str(lum_arg)+"fb-1_Nrep"+str(len(dirnames))+".pdf")
         plt.cla()
         plt.clf()
