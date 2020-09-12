@@ -289,7 +289,7 @@ def plt_DetailedZscore_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins)
         for iX in range(0, Bins['Nx']):
             if non_empty_bins[iQ2*Bins['Nx']+iX]:
                 ax.text(np.log(hist_Analysis['x'][iQ2*Bins['Nx']+iX]), np.log(hist_Analysis['Q2'][iQ2*Bins['Nx']+iX]), '{:.2f}'.format(
-                    hist_Analysis['zscores_f'][iQ2*Bins['Nx']+iX])+"\n"+r'$\pm$'+'{:.1f}'.format(hist_Analysis['std_zscores'][iQ2*Bins['Nx']+iX]),
+                    hist_Analysis['zscores_f'][iQ2*Bins['Nx']+iX])+"\n"+r'$\pm$'+'{:.2f}'.format(hist_Analysis['std_zscores'][iQ2*Bins['Nx']+iX]),
                         color="w", ha="center", va="center", fontweight="bold", fontsize=5)
 
 if __name__ == "__main__":
@@ -435,11 +435,11 @@ if __name__ == "__main__":
         non_empty_bins = np.zeros(Bins['Nx']*Bins['NQ2']) > 1
 
         for dirname in dirnames:
-            hist_Analysis = load_obj(sub_wdir+"/"+dirname+"/hist_Analysis.p")
+            hist_Analysis = load_obj(sub_wdir+dirname+"/hist_Analysis.p")
             tot_hist_Analysis['chi2s'] += hist_Analysis['chi2s']
             tot_hist_Analysis['zscores'] += np.sqrt(hist_Analysis['chi2s'])
 
-            hist_CrossSection = load_obj(sub_wdir+"/"+dirname+"/hist_CrossSection.p")
+            hist_CrossSection = load_obj(sub_wdir+dirname+"/hist_CrossSection.p")
             non_empty_bins += hist_CrossSection['non_empty']['total']
 
         tot_hist_Analysis['chi2s'] /= len(dirnames)
@@ -448,7 +448,7 @@ if __name__ == "__main__":
         tot_hist_Analysis['Nrep'] = np.copy(len(dirnames))
 
         for dirname in dirnames:
-            hist_Analysis = load_obj(sub_wdir+"/"+dirname+"/hist_Analysis.p")
+            hist_Analysis = load_obj(sub_wdir+dirname+"/hist_Analysis.p")
             tot_hist_Analysis['std_chi2s'] += (hist_Analysis['chi2s']-tot_hist_Analysis['chi2s'])**2
             tot_hist_Analysis['std_zscores'] += (np.sqrt(hist_Analysis['chi2s'])-tot_hist_Analysis['zscores'])**2
 
