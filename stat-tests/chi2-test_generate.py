@@ -38,6 +38,32 @@ def load_obj(path):
     with open(path, 'rb') as f:
         return pickle.load(f)
 
+def GetSysUnc(sys_path):
+    L=open(sys_path).readlines()
+    L=[_.strip() for _  in L]
+    L=[_ for _ in L if '-----' not in _  if _!='']
+    H=L[0].split()
+    I=[i for i in range(len(L)) if L[i].startswith('beam')]
+    I.append(len(L))
+
+    DATA={}
+    for i in range(len(I)-1):
+        msg=L[I[i]]
+        tab=[[float(v) for v in _.split()] for _ in L[I[i]+1:I[i+1]]]
+        tab=np.transpose(tab)
+        data={}
+        El,Ep=[float(v) for v in msg.split(':')[1].split('x')]
+        data['rs']=np.sqrt(4*El*Ep)
+        data['x']=tab[0]
+        data['Q2']=tab[1]
+        data['stat_u(%)']=tab[4]#/np.sqrt(10)
+        data['syst_u(%)']=tab[5]
+        data['norm_c(%)']=tab[6]
+        DATA[msg]=pd.DataFrame(data).query('Q2>1')
+    data=pd.concat([DATA[msg] for msg in DATA.keys()], ignore_index=True)
+
+    return data
+
 def GetEvents(path,lum_arg,veto,sign,rep=0):
     """
     sign: --electron=1 positron=-1
@@ -96,7 +122,30 @@ def GetEvents(path,lum_arg,veto,sign,rep=0):
 
     return Sample
 
-def GetBins(pwd=""):
+def GetBins(sys_path):
+    #! Barak's
+    Bins = {}
+
+    sys = GetSysUnc(sys_path)
+    sys = sys.loc[sys['rs'] == rs]
+
+    Bins['x_cv'] = np.array(sorted(set(np.array(sys['x']))))
+    Bins['Q2_cv'] = np.array(sorted(set(np.array(sys['Q2']))))
+
+    Bins['x'] = np.zeros(Bins['x_cv'].shape[0]+1)
+    Bins["x"][0] = Bins['x_cv'][0]-(Bins['x_cv'][1]-Bins['x_cv'][0])/2.
+    for i,x_cv in enumerate(Bins['x_cv']):
+        Bins['x'][i+1] = x_cv+(x_cv-Bins['x'][i])
+
+    Bins['Q2'] = np.zeros(Bins['Q2_cv'].shape[0]+1)
+    Bins["Q2"][0] = Bins['Q2_cv'][0]-(Bins['Q2_cv'][1]-Bins['Q2_cv'][0])/2.
+    for i, Q2_cv in enumerate(Bins['Q2_cv']):
+        Bins['Q2'][i+1] = Q2_cv+(Q2_cv-Bins['Q2'][i])
+
+    Bins['NQ2'] = len(Bins['Q2'])-1
+    Bins['Nx'] = len(Bins['x'])-1
+
+    """#! xiaoxuan (purity based)
     Bins = {}
     kin0, kin = gen_grid(pwd+"../expdata/")
     Bins['x'] = sorted(set(np.array(kin)[:, 0]))
@@ -107,8 +156,9 @@ def GetBins(pwd=""):
 
     Bins['NQ2'] = len(Bins['Q2'])-1
     Bins['Nx'] = len(Bins['x'])-1
+    """
 
-    """ #user defined binning
+    """ #! user defined binning
     Bins['NQ2'] = 50
     print "Bins['NQ2'] = ", Bins['NQ2']
     Bins['Nx'] = 50
@@ -131,9 +181,6 @@ def GetBins(pwd=""):
     return Bins
 
 def GetCrossSections(Bins,sys_path="../expdata/data/xQ2binTable-xiaoxuan-060220+syst.npy"):
-
-    #--- systematics uncertainties
-    sys_bins = np.load(sys_path)
 
     #initialization
     hist_CrossSection={}
@@ -168,12 +215,34 @@ def GetCrossSections(Bins,sys_path="../expdata/data/xQ2binTable-xiaoxuan-060220+
                     hist_CrossSection['non_empty'][key][iQ2*Bins['Nx']+iX] = False
                     hist_CrossSection['statunc'][key][iQ2*Bins['Nx']+iX] = 0.
                     hist_CrossSection['MCunc'][key][iQ2*Bins['Nx']+iX] = 0.
-                    hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX] = 0.
                 else:
                     hist_CrossSection['non_empty'][key][iQ2*Bins['Nx']+iX] = True
                     hist_CrossSection['statunc'][key][iQ2*Bins['Nx']+iX] = np.sqrt(N)/lum_arg
                     hist_CrossSection['MCunc'][key][iQ2*Bins['Nx']+iX] = weight*Sample[key]['var_xsec']
 
+    print("--Filling systematics in hist_CrossSection--")
+    #! Barak's
+    sys_bins = GetSysUnc(sys_path)
+    sys_bins = sys_bins.loc[sys_bins['rs'] == rs]
+    for key in hist_CrossSection['weights'].keys():
+        for iQ2 in range(0, Bins['NQ2']):
+            for iX in range(0, Bins['Nx']):
+                if hist_CrossSection['Nevents'][key][iQ2*Bins['Nx']+iX] == 0:
+                    hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX] = 0.
+                else:
+                    relative_sys = sys_bins.loc[sys_bins['x'] == Bins['x_cv'][iX]]
+                    relative_sys = relative_sys.loc[sys_bins['Q2'] == Bins['Q2_cv'][iQ2]]   
+                    hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX] = np.sqrt((hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX]*relative_sys.iloc[0]['syst_u(%)']/100.)**2+(hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX]*relative_sys.iloc[0]['norm_c(%)']/100.)**2)
+
+    """#! xiaoxuan
+    #--- systematics uncertainties
+    sys_bins = np.load(sys_path)
+    for key in hist_CrossSection['weights'].keys():
+        for iQ2 in range(0, Bins['NQ2']):
+            for iX in range(0, Bins['Nx']):
+                if hist_CrossSection['Nevents'][key][iQ2*Bins['Nx']+iX] == 0:
+                    hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX] = 0.
+                else:
                     relative_sys = np.where(
                         (sys_bins[:, 0] == Bins['x_cv'][iX]) & (sys_bins[:, 1] == Bins['Q2_cv'][iQ2]))
                     if np.any(relative_sys): #if bin has sys uncertainty
@@ -181,7 +250,8 @@ def GetCrossSections(Bins,sys_path="../expdata/data/xQ2binTable-xiaoxuan-060220+
                     else: #if bin doesn't have sys uncertainty
                         relative_sys = 0
 
-                    hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX] = xsec*relative_sys
+                    hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX] = hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX]*relative_sys
+    """
 
     hist_CrossSection['non_empty']['total'] = hist_CrossSection['non_empty']['min']+hist_CrossSection['non_empty']['max']
 
@@ -308,6 +378,7 @@ if __name__ == "__main__":
     hist_CrossSection_path = sub_sub_wdir+"hist_CrossSection.p"
     CovMat_path = sub_sub_wdir+"CovMat.p"
     hist_Analysis_path = sub_sub_wdir+"hist_Analysis.p"
+    sys_path = pwd+"../expdata/src/ep_NC_optimistic-barak-100920.dat" #pwd+"../expdata/data/xQ2binTable-xiaoxuan-060220+syst.npy"
 
     Sample = {}
     hist_CrossSection = {}
@@ -332,11 +403,11 @@ if __name__ == "__main__":
     max_SF = 'NNPDF31_nnlo_pch_as_0118_rs_1.0_SF'
 
     seeds = {'min': 3, 'max': 4}
-    rs = 140.7
+    rs = 140.71247279470288  # 140.7
     #-----------------------------------------------
 
     #--- acceptance/purity based binning
-    Bins=GetBins(pwd)
+    Bins = GetBins(sys_path)
 
     #--- kinematic cuts
     def veto00(x,y,Q2,W2):
@@ -353,7 +424,7 @@ if __name__ == "__main__":
 
     #--Getting CrossSections
     if not os.path.isfile(hist_CrossSection_path):
-        hist_CrossSection = GetCrossSections(Bins, sys_path=pwd+"../expdata/data/xQ2binTable-xiaoxuan-060220+syst.npy")
+        hist_CrossSection = GetCrossSections(Bins, sys_path=sys_path)
         save_obj(hist_CrossSection,hist_CrossSection_path)
     else:
         hist_CrossSection = load_obj(hist_CrossSection_path)
