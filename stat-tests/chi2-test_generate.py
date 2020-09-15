@@ -231,8 +231,11 @@ def GetCrossSections(Bins,sys_path="../expdata/data/xQ2binTable-xiaoxuan-060220+
                     hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX] = 0.
                 else:
                     relative_sys = sys_bins.loc[sys_bins['x'] == Bins['x_cv'][iX]]
-                    relative_sys = relative_sys.loc[sys_bins['Q2'] == Bins['Q2_cv'][iQ2]]   
-                    hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX] = np.sqrt((hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX]*relative_sys.iloc[0]['syst_u(%)']/100.)**2+(hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX]*relative_sys.iloc[0]['norm_c(%)']/100.)**2)
+                    relative_sys = relative_sys.loc[sys_bins['Q2'] == Bins['Q2_cv'][iQ2]]
+                    if relative_sys.iloc[0]['norm_c(%)']:
+                        hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX] = np.sqrt((hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX]*relative_sys.iloc[0]['syst_u(%)']/100.)**2+(hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX]*relative_sys.iloc[0]['norm_c(%)']/100.)**2)
+                    else:
+                        hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX] = 0.
 
     """#! xiaoxuan
     #--- systematics uncertainties
