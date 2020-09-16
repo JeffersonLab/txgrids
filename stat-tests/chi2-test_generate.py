@@ -232,10 +232,18 @@ def GetCrossSections(Bins,sys_path="../expdata/data/xQ2binTable-xiaoxuan-060220+
                 else:
                     relative_sys = sys_bins.loc[sys_bins['x'] == Bins['x_cv'][iX]]
                     relative_sys = relative_sys.loc[sys_bins['Q2'] == Bins['Q2_cv'][iQ2]]
-                    if not relative_sys['norm_c(%)'].empty:
-                        hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX] = np.sqrt((hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX]*relative_sys.iloc[0]['syst_u(%)']/100.)**2+(hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX]*relative_sys.iloc[0]['norm_c(%)']/100.)**2)
+                    if not relative_sys['syst_u(%)'].empty:
+                        hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX] = hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX]*relative_sys.iloc[0]['syst_u(%)']/100. #+(hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX]*relative_sys.iloc[0]['norm_c(%)']/100.)**2)
                     else:
+                        #hist_CrossSection['non_empty'][key][iQ2*Bins['Nx']+iX] = False
                         hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX] = 0.
+                        #if no sys provided, set all to zero
+                        hist_CrossSection['weights'][key][iQ2*Bins['Nx']+iX] = 0.
+                        hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX] = 0.
+                        hist_CrossSection['Nevents'][key][iQ2*Bins['Nx']+iX] = 0.
+                        hist_CrossSection['non_empty'][key][iQ2*Bins['Nx']+iX] = False
+                        hist_CrossSection['statunc'][key][iQ2*Bins['Nx']+iX] = 0.
+                        hist_CrossSection['MCunc'][key][iQ2*Bins['Nx']+iX] = 0.
 
     """#! xiaoxuan
     #--- systematics uncertainties
@@ -263,8 +271,7 @@ def GetCrossSections(Bins,sys_path="../expdata/data/xQ2binTable-xiaoxuan-060220+
     for iQ2 in range(0, Bins['NQ2']):
         for iX in range(0, Bins['Nx']):
             if hist_CrossSection['non_empty']['total'][iQ2*Bins['Nx']+iX]:
-                hist_CrossSection['non_empty']['map'][iQ2 *
-                                                      Bins['Nx']+iX] = count
+                hist_CrossSection['non_empty']['map'][iQ2 * Bins['Nx']+iX] = count
                 count += 1
 
     Bins['total'] = np.count_nonzero(hist_CrossSection['non_empty']['total'])
@@ -341,6 +348,8 @@ def GetAnalysis(Bins, hist_CrossSection):
     for key in hist_CrossSection['xsecs'].keys():
         hist_CrossSection['weights'][key][hist_CrossSection['weights'][key]==0] = np.nan
         hist_CrossSection['xsecs'][key][hist_CrossSection['xsecs'][key]==0] = np.nan
+        hist_CrossSection['statunc'][key][hist_CrossSection['statunc'][key]==0] = np.nan
+        hist_CrossSection['sysunc'][key][hist_CrossSection['sysunc'][key]==0] = np.nan
         hist_Analysis['chi2s'][hist_Analysis['chi2s']==0] = np.nan
         hist_Analysis['zscores'][hist_Analysis['zscores'] == 0] = np.nan
 
@@ -381,7 +390,8 @@ if __name__ == "__main__":
     hist_CrossSection_path = sub_sub_wdir+"hist_CrossSection.p"
     CovMat_path = sub_sub_wdir+"CovMat.p"
     hist_Analysis_path = sub_sub_wdir+"hist_Analysis.p"
-    sys_path = pwd+"../expdata/src/ep_NC_optimistic-barak-100920.dat" #pwd+"../expdata/data/xQ2binTable-xiaoxuan-060220+syst.npy"
+    # pwd+"../expdata/data/xQ2binTable-xiaoxuan-060220+syst.npy"
+    sys_path = pwd+"../expdata/src/ep_NC_optimistic-barak-100920.dat"
 
     Sample = {}
     hist_CrossSection = {}
@@ -405,7 +415,7 @@ if __name__ == "__main__":
     min_SF = 'NNPDF31_nnlo_pch_as_0118_rs_0.5_SF'
     max_SF = 'NNPDF31_nnlo_pch_as_0118_rs_1.0_SF'
 
-    seeds = {'min': 3, 'max': 4}
+    seeds = {'min': 1, 'max': 1}
     rs = 140.71247279470288  # 140.7
     #-----------------------------------------------
 
@@ -413,9 +423,12 @@ if __name__ == "__main__":
     Bins = GetBins(sys_path)
 
     #--- kinematic cuts
+    #1e-3 <= y(optimistic) <= 0.98
+    #1e-2 <= y(pessimistic) <= 0.95
     def veto00(x,y,Q2,W2):
         if   W2 < 10       : return 0
         elif Q2 < 1        : return 0
+        elif y>0.98 or y< 1e-3: return 0
         else               : return 1
         
     #--Getting events
