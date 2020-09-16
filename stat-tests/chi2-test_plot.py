@@ -291,19 +291,19 @@ def plt_DetailedZscore(Bins, hist_Analysis, hist_CrossSection):
         for iX in range(0, Bins['Nx']):
             if hist_CrossSection['non_empty']['total'][iQ2*Bins['Nx']+iX]:
                 ax.text(np.log(hist_Analysis['x'][iQ2*Bins['Nx']+iX]), np.log(hist_Analysis['Q2'][iQ2*Bins['Nx']+iX]), '{:.2f}'.format(np.sqrt(hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX])),
-                        color="w", ha="center", va="center", fontweight="bold", fontsize=6)
+                        color="w", ha="center", va="center", fontweight="bold", fontsize=4)
 
 
 def plt_DetailedZscore_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins):
     print("--Detailed Zscore with Errors histogram plotted--")
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8, 6))
 
     ax.set_aspect("equal")
 
     fig.suptitle(r'\hspace{-15pt}$\textrm{min: '+tabnames[0].replace("_", "\_") + r'}$, \\' +
              r' $\textrm{max: '+tabnames[1].replace("_", "\_") + r'}$, \\' +
-                 r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, "+lum_label, fontsize=10, y=0.98)
+                 r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, "+lum_label+r", \textbf{Pessimistic Scenario}", fontsize=10, y=0.98)
 
     cmap = matplotlib.colors.ListedColormap(#['#3535FD', 
             ['#2A00D5', '#63009E', '#A1015D', '#D80027', '#FE0002'])
@@ -370,7 +370,7 @@ if __name__ == "__main__":
     CovMat_path = sub_sub_wdir+"CovMat.p"
     hist_Analysis_path = sub_sub_wdir+"hist_Analysis.p"
     # pwd+"../expdata/data/xQ2binTable-xiaoxuan-060220+syst.npy"
-    sys_path = pwd+"../expdata/src/ep_NC_optimistic-barak-100920.dat"
+    sys_path = pwd+"../expdata/src/ep_NC_pessimistic-barak-100920.dat"
 
     Sample={}
     hist_CrossSection={}
@@ -477,6 +477,7 @@ if __name__ == "__main__":
         plt.clf()
 
     else:
+        Nrep =0
         (_, dirnames, filenames) = walk(sub_wdir).next()
         tot_hist_Analysis = {}
         tot_hist_Analysis['chi2s'] = np.zeros(Bins['Nx']*Bins['NQ2'])
@@ -489,27 +490,30 @@ if __name__ == "__main__":
         non_empty_bins = np.zeros(Bins['Nx']*Bins['NQ2']) > 1
 
         for dirname in dirnames:
-            hist_Analysis = load_obj(sub_wdir+dirname+"/hist_Analysis.p")
-            tot_hist_Analysis['chi2s'] += hist_Analysis['chi2s']
-            tot_hist_Analysis['zscores'] += np.sqrt(hist_Analysis['chi2s'])
+            if os.path.isfile(sub_wdir+dirname+"/hist_Analysis.p"):
+                hist_Analysis = load_obj(sub_wdir+dirname+"/hist_Analysis.p")
+                tot_hist_Analysis['chi2s'] += hist_Analysis['chi2s']
+                tot_hist_Analysis['zscores'] += np.sqrt(hist_Analysis['chi2s'])
 
-            hist_CrossSection = load_obj(sub_wdir+dirname+"/hist_CrossSection.p")
-            non_empty_bins += hist_CrossSection['non_empty']['total']
+                hist_CrossSection = load_obj(sub_wdir+dirname+"/hist_CrossSection.p")
+                non_empty_bins += hist_CrossSection['non_empty']['total']
+                Nrep+=1
 
-        tot_hist_Analysis['chi2s'] /= len(dirnames)
-        tot_hist_Analysis['zscores'] /= len(dirnames)
+        tot_hist_Analysis['chi2s'] /= Nrep
+        tot_hist_Analysis['zscores'] /= Nrep
         tot_hist_Analysis['zscores_f'] = np.copy(tot_hist_Analysis['zscores'])
-        tot_hist_Analysis['Nrep'] = np.copy(len(dirnames))
+        tot_hist_Analysis['Nrep'] = Nrep
 
         for dirname in dirnames:
-            hist_Analysis = load_obj(sub_wdir+dirname+"/hist_Analysis.p")
-            tot_hist_Analysis['std_chi2s'] += (hist_Analysis['chi2s']-tot_hist_Analysis['chi2s'])**2
-            tot_hist_Analysis['std_zscores'] += (np.sqrt(hist_Analysis['chi2s'])-tot_hist_Analysis['zscores'])**2
+            if os.path.isfile(sub_wdir+dirname+"/hist_Analysis.p"):
+                hist_Analysis = load_obj(sub_wdir+dirname+"/hist_Analysis.p")
+                tot_hist_Analysis['std_chi2s'] += (hist_Analysis['chi2s']-tot_hist_Analysis['chi2s'])**2
+                tot_hist_Analysis['std_zscores'] += (np.sqrt(hist_Analysis['chi2s'])-tot_hist_Analysis['zscores'])**2
 
-        tot_hist_Analysis['std_chi2s'] /= len(dirnames)
+        tot_hist_Analysis['std_chi2s'] /= Nrep
         tot_hist_Analysis['std_chi2s'] = np.sqrt(tot_hist_Analysis['std_chi2s'])
 
-        tot_hist_Analysis['std_zscores'] /= len(dirnames)
+        tot_hist_Analysis['std_zscores'] /= Nrep
         tot_hist_Analysis['std_zscores'] = np.sqrt(tot_hist_Analysis['std_zscores'])
 
         #--- for plotting purposes
@@ -534,6 +538,6 @@ if __name__ == "__main__":
         plt_DetailedZscore_witherrors((min_SF,max_SF), Bins, tot_hist_Analysis, non_empty_bins)
 
         plt.savefig(sub_wdir+"ZscoreWithError-detailed-" +
-                    str(lum_arg)+"fb-1_Nrep"+str(len(dirnames))+".pdf")
+                    str(lum_arg)+"fb-1_Nrep"+str(Nrep)+".pdf")
         plt.cla()
         plt.clf()
