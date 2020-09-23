@@ -28,8 +28,8 @@ import pandas as pd
 from collections import OrderedDict, Counter
 
 from  matplotlib import rc
-rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-rc('text',usetex=True)
+rc('font', **{'family': 'sans-serif', 'sans-serif': []})
+rc('text', usetex=True)
 
 def load_obj(path):
     with open(path, 'rb') as f:
@@ -301,9 +301,17 @@ def plt_DetailedZscore_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins)
 
     ax.set_aspect("equal")
 
-    fig.suptitle(r'\hspace{-15pt}$\textrm{min: '+tabnames[0].replace("_", "\_") + r'}$, \\' +
-             r' $\textrm{max: '+tabnames[1].replace("_", "\_") + r'}$, \\' +
-                 r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, "+lum_label+r", \textbf{Pessimistic Scenario}", fontsize=10, y=0.98)
+    #fig.suptitle(r'\hspace{-15pt}$\textrm{min: '+tabnames[0].replace("_", "\_") + r'}$, \\' +
+    #         r' $\textrm{max: '+tabnames[1].replace("_", "\_") + r'}$, \\' +
+    #             r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, "+lum_label+r", \textbf{Pessimistic Scenario}", fontsize=10, y=0.98)
+
+    props = dict(boxstyle='square', facecolor='white',
+                 edgecolor='gray', alpha=0.5)
+
+    ax.text(0.1, 0.95, r'\hspace{-15pt} \textbf{Pessimistic Scenario} \\'+r'$\textrm{($H_0$): '+tabnames[0].replace("_", "\_") + r'}$, \\' + r' $\textrm{($H_1$): '+tabnames[1].replace("_", "\_") + r'}$, \\' + r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, $\sqrt{s}=140.7$ GeV, "+lum_label, transform=ax.transAxes, fontsize=10, verticalalignment='top', bbox=props)
+
+    ax.text(0.1, 0.7, r'$Z = \left|\frac{\frac{d\sigma^{(H_0)}}{dxdQ^2}-\frac{d\sigma^{(H_1)}}{dxdQ^2}}{\delta^{sys,stat}_{H_0,H_1}}\right|$', transform=ax.transAxes, fontsize=15, verticalalignment='center', bbox=props)
+
 
     cmap = matplotlib.colors.ListedColormap(#['#3535FD', 
             ['#2A00D5', '#63009E', '#A1015D', '#D80027', '#FE0002'])
@@ -323,7 +331,7 @@ def plt_DetailedZscore_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins)
     cbar.ax.set_yticklabels(['0', '1', '2', '3', '4', r'$>$ 5', ' '])
 
     #cbar = plt.colorbar()
-    cbar.ax.set_xlabel(r"${\rm z-score}$")
+    cbar.ax.set_xlabel(r"${\rm Z}$")
     ax.set_xlabel(r"$x$")
     ax.set_ylabel(r"$Q^2$")
     ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
@@ -339,6 +347,7 @@ def plt_DetailedZscore_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins)
                 ax.text(np.log(hist_Analysis['x'][iQ2*Bins['Nx']+iX]), np.log(hist_Analysis['Q2'][iQ2*Bins['Nx']+iX]), '{:.2f}'.format(
                     hist_Analysis['zscores_f'][iQ2*Bins['Nx']+iX])+"\n"+r'$\pm$'+'{:.2f}'.format(hist_Analysis['std_zscores'][iQ2*Bins['Nx']+iX]),
                         color="w", ha="center", va="center", fontweight="bold", fontsize=5)
+    py.tight_layout()
 
 if __name__ == "__main__":
 
