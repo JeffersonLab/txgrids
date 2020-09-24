@@ -19,7 +19,7 @@ import lhapdf
 cfg = lhapdf.getConfig()
 cfg.set_entry("Verbosity", 0)
 sys.path.append(os.getcwd()+"/../")
-rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
+rc('font', **{'family': 'sans-serif', 'sans-serif': []})
 rc('text', usetex=True)
 
 lhafl = {'TBAR': -6, 'BBAR': -5, 'CBAR': -4, 'SBAR': -3, 'UBAR': -2, 'DBAR': -1,
@@ -29,7 +29,7 @@ lhafl = {'TBAR': -6, 'BBAR': -5, 'CBAR': -4, 'SBAR': -3, 'UBAR': -2, 'DBAR': -1,
 Q=1
 X1=np.logspace(-5,-1,101)[:100]
 X2=np.linspace(0.1,1,100)
-X=np.concatenate([X1,X2])
+X=X1 #np.concatenate([X1,X2])
 Nrep=101
 
 PDFs_names = ["NNPDF31_nnlo_pch_as_0118",
@@ -42,18 +42,20 @@ PDFs_colors = ["green",
                "blue",
                "red"]
 
-PDFs_labels = ['ref',
-               'ref-',
-                'ref+']
+PDFs_labels = [r'Reference',
+               r'$(H_0):\,R_s=0.5$',
+               r'$(H_1):\,R_s=1.0$']
 
 fls = [lhafl['UBAR'],lhafl['DBAR'],lhafl['S'],lhafl['SBAR']]
 fls_labels = [r'$\bar{u}$',r'$\bar{d}$',r'$s$',r'$\bar{s}$']
 fig_composition= [2,2]
 
 PDFs = {}
+Rs = {}
 
 for iPDF,PDF_name in enumerate(PDFs_names):
     PDFs[PDF_name]={}
+    Rs[PDF_name] = []
     PDFs[PDF_name]['color']=PDFs_colors[iPDF]
     PDFs[PDF_name]['label'] = PDFs_labels[iPDF]
     for fl in range(-6,8):
@@ -68,12 +70,22 @@ for iPDF,PDF_name in enumerate(PDFs_names):
                 rep.append(LHAPDF.xfxQ(fl, x, Q))
                 PDFs[PDF_name][fl]['reps'].append(rep)
 
-
+for iPDF, PDF_name in enumerate(PDFs_names):
+    Rs[PDF_name]=(np.array(PDFs[PDF_name][lhafl['SBAR']]['reps']) +
+            np.array(PDFs[PDF_name][lhafl['S']]['reps']))/(np.array(PDFs[PDF_name][lhafl['UBAR']]['reps'])+np.array(PDFs[PDF_name][lhafl['DBAR']]['reps']))
+        
+Rs_median={}
+Rs_low={}
+Rs_up={}
 for PDF_name in PDFs_names:
     for fl in range(-6,8):
         PDFs[PDF_name][fl]['low95cl'] = np.nanpercentile(PDFs[PDF_name][fl]['reps'], 5., axis=0)
         PDFs[PDF_name][fl]['up95cl'] = np.nanpercentile(PDFs[PDF_name][fl]['reps'], 95., axis=0)
         PDFs[PDF_name][fl]['median'] = np.median(PDFs[PDF_name][fl]['reps'], axis=0)
+
+    Rs_median[PDF_name]=np.median(Rs[PDF_name], axis=0)
+    Rs_low[PDF_name]=np.nanpercentile(Rs[PDF_name], 5., axis=0)
+    Rs_up[PDF_name]=np.nanpercentile(Rs[PDF_name], 95., axis=0)
 
 
 fig = gcf()
@@ -107,30 +119,47 @@ py.savefig(resultpath)
 py.cla()
 py.clf()
 
+#------------- Rs
 fig = gcf()
-fig.suptitle(PDFs_names[0].replace("_","\_")+r" $R_s = \frac{s+\bar{s}}{u+\bar{u}}$ at Q = "+str(Q)+" GeV", fontsize=14)
+#fig.suptitle(PDFs_names[0].replace("_","\_")+r" $R_s = \frac{s+\bar{s}}{\bar{u}+\bar{d}}$ at Q = "+str(Q)+" GeV", fontsize=14)
 
 np.seterr(divide='ignore', invalid='ignore')
 
 ax = py.subplot(111)
-max_xbin=-12
+max_xbin = -12  # add [:max_xbin] to PDFs
 for PDF_name in PDFs_names:
 
-    R_s = (np.array(PDFs[PDF_name][lhafl['S']]['median'][:max_xbin])+np.array(PDFs[PDF_name][lhafl['SBAR']]['median'][:max_xbin]))/(np.array(PDFs[PDF_name][lhafl['UBAR']]['median'][:max_xbin])+np.array(PDFs[PDF_name][lhafl['DBAR']]['median'][:max_xbin]))          
+    #R_s = (np.array(PDFs[PDF_name][lhafl['S']]['median'])+np.array(PDFs[PDF_name][lhafl['SBAR']]['median']))/(np.array(PDFs[PDF_name][lhafl['UBAR']]['median'])+np.#array(PDFs[PDF_name][lhafl['DBAR']]['median']))       
+#
+    #R_s_up = (np.array(PDFs[PDF_name][lhafl['S']]['up95cl'])+np.array(PDFs[PDF_name][lhafl['SBAR']]['up95cl']))/(
+    #    np.array(PDFs[PDF_name][lhafl['UBAR']]['up95cl'])+np.array(PDFs[PDF_name][lhafl['DBAR']]['up95cl']))
+#
+    #R_s_low = (np.array(PDFs[PDF_name][lhafl['S']]['low95cl'])+np.array(PDFs[PDF_name][lhafl['SBAR']]['low95cl']))/(
+    #    np.array(PDFs[PDF_name][lhafl['UBAR']]['low95cl'])+np.array(PDFs[PDF_name][lhafl['DBAR']]['low95cl']))
 
-    ax.plot(X[:max_xbin], R_s, ls='-', color=PDFs[PDF_name]['color'], lw=1.25,label=PDFs[PDF_name]['label'])
+    ax.plot(X, Rs_median[PDF_name], ls='-', color=PDFs[PDF_name]
+            ['color'], lw=1.25, label=PDFs[PDF_name]['label'])
+
+    ax.fill_between(X, Rs_up[PDF_name], Rs_low[PDF_name],
+                    facecolor=PDFs[PDF_name]['color'], alpha=0.25, edgecolor=None, lw=1.25)
 
 ax.set_xscale('log')
-ax.set_xlabel('x')
-ax.set_ylabel(r'$R_s(x)$')
-ax.legend(loc='best', title=r'$R_s$')
+ax.set_xlabel(r'$x$')
+ax.set_ylabel(r'$R_s(x) = \frac{s+\bar{s}}{\bar{u}+\bar{d}}$')
+ax.legend(loc='best', title=r'NNPDF3.1 (nnlo)')
+
+ax.text(0.4, 0.9, r'$Q='+str(Q)+"$ GeV, $90\%$ CL", transform=ax.transAxes, fontsize=12,
+        verticalalignment='top', bbox=props)
+
+py.tight_layout()
          
 resultpath = "plots/R_s.pdf"
 print resultpath+"... "
 py.savefig(resultpath)
 py.cla()
 py.clf()
-
+#-------------
+"""
 fig = gcf()
 fig.suptitle(PDFs_names[0].replace("_","\_")+r" $R_{f_v} = \frac{f_v}{f^{ref}_v}$ at Q = "+str(Q)+" GeV", fontsize=14)
 
@@ -164,6 +193,7 @@ print resultpath+" saved... "
 py.savefig(resultpath)
 py.cla()
 py.clf()
+"""
 
 print "DONE!!"
 

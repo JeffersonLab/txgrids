@@ -2,6 +2,7 @@
 import sys,os
 sys.path.append(os.path.dirname( os.path.dirname(os.path.abspath(__file__) ) ) )
 import numpy as np
+import pandas as pd
 #--matplotlib
 import matplotlib
 matplotlib.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
@@ -86,6 +87,25 @@ def main00():
 
     checkdir('data')
     np.save('data/xQ2binTable-xiaoxuan-060220.npy',BINS)
+
+    #--save grid0 to excel
+    xlsx = {_:[] for _ in ['X','Q2','RS','Xdo','Xup','Q2do','Q2up']}
+    for i in range(len(BINS)):
+        x, q2 = np.transpose(BINS[i])
+        xmin,  xmax  = np.amin(x),  np.amax(x)
+        q2min, q2max = np.amin(q2), np.amax(q2)
+        x  = np.exp(0.5*(np.log(xmin) +np.log(xmax)))
+        q2 = np.exp(0.5*(np.log(q2min)+np.log(q2max)))
+        xlsx['Xdo'].append(xmin) 
+        xlsx['Xup'].append(xmax) 
+        xlsx['Q2do'].append(q2min) 
+        xlsx['Q2up'].append(q2max)
+        xlsx['X'].append(x)
+        xlsx['Q2'].append(q2)
+        xlsx['RS'].append(rs)
+
+    df=pd.DataFrame(xlsx)
+    df.to_excel('data/1000.xlsx',index=False)
 
     nrows,ncols=1,1
     fig = py.figure(figsize=(ncols*5,nrows*4))

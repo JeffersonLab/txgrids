@@ -28,14 +28,63 @@ import pandas as pd
 from collections import OrderedDict, Counter
 
 from  matplotlib import rc
-rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-rc('text',usetex=True)
+rc('font', **{'family': 'sans-serif', 'sans-serif': []})
+rc('text', usetex=True)
 
 def load_obj(path):
     with open(path, 'rb') as f:
         return pickle.load(f)
 
-def GetBins(pwd=""):
+def GetSysUnc(sys_path):
+    L=open(sys_path).readlines()
+    L=[_.strip() for _  in L]
+    L=[_ for _ in L if '-----' not in _  if _!='']
+    H=L[0].split()
+    I=[i for i in range(len(L)) if L[i].startswith('beam')]
+    I.append(len(L))
+
+    DATA={}
+    for i in range(len(I)-1):
+        msg=L[I[i]]
+        tab=[[float(v) for v in _.split()] for _ in L[I[i]+1:I[i+1]]]
+        tab=np.transpose(tab)
+        data={}
+        El,Ep=[float(v) for v in msg.split(':')[1].split('x')]
+        data['rs']=np.sqrt(4*El*Ep)
+        data['x']=tab[0]
+        data['Q2']=tab[1]
+        data['stat_u(%)']=tab[4]#/np.sqrt(10)
+        data['syst_u(%)']=tab[5]
+        data['norm_c(%)']=tab[6]
+        DATA[msg]=pd.DataFrame(data).query('Q2>1')
+    data=pd.concat([DATA[msg] for msg in DATA.keys()], ignore_index=True)
+
+    return data
+
+def GetBins(sys_path):
+    #! Barak's
+    Bins = {}
+
+    sys = GetSysUnc(sys_path)
+    sys = sys.loc[sys['rs'] == rs]
+
+    Bins['x_cv'] = np.array(sorted(set(np.array(sys['x']))))
+    Bins['Q2_cv'] = np.array(sorted(set(np.array(sys['Q2']))))
+
+    Bins['x'] = np.zeros(Bins['x_cv'].shape[0]+1)
+    Bins["x"][0] = Bins['x_cv'][0]-(Bins['x_cv'][1]-Bins['x_cv'][0])/2.
+    for i,x_cv in enumerate(Bins['x_cv']):
+        Bins['x'][i+1] = x_cv+(x_cv-Bins['x'][i])
+
+    Bins['Q2'] = np.zeros(Bins['Q2_cv'].shape[0]+1)
+    Bins["Q2"][0] = Bins['Q2_cv'][0]-(Bins['Q2_cv'][1]-Bins['Q2_cv'][0])/2.
+    for i, Q2_cv in enumerate(Bins['Q2_cv']):
+        Bins['Q2'][i+1] = Q2_cv+(Q2_cv-Bins['Q2'][i])
+
+    Bins['NQ2'] = len(Bins['Q2'])-1
+    Bins['Nx'] = len(Bins['x'])-1
+
+    """#! xiaoxuan (purity based)
     Bins = {}
     kin0, kin = gen_grid(pwd+"../expdata/")
     Bins['x'] = sorted(set(np.array(kin)[:, 0]))
@@ -46,8 +95,9 @@ def GetBins(pwd=""):
 
     Bins['NQ2'] = len(Bins['Q2'])-1
     Bins['Nx'] = len(Bins['x'])-1
+    """
 
-    """ #user defined binning
+    """ #! user defined binning
     Bins['NQ2'] = 50
     print "Bins['NQ2'] = ", Bins['NQ2']
     Bins['Nx'] = 50
@@ -211,20 +261,18 @@ def plt_DetailedZscore(Bins, hist_Analysis, hist_CrossSection):
     fig, ax = plt.subplots()
     ax.set_aspect("equal")
 
-    cmap = matplotlib.colors.ListedColormap(#['#3535FD', 
-            ['#2A00D5', '#63009E', '#A1015D', '#D80027', '#FE0002'])
+    cmap = matplotlib.colors.ListedColormap(['#3535FD', '#2A00D5', '#63009E', '#A1015D', '#D80027', '#FE0002'])
 
     # define the bins and normalize
-    bounds = np.linspace(0, 5, 6)
-    norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
+    bounds = np.linspace(0, 6, 7)
+    norm = matplotlib.colors.BoundaryNorm(bounds,cmap.N)
 
     h = plt.hist2d(np.log(hist_Analysis['x']), np.log(hist_Analysis['Q2']), weights=hist_Analysis['zscores'], bins=[
-                np.log(Bins['x']), np.log(Bins['Q2'])], cmap=cmap)
+        np.log(Bins['x']), np.log(Bins['Q2'])], cmap=cmap, norm=norm)
 
     ax2 = fig.add_axes([0.85, 0.1, 0.03, 0.8])
-
     cbar = matplotlib.colorbar.ColorbarBase(ax2, cmap=cmap, norm=norm,
-        spacing='uniform', ticks=bounds, boundaries=bounds, format='%1i')
+                                            spacing='uniform', ticks=bounds, boundaries=bounds, format='%1i')
 
     cbar.ax.set_yticklabels(['0', '1', '2', '3', '4', r'$>$ 5', ' '])
 
@@ -243,19 +291,27 @@ def plt_DetailedZscore(Bins, hist_Analysis, hist_CrossSection):
         for iX in range(0, Bins['Nx']):
             if hist_CrossSection['non_empty']['total'][iQ2*Bins['Nx']+iX]:
                 ax.text(np.log(hist_Analysis['x'][iQ2*Bins['Nx']+iX]), np.log(hist_Analysis['Q2'][iQ2*Bins['Nx']+iX]), '{:.2f}'.format(np.sqrt(hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX])),
-                        color="w", ha="center", va="center", fontweight="bold", fontsize=6)
+                        color="w", ha="center", va="center", fontweight="bold", fontsize=4)
 
 
 def plt_DetailedZscore_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins):
     print("--Detailed Zscore with Errors histogram plotted--")
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8, 6))
 
     ax.set_aspect("equal")
 
-    fig.suptitle(r'\hspace{-15pt}$\textrm{min: '+tabnames[0].replace("_", "\_") + r'}$, \\' +
-             r' $\textrm{max: '+tabnames[1].replace("_", "\_") + r'}$, \\' +
-                 r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, "+lum_label, fontsize=10, y=0.98)
+    #fig.suptitle(r'\hspace{-15pt}$\textrm{min: '+tabnames[0].replace("_", "\_") + r'}$, \\' +
+    #         r' $\textrm{max: '+tabnames[1].replace("_", "\_") + r'}$, \\' +
+    #             r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, "+lum_label+r", \textbf{Pessimistic Scenario}", fontsize=10, y=0.98)
+
+    props = dict(boxstyle='square', facecolor='white',
+                 edgecolor='gray', alpha=0.5)
+
+    ax.text(0.1, 0.95, r'\hspace{-15pt} \textbf{Pessimistic Scenario} \\'+r'$\textrm{($H_0$): '+tabnames[0].replace("_", "\_") + r'}$, \\' + r' $\textrm{($H_1$): '+tabnames[1].replace("_", "\_") + r'}$, \\' + r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, $\sqrt{s}=140.7$ GeV, "+lum_label, transform=ax.transAxes, fontsize=10, verticalalignment='top', bbox=props)
+
+    ax.text(0.1, 0.7, r'$Z = \left|\frac{\frac{d\sigma^{(H_0)}}{dxdQ^2}-\frac{d\sigma^{(H_1)}}{dxdQ^2}}{\delta^{sys,stat}_{H_0,H_1}}\right|$', transform=ax.transAxes, fontsize=15, verticalalignment='center', bbox=props)
+
 
     cmap = matplotlib.colors.ListedColormap(#['#3535FD', 
             ['#2A00D5', '#63009E', '#A1015D', '#D80027', '#FE0002'])
@@ -265,7 +321,7 @@ def plt_DetailedZscore_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins)
     norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
 
     h = plt.hist2d(np.log(hist_Analysis['x']), np.log(hist_Analysis['Q2']), weights=hist_Analysis['zscores'], bins=[
-                np.log(Bins['x']), np.log(Bins['Q2'])], cmap=cmap)
+        np.log(Bins['x']), np.log(Bins['Q2'])], cmap=cmap, norm=norm)
 
     ax2 = fig.add_axes([0.85, 0.1, 0.03, 0.8])
 
@@ -275,7 +331,7 @@ def plt_DetailedZscore_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins)
     cbar.ax.set_yticklabels(['0', '1', '2', '3', '4', r'$>$ 5', ' '])
 
     #cbar = plt.colorbar()
-    cbar.ax.set_xlabel(r"${\rm z-score}$")
+    cbar.ax.set_xlabel(r"${\rm Z}$")
     ax.set_xlabel(r"$x$")
     ax.set_ylabel(r"$Q^2$")
     ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
@@ -289,8 +345,9 @@ def plt_DetailedZscore_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins)
         for iX in range(0, Bins['Nx']):
             if non_empty_bins[iQ2*Bins['Nx']+iX]:
                 ax.text(np.log(hist_Analysis['x'][iQ2*Bins['Nx']+iX]), np.log(hist_Analysis['Q2'][iQ2*Bins['Nx']+iX]), '{:.2f}'.format(
-                    hist_Analysis['zscores_f'][iQ2*Bins['Nx']+iX])+"\n"+r'$\pm$'+'{:.1f}'.format(hist_Analysis['std_zscores'][iQ2*Bins['Nx']+iX]),
+                    hist_Analysis['zscores_f'][iQ2*Bins['Nx']+iX])+"\n"+r'$\pm$'+'{:.2f}'.format(hist_Analysis['std_zscores'][iQ2*Bins['Nx']+iX]),
                         color="w", ha="center", va="center", fontweight="bold", fontsize=5)
+    py.tight_layout()
 
 if __name__ == "__main__":
 
@@ -321,6 +378,8 @@ if __name__ == "__main__":
     hist_CrossSection_path = sub_sub_wdir+"hist_CrossSection.p"
     CovMat_path = sub_sub_wdir+"CovMat.p"
     hist_Analysis_path = sub_sub_wdir+"hist_Analysis.p"
+    # pwd+"../expdata/data/xQ2binTable-xiaoxuan-060220+syst.npy"
+    sys_path = pwd+"../expdata/src/ep_NC_pessimistic-barak-100920.dat"
 
     Sample={}
     hist_CrossSection={}
@@ -345,17 +404,22 @@ if __name__ == "__main__":
     max_SF = 'NNPDF31_nnlo_pch_as_0118_rs_1.0_SF'
 
     seeds = {'min': 3, 'max': 4}
-    rs = 140.7
+    rs = 140.71247279470288  # 140.7
     #-----------------------------------------------
 
     #--- acceptance/purity based binning
-    Bins=GetBins(pwd)
+    Bins = GetBins(sys_path)
 
     #--- kinematic cuts
-    def veto00(x,y,Q2,W2):
-        if   W2 < 10       : return 0
-        elif Q2 < 1        : return 0
-        else               : return 1
+    def veto00(x, y, Q2, W2):
+        if W2 < 10:
+            return 0
+        elif Q2 < 1:
+            return 0
+        elif y > 0.98 or y < 1e-3:
+            return 0
+        else:
+            return 1
     
     if rep != -1:
         #--Getting events
@@ -382,7 +446,6 @@ if __name__ == "__main__":
         #--Plotting-----------------------------------------------
         #---------------------------------------------------------
         print("--Plotting--")
-
         #--General settings
         gs, fig = plt_SetGridSpec((2, 4), (min_SF, max_SF))
 
@@ -423,6 +486,7 @@ if __name__ == "__main__":
         plt.clf()
 
     else:
+        Nrep =0
         (_, dirnames, filenames) = walk(sub_wdir).next()
         tot_hist_Analysis = {}
         tot_hist_Analysis['chi2s'] = np.zeros(Bins['Nx']*Bins['NQ2'])
@@ -435,27 +499,30 @@ if __name__ == "__main__":
         non_empty_bins = np.zeros(Bins['Nx']*Bins['NQ2']) > 1
 
         for dirname in dirnames:
-            hist_Analysis = load_obj(sub_wdir+"/"+dirname+"/hist_Analysis.p")
-            tot_hist_Analysis['chi2s'] += hist_Analysis['chi2s']
-            tot_hist_Analysis['zscores'] += np.sqrt(hist_Analysis['chi2s'])
+            if os.path.isfile(sub_wdir+dirname+"/hist_Analysis.p"):
+                hist_Analysis = load_obj(sub_wdir+dirname+"/hist_Analysis.p")
+                tot_hist_Analysis['chi2s'] += hist_Analysis['chi2s']
+                tot_hist_Analysis['zscores'] += np.sqrt(hist_Analysis['chi2s'])
 
-            hist_CrossSection = load_obj(sub_wdir+"/"+dirname+"/hist_CrossSection.p")
-            non_empty_bins += hist_CrossSection['non_empty']['total']
+                hist_CrossSection = load_obj(sub_wdir+dirname+"/hist_CrossSection.p")
+                non_empty_bins += hist_CrossSection['non_empty']['total']
+                Nrep+=1
 
-        tot_hist_Analysis['chi2s'] /= len(dirnames)
-        tot_hist_Analysis['zscores'] /= len(dirnames)
+        tot_hist_Analysis['chi2s'] /= Nrep
+        tot_hist_Analysis['zscores'] /= Nrep
         tot_hist_Analysis['zscores_f'] = np.copy(tot_hist_Analysis['zscores'])
-        tot_hist_Analysis['Nrep'] = np.copy(len(dirnames))
+        tot_hist_Analysis['Nrep'] = Nrep
 
         for dirname in dirnames:
-            hist_Analysis = load_obj(sub_wdir+"/"+dirname+"/hist_Analysis.p")
-            tot_hist_Analysis['std_chi2s'] += (hist_Analysis['chi2s']-tot_hist_Analysis['chi2s'])**2
-            tot_hist_Analysis['std_zscores'] += (np.sqrt(hist_Analysis['chi2s'])-tot_hist_Analysis['zscores'])**2
+            if os.path.isfile(sub_wdir+dirname+"/hist_Analysis.p"):
+                hist_Analysis = load_obj(sub_wdir+dirname+"/hist_Analysis.p")
+                tot_hist_Analysis['std_chi2s'] += (hist_Analysis['chi2s']-tot_hist_Analysis['chi2s'])**2
+                tot_hist_Analysis['std_zscores'] += (np.sqrt(hist_Analysis['chi2s'])-tot_hist_Analysis['zscores'])**2
 
-        tot_hist_Analysis['std_chi2s'] /= len(dirnames)
+        tot_hist_Analysis['std_chi2s'] /= Nrep
         tot_hist_Analysis['std_chi2s'] = np.sqrt(tot_hist_Analysis['std_chi2s'])
 
-        tot_hist_Analysis['std_zscores'] /= len(dirnames)
+        tot_hist_Analysis['std_zscores'] /= Nrep
         tot_hist_Analysis['std_zscores'] = np.sqrt(tot_hist_Analysis['std_zscores'])
 
         #--- for plotting purposes
@@ -480,6 +547,6 @@ if __name__ == "__main__":
         plt_DetailedZscore_witherrors((min_SF,max_SF), Bins, tot_hist_Analysis, non_empty_bins)
 
         plt.savefig(sub_wdir+"ZscoreWithError-detailed-" +
-                    str(lum_arg)+"fb-1_Nrep"+str(len(dirnames))+".pdf")
+                    str(lum_arg)+"fb-1_Nrep"+str(Nrep)+".pdf")
         plt.cla()
         plt.clf()
