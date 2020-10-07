@@ -256,28 +256,43 @@ def plt_Detailedchi2s(Bins, hist_Analysis, hist_CrossSection):
                         color="w", ha="center", va="center", fontweight="bold", fontsize=6)
 
 
-def plt_DetailedZscore(Bins, hist_Analysis, hist_CrossSection):
+def plt_DetailedZscore(tabnames, Bins, hist_Analysis, non_empty_bins):
     print("--Detailed Zscore histogram plotted--")
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8, 6))
+
     ax.set_aspect("equal")
 
-    cmap = matplotlib.colors.ListedColormap(['#3535FD', '#2A00D5', '#63009E', '#A1015D', '#D80027', '#FE0002'])
+    #fig.suptitle(r'\hspace{-15pt}$\textrm{min: '+tabnames[0].replace("_", "\_") + r'}$, \\' +
+    #         r' $\textrm{max: '+tabnames[1].replace("_", "\_") + r'}$, \\' +
+    #             r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, "+lum_label+r", \textbf{Pessimistic Scenario}", fontsize=10, y=0.98)
+
+    props = dict(boxstyle='square', facecolor='white',
+                 edgecolor='gray', alpha=0.5)
+
+    ax.text(0.1, 0.95, r'\hspace{-15pt} \textbf{Optimistic Scenario} \\'+r'$\textrm{($H_0$): '+tabnames[0].replace("_", "\_") + r'}$, \\' + r' $\textrm{($H_1$): '+tabnames[1].replace("_", "\_") + r'}$, \\  $\sqrt{s}=140.7$ GeV, '+lum_label, transform=ax.transAxes, fontsize=10, verticalalignment='top', bbox=props)
+
+    ax.text(0.1, 0.7, r'$Z = \left|\frac{\frac{d\sigma^{(H_0)}}{dxdQ^2}-\frac{d\sigma^{(H_1)}}{dxdQ^2}}{\delta^{sys,stat}_{H_0,H_1}}\right|$', transform=ax.transAxes, fontsize=15, verticalalignment='center', bbox=props)
+
+
+    cmap = matplotlib.colors.ListedColormap(#['#3535FD', 
+            ['#2A00D5', '#63009E', '#A1015D', '#D80027', '#FE0002'])
 
     # define the bins and normalize
-    bounds = np.linspace(0, 6, 7)
-    norm = matplotlib.colors.BoundaryNorm(bounds,cmap.N)
+    bounds = np.linspace(0, 5, 6)
+    norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
 
     h = plt.hist2d(np.log(hist_Analysis['x']), np.log(hist_Analysis['Q2']), weights=hist_Analysis['zscores'], bins=[
         np.log(Bins['x']), np.log(Bins['Q2'])], cmap=cmap, norm=norm)
 
     ax2 = fig.add_axes([0.85, 0.1, 0.03, 0.8])
+
     cbar = matplotlib.colorbar.ColorbarBase(ax2, cmap=cmap, norm=norm,
-                                            spacing='uniform', ticks=bounds, boundaries=bounds, format='%1i')
+        spacing='uniform', ticks=bounds, boundaries=bounds, format='%1i')
 
     cbar.ax.set_yticklabels(['0', '1', '2', '3', '4', r'$>$ 5', ' '])
 
     #cbar = plt.colorbar()
-    cbar.ax.set_xlabel(r"${\rm z-score}$")
+    cbar.ax.set_xlabel(r"${\rm Z}$")
     ax.set_xlabel(r"$x$")
     ax.set_ylabel(r"$Q^2$")
     ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
@@ -289,9 +304,10 @@ def plt_DetailedZscore(Bins, hist_Analysis, hist_CrossSection):
 
     for iQ2 in range(0, Bins['NQ2']):
         for iX in range(0, Bins['Nx']):
-            if hist_CrossSection['non_empty']['total'][iQ2*Bins['Nx']+iX]:
-                ax.text(np.log(hist_Analysis['x'][iQ2*Bins['Nx']+iX]), np.log(hist_Analysis['Q2'][iQ2*Bins['Nx']+iX]), '{:.2f}'.format(np.sqrt(hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX])),
-                        color="w", ha="center", va="center", fontweight="bold", fontsize=4)
+            if non_empty_bins[iQ2*Bins['Nx']+iX]:
+                ax.text(np.log(hist_Analysis['x'][iQ2*Bins['Nx']+iX]), np.log(hist_Analysis['Q2'][iQ2*Bins['Nx']+iX]), '{:.2f}'.format(np.sqrt(
+                    hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX])), color="w", ha="center", va="center", fontweight="bold", fontsize=5)
+    py.tight_layout()
 
 
 def plt_DetailedZscore_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins):
@@ -308,7 +324,7 @@ def plt_DetailedZscore_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins)
     props = dict(boxstyle='square', facecolor='white',
                  edgecolor='gray', alpha=0.5)
 
-    ax.text(0.1, 0.95, r'\hspace{-15pt} \textbf{Pessimistic Scenario} \\'+r'$\textrm{($H_0$): '+tabnames[0].replace("_", "\_") + r'}$, \\' + r' $\textrm{($H_1$): '+tabnames[1].replace("_", "\_") + r'}$, \\' + r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, $\sqrt{s}=140.7$ GeV, "+lum_label, transform=ax.transAxes, fontsize=10, verticalalignment='top', bbox=props)
+    ax.text(0.1, 0.95, r'\hspace{-15pt} \textbf{Optimistic Scenario} \\'+r'$\textrm{($H_0$): '+tabnames[0].replace("_", "\_") + r'}$, \\' + r' $\textrm{($H_1$): '+tabnames[1].replace("_", "\_") + r'}$, \\' + r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, $\sqrt{s}=140.7$ GeV, "+lum_label, transform=ax.transAxes, fontsize=10, verticalalignment='top', bbox=props)
 
     ax.text(0.1, 0.7, r'$Z = \left|\frac{\frac{d\sigma^{(H_0)}}{dxdQ^2}-\frac{d\sigma^{(H_1)}}{dxdQ^2}}{\delta^{sys,stat}_{H_0,H_1}}\right|$', transform=ax.transAxes, fontsize=15, verticalalignment='center', bbox=props)
 
@@ -379,7 +395,7 @@ if __name__ == "__main__":
     CovMat_path = sub_sub_wdir+"CovMat.p"
     hist_Analysis_path = sub_sub_wdir+"hist_Analysis.p"
     # pwd+"../expdata/data/xQ2binTable-xiaoxuan-060220+syst.npy"
-    sys_path = pwd+"../expdata/src/ep_NC_pessimistic-barak-100920.dat"
+    sys_path = pwd+"../expdata/src/ep_NC_optimistic-barak-102420.dat"
 
     Sample={}
     hist_CrossSection={}
@@ -400,8 +416,8 @@ if __name__ == "__main__":
     min_Q = 0.1
 
     #SFs
-    min_SF = 'NNPDF31_nnlo_pch_as_0118_rs_0.5_SF'
-    max_SF = 'NNPDF31_nnlo_pch_as_0118_rs_1.0_SF'
+    min_SF = 'NNPDF31_nnlo_pch_as_0118_NC_Wm_Wp_SF_F2NC_90CL_LOW'
+    max_SF = 'NNPDF31_nnlo_pch_as_0118_NC_Wm_Wp_SF_F2NC_90CL_UP'
 
     seeds = {'min': 3, 'max': 4}
     rs = 140.71247279470288  # 140.7
@@ -423,11 +439,11 @@ if __name__ == "__main__":
     
     if rep != -1:
         #--Getting events
-        if not os.path.isfile(Sample_path):
-            print(Sample_path+" doesn't exist, please run chi2-test_generate.py first.")
-            exit(1)
-        else:
-            Sample = load_obj(Sample_path)
+        #if not os.path.isfile(Sample_path):
+        #    print(Sample_path+" doesn't exist, please run chi2-test_generate.py first.")
+        #    exit(1)
+        #else:
+        #    Sample = load_obj(Sample_path)
 
         #--Getting CrossSections
         if not os.path.isfile(hist_CrossSection_path):
@@ -455,8 +471,8 @@ if __name__ == "__main__":
         plt_chi2s(0, title_pos, Bins, hist_Analysis)
 
 
-        plt_xsecs([0,1],'max', title_pos, Bins, hist_Analysis, Sample)
-        plt_xsecs([1,1],'min', title_pos, Bins, hist_Analysis, Sample)
+        #plt_xsecs([0,1],'max', title_pos, Bins, hist_Analysis, Sample)
+        #plt_xsecs([1,1],'min', title_pos, Bins, hist_Analysis, Sample)
 
         plt_unc([0,2],'sysunc','max', title_pos, Bins, hist_Analysis, hist_CrossSection)
         plt_unc([1,2],'sysunc','min', title_pos, Bins, hist_Analysis, hist_CrossSection)
@@ -479,7 +495,8 @@ if __name__ == "__main__":
 
         #---- Zscore hist alone with discrete colors
         print " "
-        plt_DetailedZscore(Bins,hist_Analysis,hist_CrossSection)
+        plt_DetailedZscore((min_SF, max_SF), Bins,
+                           hist_Analysis, hist_CrossSection['non_empty']['total'])
 
         plt.savefig(sub_wdir+"Zscore-detailed-"+str(lum_arg)+"fb-1_pdfrep"+str(rep)+".pdf")
         plt.cla()

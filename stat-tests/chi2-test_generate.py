@@ -30,6 +30,8 @@ from  matplotlib import rc
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text',usetex=True)
 
+lum_target=100 #fb^-1
+
 def save_obj(obj, path ):
     with open(path, 'wb') as f:
         pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
@@ -64,21 +66,27 @@ def GetSysUnc(sys_path):
 
     return data
 
-def GetEvents(path,lum_arg,veto,sign,rep=0):
+def GetEvents(path,SFs,lum_arg,veto,sign,reps=(0,0)):
     """
     sign: --electron=1 positron=-1
 
     """
+    min_SF = SFs[0]
+    max_SF = SFs[1]
+
+    min_SF_rep = reps[0]
+    max_SF_rep = reps[1]
+    
     Sample = {'min':{}, 'max':{}}
 
     Sample['min']['tabname'] = min_SF
-    Sample['min']['iset'] = rep
+    Sample['min']['iset'] = min_SF_rep
     Sample['min']['iF2'] = 908
     Sample['min']['iFL'] = 909
     Sample['min']['iF3'] = 910
 
     Sample['max']['tabname'] = max_SF
-    Sample['max']['iset'] = rep
+    Sample['max']['iset'] = max_SF_rep
     Sample['max']['iF2'] = 908
     Sample['max']['iFL'] = 909
     Sample['max']['iF3'] = 910
@@ -207,7 +215,7 @@ def GetCrossSections(Bins,sys_path="../expdata/data/xQ2binTable-xiaoxuan-060220+
                 mask=x_mask*Q2_mask
                 weight = np.sum(Sample[key]['W'][mask])
                 xsec = weight*Sample[key]['tot_xsec'] # [fb]
-                N = float(int(xsec*lum_arg))
+                N = float(int(xsec*lum_target))
                 hist_CrossSection['weights'][key][iQ2*Bins['Nx']+iX] = weight
                 hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX] = xsec
                 hist_CrossSection['Nevents'][key][iQ2*Bins['Nx']+iX] = N
@@ -217,7 +225,7 @@ def GetCrossSections(Bins,sys_path="../expdata/data/xQ2binTable-xiaoxuan-060220+
                     hist_CrossSection['MCunc'][key][iQ2*Bins['Nx']+iX] = 0.
                 else:
                     hist_CrossSection['non_empty'][key][iQ2*Bins['Nx']+iX] = True
-                    hist_CrossSection['statunc'][key][iQ2*Bins['Nx']+iX] = np.sqrt(N)/lum_arg
+                    hist_CrossSection['statunc'][key][iQ2*Bins['Nx']+iX] = np.sqrt(N)/lum_target
                     hist_CrossSection['MCunc'][key][iQ2*Bins['Nx']+iX] = weight*Sample[key]['var_xsec']
 
     print("--Filling systematics in hist_CrossSection--")
@@ -401,8 +409,6 @@ if __name__ == "__main__":
 
     #--physical params and cuts
     #lum = str(lum_arg)+':fb-1'
-    lum_label = r'$\mathcal{L} = '+str(lum_arg)+r'\,fb^{-1}$'
-    cuts_label = r"$ W^2 > 10\,\,,\,\, Q^2> 1$"
 
     #to tweak:
     #-----------------------------------------------
@@ -412,8 +418,8 @@ if __name__ == "__main__":
     min_Q = 0.1
 
     #SFs
-    min_SF = 'NNPDF31_nnlo_pch_as_0118_rs_0.5_SF'
-    max_SF = 'NNPDF31_nnlo_pch_as_0118_rs_1.0_SF'
+    min_SF = 'NNPDF31_nnlo_pch_as_0118_SF'
+    max_SF = 'NNPDF31_nnlo_pch_as_0118_SF'
 
     seeds = {'min': 1, 'max': 1}
     rs = 140.71247279470288  # 140.7
@@ -433,7 +439,7 @@ if __name__ == "__main__":
         
     #--Getting events
     if not os.path.isfile(Sample_path):
-        Sample = GetEvents(sub_sub_wdir, lum_arg, veto00, sign=1, rep=rep)
+        Sample = GetEvents(sub_sub_wdir, (min_SF,max_SF), lum_arg, veto00, sign=1, rep=(0,rep))
         save_obj(Sample,Sample_path)
     else:
         Sample = load_obj(Sample_path)
