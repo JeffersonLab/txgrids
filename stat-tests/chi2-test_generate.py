@@ -318,6 +318,7 @@ def GetAnalysis(Bins, hist_CrossSection):
     hist_Analysis={}
     hist_Analysis['chi2s'] = np.zeros(Bins['Nx']*Bins['NQ2'])
     hist_Analysis['zscores'] = np.zeros(Bins['Nx']*Bins['NQ2'])
+    hist_Analysis['PDFweights'] = np.zeros(Bins['Nx']*Bins['NQ2'])
     hist_Analysis['x'] = np.zeros(Bins['Nx']*Bins['NQ2'])
     hist_Analysis['Q2'] = np.zeros(Bins['Nx']*Bins['NQ2'])
 
@@ -336,6 +337,7 @@ def GetAnalysis(Bins, hist_CrossSection):
 
                 hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX] = (min_d-max_d)*inv_covmat_xsecs[ind,ind]*(min_d-max_d)
                 hist_Analysis['zscores'][iQ2*Bins['Nx']+iX] = np.sqrt(hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX])
+                hist_Analysis['PDFweights'][iQ2*Bins['Nx']+iX] = hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX]*np.exp(-0.5*hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX])
                 if hist_Analysis['zscores'][iQ2*Bins['Nx']+iX]<1:
                     hist_Analysis['zscores'][iQ2*Bins['Nx']+iX]=-1
                 else:
@@ -359,6 +361,7 @@ def GetAnalysis(Bins, hist_CrossSection):
         hist_CrossSection['statunc'][key][hist_CrossSection['statunc'][key]==0] = np.nan
         hist_CrossSection['sysunc'][key][hist_CrossSection['sysunc'][key]==0] = np.nan
         hist_Analysis['chi2s'][hist_Analysis['chi2s']==0] = np.nan
+        hist_Analysis['PDFweights'][hist_Analysis['PDFweights'] == 0] = np.nan
         hist_Analysis['zscores'][hist_Analysis['zscores'] == 0] = np.nan
 
     hist_Analysis['zscores'][hist_Analysis['zscores'] == -1] = 0
@@ -439,7 +442,7 @@ if __name__ == "__main__":
         
     #--Getting events
     if not os.path.isfile(Sample_path):
-        Sample = GetEvents(sub_sub_wdir, (min_SF,max_SF), lum_arg, veto00, sign=1, rep=(0,rep))
+        Sample = GetEvents(sub_sub_wdir, (min_SF,max_SF), lum_arg, veto00, sign=1, reps=(0,rep))
         save_obj(Sample,Sample_path)
     else:
         Sample = load_obj(Sample_path)
