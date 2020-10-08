@@ -31,6 +31,7 @@ rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text',usetex=True)
 
 lum_target=100 #fb^-1
+sys_target=0.5 #sys = sys_target*sys_original
 
 def save_obj(obj, path ):
     with open(path, 'wb') as f:
@@ -192,6 +193,7 @@ def GetCrossSections(Bins,sys_path="../expdata/data/xQ2binTable-xiaoxuan-060220+
 
     #initialization
     hist_CrossSection={}
+    hist_CrossSection['sys_target'] = sys_target
     hist_CrossSection['non_empty'] = {'min': np.zeros(Bins['Nx']*Bins['NQ2']) > 1, 'max': np.zeros(Bins['Nx']*Bins['NQ2']) > 1}
     hist_CrossSection['weights'] = {'min': np.zeros(Bins['Nx']*Bins['NQ2']), 'max': np.zeros(Bins['Nx']*Bins['NQ2'])}
     hist_CrossSection['xsecs'] = {'min': np.zeros(Bins['Nx']*Bins['NQ2']), 'max': np.zeros(Bins['Nx']*Bins['NQ2'])}
@@ -241,7 +243,9 @@ def GetCrossSections(Bins,sys_path="../expdata/data/xQ2binTable-xiaoxuan-060220+
                     relative_sys = sys_bins.loc[sys_bins['x'] == Bins['x_cv'][iX]]
                     relative_sys = relative_sys.loc[sys_bins['Q2'] == Bins['Q2_cv'][iQ2]]
                     if not relative_sys['syst_u(%)'].empty:
-                        hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX] = hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX]*relative_sys.iloc[0]['syst_u(%)']/100. #+(hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX]*relative_sys.iloc[0]['norm_c(%)']/100.)**2)
+                        hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX] = sys_target*hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX] * \
+                            relative_sys.iloc[0]['syst_u(%)'] / \
+                            100.  # +(hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX]*relative_sys.iloc[0]['norm_c(%)']/100.)**2)
                     else:
                         #hist_CrossSection['non_empty'][key][iQ2*Bins['Nx']+iX] = False
                         hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX] = 0.
