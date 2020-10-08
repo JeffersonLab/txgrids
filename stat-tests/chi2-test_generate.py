@@ -337,7 +337,7 @@ def GetAnalysis(Bins, hist_CrossSection):
 
                 hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX] = (min_d-max_d)*inv_covmat_xsecs[ind,ind]*(min_d-max_d)
                 hist_Analysis['zscores'][iQ2*Bins['Nx']+iX] = np.sqrt(hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX])
-                hist_Analysis['PDFweights'][iQ2*Bins['Nx']+iX] = hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX]*np.exp(-0.5*hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX])
+                hist_Analysis['PDFweights'][iQ2*Bins['Nx']+iX] = np.exp(-0.5*hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX])
                 if hist_Analysis['zscores'][iQ2*Bins['Nx']+iX]<1:
                     hist_Analysis['zscores'][iQ2*Bins['Nx']+iX]=-1
                 else:
