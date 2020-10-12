@@ -107,8 +107,8 @@ class MCEG:
             print('trial %d' % cnt)
             result = self._vegas_integrate(neval=neval, nitn=nitn)
             if result.Q < min_Q:
-                print 'Q = ',result.Q,'<',min_Q,' | neval=',neval,' | nitn=',nitn, ' | trying again with neval*10...'
-                neval *= 10
+                print 'Q = ',result.Q,'<',min_Q,' | neval=',neval,' | nitn=',nitn, ' | trying again with neval+1...'
+                neval += 1
             else:
                 break
             cnt += 1
