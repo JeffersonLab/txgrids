@@ -246,7 +246,7 @@ def GetCrossSections(Bins,sys_path="../expdata/data/xQ2binTable-xiaoxuan-060220+
                     relative_sys = relative_sys.loc[sys_bins['Q2'] == Bins['Q2_cv'][iQ2]]
                     if not relative_sys['syst_u(%)'].empty:
                         hist_CrossSection['sysunc']['uncorr'][key][iQ2*Bins['Nx']+iX] = sys_target*hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX] * relative_sys.iloc[0]['syst_u(%)'] / 100.
-                        hist_CrossSection['sysunc']['uncorr'][key][iQ2*Bins['Nx']+iX] = sys_target * relative_sys.iloc[0]['norm_c(%)'] / 100.
+                        hist_CrossSection['sysunc']['corr'][key][iQ2*Bins['Nx']+iX] = sys_target*hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX]* relative_sys.iloc[0]['norm_c(%)'] / 100.
                     else:
                         #hist_CrossSection['non_empty'][key][iQ2*Bins['Nx']+iX] = False
                         hist_CrossSection['sysunc']['uncorr'][key][iQ2*Bins['Nx']+iX] = 0.
@@ -316,9 +316,7 @@ def GetCovMat(Bins, hist_CrossSection):
                                 * hist_CrossSection['sysunc']['corr'][key][_iQ2*Bins['Nx']+_iX]
 
                         CovMat['xsecs'][key][iQ2*Bins['Nx']+iX][_iQ2*Bins['Nx'] + _iX] \
-                            += signor \
-                                * hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX] \
-                                * hist_CrossSection['xsecs'][key][_iQ2*Bins['Nx']+_iX]
+                            += signor 
                 """
 
     CovMat['xsecs']['total'] = np.matrix(np.zeros((Bins['total'], Bins['total'])))
