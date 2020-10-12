@@ -391,8 +391,8 @@ def GetAnalysis(Bins, hist_CrossSection):
                 min_d = hist_Analysis['xsecs']['min'][0,ind]
 
                 #add corr shifts
-                shift_min = 0 #lambda_corr['min']*hist_CrossSection['sysunc']['corr']['min'][iQ2*Bins['Nx']+iX]
-                shift_max = 0 #lambda_corr['max']*hist_CrossSection['sysunc']['corr']['max'][iQ2*Bins['Nx']+iX]
+                shift_min = lambda_corr['min']*hist_CrossSection['sysunc']['corr']['min'][iQ2*Bins['Nx']+iX]
+                shift_max = lambda_corr['max']*hist_CrossSection['sysunc']['corr']['max'][iQ2*Bins['Nx']+iX]
 
                 max_d -= shift_max
                 min_d -= shift_min
@@ -484,8 +484,8 @@ if __name__ == "__main__":
     min_Q = 0.1
 
     #SFs
-    min_SF = 'NNPDF31_nnlo_pch_as_0118_SF'
-    max_SF = 'NNPDF31_nnlo_pch_as_0118_SF'
+    min_SF = 'NNPDF31_nnlo_pch_as_0118_rs_0.5_SF'
+    max_SF = 'NNPDF31_nnlo_pch_as_0118_rs_1.0_SF'
 
     seeds = {'min': 1, 'max': 1}
     rs = 140.71247279470288  # 140.7
@@ -505,7 +505,7 @@ if __name__ == "__main__":
         
     #--Getting events
     if not os.path.isfile(Sample_path):
-        Sample = GetEvents(sub_sub_wdir, (min_SF,max_SF), lum_arg, veto00, sign=1, reps=(0,rep))
+        Sample = GetEvents(sub_sub_wdir, (min_SF,max_SF), lum_arg, veto00, sign=1, reps=(rep,rep))
         save_obj(Sample,Sample_path)
     else:
         Sample = load_obj(Sample_path)
