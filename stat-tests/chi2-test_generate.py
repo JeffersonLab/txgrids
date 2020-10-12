@@ -31,7 +31,7 @@ rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text',usetex=True)
 
 lum_target=100 #fb^-1
-sys_target=0.5 #sys = sys_target*sys_original
+sys_target=1.0 #sys = sys_target*sys_original
 
 def save_obj(obj, path ):
     with open(path, 'wb') as f:
@@ -200,7 +200,8 @@ def GetCrossSections(Bins,sys_path="../expdata/data/xQ2binTable-xiaoxuan-060220+
     hist_CrossSection['Nevents'] = {'min': np.zeros(Bins['Nx']*Bins['NQ2']), 'max': np.zeros(Bins['Nx']*Bins['NQ2'])}
     hist_CrossSection['statunc'] = {'min': np.zeros(Bins['Nx']*Bins['NQ2']), 'max': np.zeros(Bins['Nx']*Bins['NQ2'])}
     hist_CrossSection['MCunc'] = {'min': np.zeros(Bins['Nx']*Bins['NQ2']), 'max': np.zeros(Bins['Nx']*Bins['NQ2'])}
-    hist_CrossSection['sysunc'] = {'min': np.zeros(Bins['Nx']*Bins['NQ2']), 'max': np.zeros(Bins['Nx']*Bins['NQ2'])}
+    hist_CrossSection['sysunc'] = {'uncorr': {'min': np.zeros(Bins['Nx']*Bins['NQ2']), 'max': np.zeros(Bins['Nx']*Bins['NQ2'])},
+                                   'corr': {'min': np.zeros(Bins['Nx']*Bins['NQ2']), 'max': np.zeros(Bins['Nx']*Bins['NQ2'])}}
 
     #to get:
     #Sample[key]['Nevents']: hist_CrossSection['weights']['min']*Sample['max']['tot_xsec']*lum (per bin)
@@ -238,17 +239,18 @@ def GetCrossSections(Bins,sys_path="../expdata/data/xQ2binTable-xiaoxuan-060220+
         for iQ2 in range(0, Bins['NQ2']):
             for iX in range(0, Bins['Nx']):
                 if hist_CrossSection['Nevents'][key][iQ2*Bins['Nx']+iX] == 0:
-                    hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX] = 0.
+                    hist_CrossSection['sysunc']['uncorr'][key][iQ2*Bins['Nx']+iX] = 0.
+                    hist_CrossSection['sysunc']['corr'][key][iQ2*Bins['Nx']+iX] = 0.
                 else:
                     relative_sys = sys_bins.loc[sys_bins['x'] == Bins['x_cv'][iX]]
                     relative_sys = relative_sys.loc[sys_bins['Q2'] == Bins['Q2_cv'][iQ2]]
                     if not relative_sys['syst_u(%)'].empty:
-                        hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX] = sys_target*hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX] * \
-                            relative_sys.iloc[0]['syst_u(%)'] / \
-                            100.  # +(hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX]*relative_sys.iloc[0]['norm_c(%)']/100.)**2)
+                        hist_CrossSection['sysunc']['uncorr'][key][iQ2*Bins['Nx']+iX] = sys_target*hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX] * relative_sys.iloc[0]['syst_u(%)'] / 100.
+                        hist_CrossSection['sysunc']['uncorr'][key][iQ2*Bins['Nx']+iX] = sys_target * relative_sys.iloc[0]['norm_c(%)'] / 100.
                     else:
                         #hist_CrossSection['non_empty'][key][iQ2*Bins['Nx']+iX] = False
-                        hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX] = 0.
+                        hist_CrossSection['sysunc']['uncorr'][key][iQ2*Bins['Nx']+iX] = 0.
+                        hist_CrossSection['sysunc']['corr'][key][iQ2*Bins['Nx']+iX] = 0.
                         #if no sys provided, set all to zero
                         hist_CrossSection['weights'][key][iQ2*Bins['Nx']+iX] = 0.
                         hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX] = 0.
@@ -286,8 +288,6 @@ def GetCrossSections(Bins,sys_path="../expdata/data/xQ2binTable-xiaoxuan-060220+
                 hist_CrossSection['non_empty']['map'][iQ2 * Bins['Nx']+iX] = count
                 count += 1
 
-    Bins['total'] = np.count_nonzero(hist_CrossSection['non_empty']['total'])
-
     return hist_CrossSection
 
 def GetCovMat(Bins, hist_CrossSection):
@@ -299,13 +299,27 @@ def GetCovMat(Bins, hist_CrossSection):
     for key in hist_CrossSection['weights'].keys():
         for iQ2 in range(0, Bins['NQ2']):
             for iX in range(0, Bins['Nx']):
-
+                
+                #uncorr
                 if hist_CrossSection['Nevents'][key][iQ2*Bins['Nx']+iX] == 0:
                     CovMat['xsecs'][key][iQ2*Bins['Nx']+iX][iQ2*Bins['Nx']+iX] = 0.
                 else:
-                    CovMat['xsecs'][key][iQ2*Bins['Nx']+iX][iQ2*Bins['Nx']+iX] = (hist_CrossSection['statunc'][key][iQ2*Bins['Nx']+iX])**2 + (
-                        hist_CrossSection['MCunc'][key][iQ2*Bins['Nx']+iX])**2 + (hist_CrossSection['sysunc'][key][iQ2*Bins['Nx']+iX])**2
+                    CovMat['xsecs'][key][iQ2*Bins['Nx']+iX][iQ2*Bins['Nx']+iX] = (hist_CrossSection['statunc'][key][iQ2*Bins['Nx']+iX])**2 + (hist_CrossSection['MCunc'][key][iQ2*Bins['Nx']+iX])**2 + (hist_CrossSection['sysunc']['uncorr'][key][iQ2*Bins['Nx']+iX])**2
                     #covmat_weights[key][iQ2*Bins['Nx']+iX][iQ2*Bins['Nx']+iX] = (np.sqrt(N)/(Sample[key]['tot_xsec']*lum))**2
+                
+                #corr (not to be included if shifts are taken into account)
+                """
+                for _iQ2 in range(0, Bins['NQ2']):
+                    for _iX in range(0, Bins['Nx']):
+
+                        signor = hist_CrossSection['sysunc']['corr'][key][iQ2*Bins['Nx'] +iX] \
+                                * hist_CrossSection['sysunc']['corr'][key][_iQ2*Bins['Nx']+_iX]
+
+                        CovMat['xsecs'][key][iQ2*Bins['Nx']+iX][_iQ2*Bins['Nx'] + _iX] \
+                            += signor \
+                                * hist_CrossSection['xsecs'][key][iQ2*Bins['Nx']+iX] \
+                                * hist_CrossSection['xsecs'][key][_iQ2*Bins['Nx']+_iX]
+                """
 
     CovMat['xsecs']['total'] = np.matrix(np.zeros((Bins['total'], Bins['total'])))
 
@@ -330,6 +344,45 @@ def GetAnalysis(Bins, hist_CrossSection):
     for key in hist_CrossSection['xsecs'].keys():
         hist_Analysis['xsecs'][key] = np.matrix(hist_CrossSection['xsecs'][key][hist_CrossSection['non_empty']['total']])
 
+    #corr shifts according to arXiv:1709.04922
+    lambda_corr={'min':0.,'max':0.}
+    for iQ2 in range(0, Bins['NQ2']):
+        for iX in range(0, Bins['Nx']):
+            if hist_CrossSection['non_empty']['total'][iQ2*Bins['Nx']+iX]:
+                uncorrE = np.sqrt((hist_CrossSection['statunc']['min'][iQ2*Bins['Nx']+iX])**2 \
+                    + (hist_CrossSection['MCunc']['min'][iQ2*Bins['Nx']+iX])**2 \
+                    + (hist_CrossSection['sysunc']['uncorr']['min'][iQ2*Bins['Nx']+iX])**2
+                    + (hist_CrossSection['statunc']['max'][iQ2*Bins['Nx']+iX])**2 \
+                    + (hist_CrossSection['MCunc']['max'][iQ2*Bins['Nx']+iX])**2 \
+                    + (hist_CrossSection['sysunc']['uncorr']['max'][iQ2*Bins['Nx']+iX])**2)
+
+                ind = hist_CrossSection['non_empty']['map'][iQ2*Bins['Nx']+iX]
+
+                max_d = hist_Analysis['xsecs']['max'][0, ind]
+                min_d = hist_Analysis['xsecs']['min'][0, ind]
+
+                f1 = (min_d - max_d)/uncorrE  # first part of eq.85
+
+                A={'min':1.0,'max':1.0}
+                for _iQ2 in range(0, Bins['NQ2']):
+                    for _iX in range(0, Bins['Nx']):
+                        if hist_CrossSection['non_empty']['total'][_iQ2*Bins['Nx']+_iX]:
+                            _uncorrE = np.sqrt((hist_CrossSection['statunc']['min'][_iQ2*Bins['Nx']+_iX])**2 \
+                                + (hist_CrossSection['MCunc']['min'][_iQ2*Bins['Nx']+_iX])**2 \
+                                + (hist_CrossSection['sysunc']['uncorr']['min'][_iQ2*Bins['Nx']+_iX])**2
+                                + (hist_CrossSection['statunc']['max'][_iQ2*Bins['Nx']+_iX])**2 \
+                                + (hist_CrossSection['MCunc']['max'][_iQ2*Bins['Nx']+_iX])**2 \
+                                + (hist_CrossSection['sysunc']['uncorr']['max'][_iQ2*Bins['Nx']+_iX])**2)
+
+                            for key in hist_CrossSection['xsecs'].keys():
+                                A[key] += hist_CrossSection['sysunc']['corr'][key][_iQ2*Bins['Nx']+_iX]**2/ _uncorrE**2  # eq.86
+
+                for key in hist_CrossSection['xsecs'].keys():
+                    f2 = (1./A[key])* hist_CrossSection['sysunc']['corr'][key][iQ2*Bins['Nx']+iX]/uncorrE # second part of eq.85
+                    
+                    lambda_corr[key] += f1*f2  # nuisance parameter
+
+
     print("--Filling hist_Analysis--")
     for iQ2 in range(0, Bins['NQ2']):
         for iX in range(0, Bins['Nx']):
@@ -338,6 +391,13 @@ def GetAnalysis(Bins, hist_CrossSection):
 
                 max_d = hist_Analysis['xsecs']['max'][0,ind]
                 min_d = hist_Analysis['xsecs']['min'][0,ind]
+
+                #add corr shifts
+                shift_min = 0 #lambda_corr['min']*hist_CrossSection['sysunc']['corr']['min'][iQ2*Bins['Nx']+iX]
+                shift_max = 0 #lambda_corr['max']*hist_CrossSection['sysunc']['corr']['max'][iQ2*Bins['Nx']+iX]
+
+                max_d -= shift_max
+                min_d -= shift_min
 
                 hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX] = (min_d-max_d)*inv_covmat_xsecs[ind,ind]*(min_d-max_d)
                 hist_Analysis['zscores'][iQ2*Bins['Nx']+iX] = np.sqrt(hist_Analysis['chi2s'][iQ2*Bins['Nx']+iX])
@@ -363,7 +423,8 @@ def GetAnalysis(Bins, hist_CrossSection):
         hist_CrossSection['weights'][key][hist_CrossSection['weights'][key]==0] = np.nan
         hist_CrossSection['xsecs'][key][hist_CrossSection['xsecs'][key]==0] = np.nan
         hist_CrossSection['statunc'][key][hist_CrossSection['statunc'][key]==0] = np.nan
-        hist_CrossSection['sysunc'][key][hist_CrossSection['sysunc'][key]==0] = np.nan
+        hist_CrossSection['sysunc']['uncorr'][key][hist_CrossSection['sysunc']['uncorr'][key]==0] = np.nan
+        hist_CrossSection['sysunc']['corr'][key][hist_CrossSection['sysunc']['corr'][key] == 0] = np.nan
         hist_Analysis['chi2s'][hist_Analysis['chi2s']==0] = np.nan
         hist_Analysis['PDFweights'][hist_Analysis['PDFweights'] == 0] = np.nan
         hist_Analysis['zscores'][hist_Analysis['zscores'] == 0] = np.nan
@@ -406,7 +467,7 @@ if __name__ == "__main__":
     CovMat_path = sub_sub_wdir+"CovMat.p"
     hist_Analysis_path = sub_sub_wdir+"hist_Analysis.p"
     # pwd+"../expdata/data/xQ2binTable-xiaoxuan-060220+syst.npy"
-    sys_path = pwd+"../expdata/src/ep_NC_optimistic-barak-100920.dat"
+    sys_path = pwd+"../expdata/src/ep_NC_optimistic.dat"
 
     Sample = {}
     hist_CrossSection = {}
@@ -457,6 +518,8 @@ if __name__ == "__main__":
         save_obj(hist_CrossSection,hist_CrossSection_path)
     else:
         hist_CrossSection = load_obj(hist_CrossSection_path)
+
+    Bins['total'] = np.count_nonzero(hist_CrossSection['non_empty']['total'])
 
     #--Getting CovMat
     if not os.path.isfile(CovMat_path):
