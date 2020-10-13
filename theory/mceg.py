@@ -69,7 +69,7 @@ class MCEG:
         elif iw == 2:
             factor = Q2
 
-        F1 = ((1+4*par.M2/Q2)*F2-FL)/2/x
+        F1 = ((1+4*par.M2/Q2*x**2)*F2-FL)/2/x
         factor *= 4*np.pi*par.alfa**2/x/y/Q2
         return factor*((1-y-x**2*y**2*par.M2/Q2)*F2 + y**2*x*F1 + self.sign*(y-y**2/2)*x*F3)
 
@@ -107,8 +107,8 @@ class MCEG:
             print('trial %d' % cnt)
             result = self._vegas_integrate(neval=neval, nitn=nitn)
             if result.Q < min_Q:
-                print 'Q = ',result.Q,'<',min_Q,' | neval=',neval,' | nitn=',nitn, ' | trying again with neval*10...'
-                neval *= 10
+                print 'Q = ',result.Q,'<',min_Q,' | neval=',neval,' | nitn=',nitn, ' | trying again with neval+1...'
+                neval += 1
             else:
                 break
             cnt += 1

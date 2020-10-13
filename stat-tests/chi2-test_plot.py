@@ -31,6 +31,8 @@ from  matplotlib import rc
 rc('font', **{'family': 'sans-serif', 'sans-serif': []})
 rc('text', usetex=True)
 
+lum_target=100
+
 def load_obj(path):
     with open(path, 'rb') as f:
         return pickle.load(f)
@@ -72,12 +74,12 @@ def GetBins(sys_path):
     Bins['Q2_cv'] = np.array(sorted(set(np.array(sys['Q2']))))
 
     Bins['x'] = np.zeros(Bins['x_cv'].shape[0]+1)
-    Bins["x"][0] = Bins['x_cv'][0]-(Bins['x_cv'][1]-Bins['x_cv'][0])/2.
+    Bins["x"][0] = 1e-4 #Bins['x_cv'][0]-(Bins['x_cv'][1]-Bins['x_cv'][0])/2.
     for i,x_cv in enumerate(Bins['x_cv']):
         Bins['x'][i+1] = x_cv+(x_cv-Bins['x'][i])
 
     Bins['Q2'] = np.zeros(Bins['Q2_cv'].shape[0]+1)
-    Bins["Q2"][0] = Bins['Q2_cv'][0]-(Bins['Q2_cv'][1]-Bins['Q2_cv'][0])/2.
+    Bins["Q2"][0] = 1. #Bins['Q2_cv'][0]-(Bins['Q2_cv'][1]-Bins['Q2_cv'][0])/2.
     for i, Q2_cv in enumerate(Bins['Q2_cv']):
         Bins['Q2'][i+1] = Q2_cv+(Q2_cv-Bins['Q2'][i])
 
@@ -324,7 +326,8 @@ def plt_DetailedZscore_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins)
     props = dict(boxstyle='square', facecolor='white',
                  edgecolor='gray', alpha=0.5)
 
-    ax.text(0.1, 0.95, r'\hspace{-15pt} \textbf{Optimistic Scenario} \\'+r'$\textrm{($H_0$): '+tabnames[0].replace("_", "\_") + r'}$, \\' + r' $\textrm{($H_1$): '+tabnames[1].replace("_", "\_") + r'}$, \\' + r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, $\sqrt{s}=140.7$ GeV, "+lum_label, transform=ax.transAxes, fontsize=10, verticalalignment='top', bbox=props)
+    ax.text(0.1, 0.95, r'\hspace{-15pt} \textbf{Optimistic Scenario} \\'+r'$\textrm{($H_0$): '+tabnames[0].replace("_", "\_") + r'}$, \\' + r' $\textrm{($H_1$): '+tabnames[1].replace(
+        "_", "\_") + r'}$, \\' + r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, $\sqrt{s}=140.7$ GeV, "+lum_label+r"\\ systematics = "+"{:.2f}".format(hist_Analysis['sys_target'])+r"$\times$original", transform=ax.transAxes, fontsize=10, verticalalignment='top', bbox=props)
 
     ax.text(0.1, 0.7, r'$Z = \left|\frac{\frac{d\sigma^{(H_0)}}{dxdQ^2}-\frac{d\sigma^{(H_1)}}{dxdQ^2}}{\delta^{sys,stat}_{H_0,H_1}}\right|$', transform=ax.transAxes, fontsize=15, verticalalignment='center', bbox=props)
 
@@ -363,6 +366,62 @@ def plt_DetailedZscore_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins)
                 ax.text(np.log(hist_Analysis['x'][iQ2*Bins['Nx']+iX]), np.log(hist_Analysis['Q2'][iQ2*Bins['Nx']+iX]), '{:.2f}'.format(
                     hist_Analysis['zscores_f'][iQ2*Bins['Nx']+iX])+"\n"+r'$\pm$'+'{:.2f}'.format(hist_Analysis['std_zscores'][iQ2*Bins['Nx']+iX]),
                         color="w", ha="center", va="center", fontweight="bold", fontsize=5)
+    py.tight_layout()
+
+def plt_DetailedPDFweights_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins):
+    print("--Detailed Zscore with Errors histogram plotted--")
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    ax.set_aspect("equal")
+
+    #fig.suptitle(r'\hspace{-15pt}$\textrm{min: '+tabnames[0].replace("_", "\_") + r'}$, \\' +
+    #         r' $\textrm{max: '+tabnames[1].replace("_", "\_") + r'}$, \\' +
+    #             r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, "+lum_label+r", \textbf{Pessimistic Scenario}", fontsize=10, y=0.98)
+
+    props = dict(boxstyle='square', facecolor='white',
+                 edgecolor='gray', alpha=0.5)
+
+    ax.text(0.1, 0.95, r'\hspace{-15pt} \textbf{Optimistic Scenario} \\'+r'$\textrm{($H_0$): '+tabnames[0].replace("_", "\_") + r'}$, \\' + r' $\textrm{($H_1$): '+tabnames[1].replace("_", "\_") + r'}$, \\' + r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, $\sqrt{s}=140.7$ GeV, "+lum_label, transform=ax.transAxes, fontsize=10, verticalalignment='top', bbox=props)
+
+    ax.text(0.1, 0.7, r'$w = \sum_k^{N_{rep}}e^{-\frac{1}{2}\chi^2_k} \pm \sigma^{SD}$', transform=ax.transAxes, fontsize=15, verticalalignment='center', bbox=props)
+
+
+    #cmap = matplotlib.colors.ListedColormap(#['#3535FD', 
+    #        ['#2A00D5', '#63009E', '#A1015D', '#D80027', '#FE0002'])
+
+    # define the bins and normalize
+    #bounds = np.linspace(0, 5, 6)
+    #norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
+
+    h = plt.hist2d(np.log(hist_Analysis['x']), np.log(hist_Analysis['Q2']), weights=hist_Analysis['PDFweights'], bins=[
+        np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis', norm=matplotlib.colors.LogNorm())
+
+    cbar = plt.colorbar()
+    #ax2 = fig.add_axes([0.85, 0.1, 0.03, 0.8])
+
+    #cbar = matplotlib.colorbar.ColorbarBase(ax2, cmap=cmap, norm=norm,
+    #    spacing='uniform', ticks=bounds, boundaries=bounds, format='%1i')
+
+    #cbar.ax.set_yticklabels(['0', '1', '2', '3', '4', r'$>$ 5', ' '])
+
+    #cbar = plt.colorbar()
+    cbar.ax.set_xlabel(r"$w$")
+    ax.set_xlabel(r"$x$")
+    ax.set_ylabel(r"$Q^2$")
+    ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
+    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
+    ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
+    ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
+    ax.tick_params(which='major', direction="in", length=7)
+    ax.tick_params(which='minor', direction="in", length=4)
+
+    for iQ2 in range(0, Bins['NQ2']):
+        for iX in range(0, Bins['Nx']):
+            if non_empty_bins[iQ2*Bins['Nx']+iX]:
+                ax.text(np.log(hist_Analysis['x'][iQ2*Bins['Nx']+iX]), np.log(hist_Analysis['Q2'][iQ2*Bins['Nx']+iX]), '{:.1e}'.format(
+                    hist_Analysis['PDFweights'][iQ2*Bins['Nx']+iX])+"\n"+r'$\pm$'+'{:.1e}'.format(hist_Analysis['std_PDFweights'][iQ2*Bins['Nx']+iX]),
+                        color="w", ha="center", va="center", fontweight="bold", fontsize=4)
     py.tight_layout()
 
 if __name__ == "__main__":
@@ -405,7 +464,7 @@ if __name__ == "__main__":
 
     #--physical params and cuts
     #lum = str(lum_arg)+':fb-1'
-    lum_label = r'$\mathcal{L} = '+str(lum_arg)+r'\,fb^{-1}$'
+    lum_label = r'$\mathcal{L} = '+str(lum_target)+r'\,fb^{-1}$'
     cuts_label = r"$ W^2 > 10\,\,,\,\, Q^2> 1$"
 
     #to tweak:
@@ -416,8 +475,8 @@ if __name__ == "__main__":
     min_Q = 0.1
 
     #SFs
-    min_SF = 'NNPDF31_nnlo_pch_as_0118_NC_Wm_Wp_SF_F2NC_90CL_LOW'
-    max_SF = 'NNPDF31_nnlo_pch_as_0118_NC_Wm_Wp_SF_F2NC_90CL_UP'
+    min_SF = 'NNPDF31_nnlo_pch_as_0118_SF(central)'
+    max_SF = 'NNPDF31_nnlo_pch_as_0118_SF(rep)'
 
     seeds = {'min': 3, 'max': 4}
     rs = 140.71247279470288  # 140.7
@@ -459,6 +518,7 @@ if __name__ == "__main__":
         else:
             hist_Analysis = load_obj(hist_Analysis_path)
 
+        hist_Analysis['sys_target'] = hist_CrossSection['sys_target']
         #--Plotting-----------------------------------------------
         #---------------------------------------------------------
         print("--Plotting--")
@@ -480,7 +540,7 @@ if __name__ == "__main__":
         plt_unc([0,3],'statunc','max', title_pos, Bins, hist_Analysis, hist_CrossSection)
         plt_unc([1,3],'statunc','min', title_pos, Bins, hist_Analysis, hist_CrossSection)
 
-        plt.savefig(sub_wdir+"chi2-overview-"+str(lum_arg)+"fb-1_pdfrep"+str(rep)+".pdf")
+        plt.savefig(sub_wdir+"chi2-overview-"+str(lum_target)+"fb-1_pdfrep"+str(rep)+".pdf")
         plt.cla()
         plt.clf()
 
@@ -489,7 +549,7 @@ if __name__ == "__main__":
         print " "
         plt_Detailedchi2s(Bins, hist_Analysis,hist_CrossSection)
 
-        plt.savefig(sub_wdir+"chi2-detailed-"+str(lum_arg)+"fb-1_pdfrep"+str(rep)+".pdf")
+        plt.savefig(sub_wdir+"chi2-detailed-"+str(lum_target)+"fb-1_pdfrep"+str(rep)+".pdf")
         plt.cla()
         plt.clf()
 
@@ -498,28 +558,37 @@ if __name__ == "__main__":
         plt_DetailedZscore((min_SF, max_SF), Bins,
                            hist_Analysis, hist_CrossSection['non_empty']['total'])
 
-        plt.savefig(sub_wdir+"Zscore-detailed-"+str(lum_arg)+"fb-1_pdfrep"+str(rep)+".pdf")
+        plt.savefig(sub_wdir+"Zscore-detailed-"+str(lum_target)+"fb-1_pdfrep"+str(rep)+".pdf")
         plt.cla()
         plt.clf()
 
     else:
+        ##------------
         Nrep =0
         (_, dirnames, filenames) = walk(sub_wdir).next()
         tot_hist_Analysis = {}
         tot_hist_Analysis['chi2s'] = np.zeros(Bins['Nx']*Bins['NQ2'])
         tot_hist_Analysis['zscores'] = np.zeros(Bins['Nx']*Bins['NQ2'])
+        tot_hist_Analysis['PDFweights'] = np.zeros(Bins['Nx']*Bins['NQ2'])
         tot_hist_Analysis['std_chi2s'] = np.zeros(Bins['Nx']*Bins['NQ2'])
         tot_hist_Analysis['std_zscores'] = np.zeros(Bins['Nx']*Bins['NQ2'])
+        tot_hist_Analysis['std_PDFweights'] = np.zeros(Bins['Nx']*Bins['NQ2'])
         tot_hist_Analysis['x'] = np.zeros(Bins['Nx']*Bins['NQ2'])
         tot_hist_Analysis['Q2'] = np.zeros(Bins['Nx']*Bins['NQ2'])
 
         non_empty_bins = np.zeros(Bins['Nx']*Bins['NQ2']) > 1
-
+        ONCE=True
         for dirname in dirnames:
             if os.path.isfile(sub_wdir+dirname+"/hist_Analysis.p"):
                 hist_Analysis = load_obj(sub_wdir+dirname+"/hist_Analysis.p")
+                if ONCE:
+                    hist_CrossSection = load_obj(sub_wdir+dirname+"/hist_CrossSection.p")
+                    tot_hist_Analysis['sys_target'] = hist_CrossSection['sys_target']
+                    ONCE=False
+
                 tot_hist_Analysis['chi2s'] += hist_Analysis['chi2s']
                 tot_hist_Analysis['zscores'] += np.sqrt(hist_Analysis['chi2s'])
+                tot_hist_Analysis['PDFweights'] += hist_Analysis['PDFweights']
 
                 hist_CrossSection = load_obj(sub_wdir+dirname+"/hist_CrossSection.p")
                 non_empty_bins += hist_CrossSection['non_empty']['total']
@@ -527,6 +596,7 @@ if __name__ == "__main__":
 
         tot_hist_Analysis['chi2s'] /= Nrep
         tot_hist_Analysis['zscores'] /= Nrep
+        tot_hist_Analysis['PDFweights'] /= Nrep
         tot_hist_Analysis['zscores_f'] = np.copy(tot_hist_Analysis['zscores'])
         tot_hist_Analysis['Nrep'] = Nrep
 
@@ -535,12 +605,17 @@ if __name__ == "__main__":
                 hist_Analysis = load_obj(sub_wdir+dirname+"/hist_Analysis.p")
                 tot_hist_Analysis['std_chi2s'] += (hist_Analysis['chi2s']-tot_hist_Analysis['chi2s'])**2
                 tot_hist_Analysis['std_zscores'] += (np.sqrt(hist_Analysis['chi2s'])-tot_hist_Analysis['zscores'])**2
+                tot_hist_Analysis['std_PDFweights'] += (hist_Analysis['PDFweights']-tot_hist_Analysis['PDFweights'])**2
 
         tot_hist_Analysis['std_chi2s'] /= Nrep
         tot_hist_Analysis['std_chi2s'] = np.sqrt(tot_hist_Analysis['std_chi2s'])
 
         tot_hist_Analysis['std_zscores'] /= Nrep
         tot_hist_Analysis['std_zscores'] = np.sqrt(tot_hist_Analysis['std_zscores'])
+
+        tot_hist_Analysis['std_PDFweights'] /= Nrep
+        tot_hist_Analysis['std_PDFweights'] = np.sqrt(tot_hist_Analysis['std_PDFweights'])
+
 
         #--- for plotting purposes
         for iQ2 in range(0, Bins['NQ2']):
@@ -558,12 +633,20 @@ if __name__ == "__main__":
 
         tot_hist_Analysis['chi2s'][tot_hist_Analysis['chi2s']==0] = np.nan
         tot_hist_Analysis['zscores'][tot_hist_Analysis['zscores'] == 0] = np.nan
+        tot_hist_Analysis['PDFweights'][tot_hist_Analysis['PDFweights'] == 0] = np.nan
 
         tot_hist_Analysis['zscores'][tot_hist_Analysis['zscores'] == -1] = 0
 
         plt_DetailedZscore_witherrors((min_SF,max_SF), Bins, tot_hist_Analysis, non_empty_bins)
 
         plt.savefig(sub_wdir+"ZscoreWithError-detailed-" +
-                    str(lum_arg)+"fb-1_Nrep"+str(Nrep)+".pdf")
+                    str(lum_target)+"fb-1_Nrep"+str(Nrep)+".pdf")
+        plt.cla()
+        plt.clf()
+
+        plt_DetailedPDFweights_witherrors((min_SF,max_SF), Bins, tot_hist_Analysis, non_empty_bins)
+
+        plt.savefig(sub_wdir+"PDFweightsWithError-detailed-" +
+                    str(lum_target)+"fb-1_Nrep"+str(Nrep)+".pdf")
         plt.cla()
         plt.clf()
