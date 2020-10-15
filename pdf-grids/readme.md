@@ -10,3 +10,12 @@ CT14EIC2: + sqrt{s}=10  GeV EIC e^+ p pseudodata (NC and CC)
      the latest pseudodata once under control; until then, results
      should be qualitatively similar
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+NNPDF4EIC0: NNPDF3.1 (updated) NNLO fit as baseline
+NNPDF4EIC1: as NNPDF4EIC0 + EIC e-p (NC and CC) optimistic scenario 
+NNPDF4EIC2: as NNPDF4EIC0 + EIC e-p (NC and CC) pessimistic scenario
+
+  ** These fits are PRELIMINARY and will be replaced/complemented by
+     currently running fits.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
