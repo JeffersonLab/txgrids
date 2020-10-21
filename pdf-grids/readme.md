@@ -9,6 +9,11 @@ CT14EIC2: + sqrt{s}=10  GeV EIC e^+ p pseudodata (NC and CC)
   ** These will be soon superseded by currently-running fits of
      the latest pseudodata once under control; until then, results
      should be qualitatively similar
+     
+CT18EIC0: UPDATED -- CT18 NNLO fit as baseline
+CT18EIC1: UPDATED -- CT18EIC0 + e-p (NC/CC), e-d base pseudodata
+
+  ** CT18EIC2, with e+ data, to be included
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
