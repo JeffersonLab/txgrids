@@ -1,4 +1,4 @@
-SetDesc: NNPDF3.1 + EIC e-p (NC and CC) pessimistic scenario
+SetDesc: NNPDF4EIC0 + EIC e-p (NC and CC), e-d (NC), e+p (NC+CC) pessimistic scenario
 SetIndex:
 Authors: [The NNPDF Collaboration]
 Reference: arXiv:xxxx.xxxxxx

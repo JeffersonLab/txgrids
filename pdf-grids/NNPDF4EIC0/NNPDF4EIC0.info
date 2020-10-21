@@ -1,4 +1,4 @@
-SetDesc: NNPDF3.1 baseline for EIC studies
+SetDesc: NNPDF3.1 baseline for EIC studies (NNLO, fitted charm, alphas(MZ)=0.118)
 SetIndex:
 Authors: [The NNPDF Collaboration]
 Reference: '2009.00014'
