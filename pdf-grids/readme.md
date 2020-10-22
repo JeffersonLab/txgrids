@@ -23,7 +23,7 @@ CT18EIC1: UPDATED -- CT18EIC0 + e-p (NC/CC), e-d base pseudodata
 - NNPDF4EIC2 : as NNPDF4EIC0 + EIC e-p (NC and CC), e-d (NC), e+p (NC+CC)
              pessimistic scenario
 - NNPDF4EIC3 : as NNPDF4EIC0 + EIC e-p (NC and CC), e-d (NC)
-	     optimistic scenario (**)
+	     optimistic scenario
 - NNPDF4EIC4 : as NNPDF4EIC0 + EIC e-p (NC and CC), e-d (NC)
 	     pessimistic scenario (**)
 - NNPDF4EIC5 : NNPDF3.1 HERA only
