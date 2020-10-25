@@ -21,6 +21,8 @@ cfg.set_entry("Verbosity", 0)
 sys.path.append(os.getcwd()+"/../")
 rc('font', **{'family': 'sans-serif', 'sans-serif': []})
 rc('text', usetex=True)
+rc('xtick', labelsize=25)
+rc('ytick', labelsize=25)
 
 lhafl = {'TBAR': -6, 'BBAR': -5, 'CBAR': -4, 'SBAR': -3, 'UBAR': -2, 'DBAR': -1,
             'GLUON': 0, 'D': 1, 'U': 2, 'S': 3, 'C': 4, 'B': 5, 'T': 6, 'PHT': 7}
@@ -42,7 +44,7 @@ PDFs_colors = ["green",
                "blue",
                "red"]
 
-PDFs_labels = [r'Reference',
+PDFs_labels = [r'NNPDF3.1 (NNLO)',
                r'$(H_0):\,R_s=0.5$',
                r'$(H_1):\,R_s=1.0$']
 
@@ -125,6 +127,10 @@ fig = gcf()
 
 np.seterr(divide='ignore', invalid='ignore')
 
+#pdfbaseline = "NNPDF31_nnlo_pch_as_0118"
+#title = scenario_choice+" Scenario"
+#fig.suptitle(r'\hspace{-15pt}\textbf{'+pdfbaseline.replace("_", "\_") + r'}' , fontsize=19, y=0.993)
+
 ax = py.subplot(111)
 max_xbin = -12  # add [:max_xbin] to PDFs
 for PDF_name in PDFs_names:
@@ -138,18 +144,24 @@ for PDF_name in PDFs_names:
     #    np.array(PDFs[PDF_name][lhafl['UBAR']]['low95cl'])+np.array(PDFs[PDF_name][lhafl['DBAR']]['low95cl']))
 
     ax.plot(X, Rs_median[PDF_name], ls='-', color=PDFs[PDF_name]
-            ['color'], lw=1.25, label=PDFs[PDF_name]['label'])
+            ['color'], lw=4.25, label=PDFs[PDF_name]['label'])
 
     ax.fill_between(X, Rs_up[PDF_name], Rs_low[PDF_name],
                     facecolor=PDFs[PDF_name]['color'], alpha=0.25, edgecolor=None, lw=1.25)
 
+ax.set_xlim(1e-4,1e-1)
+ax.set_ylim(0.,1.5)
 ax.set_xscale('log')
-ax.set_xlabel(r'$x$')
-ax.set_ylabel(r'$R_s(x) = \frac{s+\bar{s}}{\bar{u}+\bar{d}}$')
-ax.legend(loc='best', title=r'NNPDF3.1 (nnlo)')
+ax.set_xlabel(r'{\boldmath $x$}', fontsize=45)
+ax.xaxis.set_label_coords(0.9, +0.15)
+#ax.set_ylabel(r'{\boldmath $R_s = \frac{s+\bar{s}}{\bar{u}+\bar{d}}$}',fontsize=25,rotation=0)
+ax.set_ylabel(r'{\boldmath $R_s$}',fontsize=45,rotation=0)
+ax.yaxis.set_label_coords(+0.1, 0.8)
+#ax.legend(loc='best', title=r'NNPDF3.1 (nnlo)', fontsize=25)
+#ax.legend(loc='best', fontsize=23)
 
-ax.text(0.4, 0.9, r'$Q='+str(Q)+"$ GeV, $90\%$ CL", transform=ax.transAxes, fontsize=12,
-        verticalalignment='top', bbox=props)
+#ax.text(0.45, 0.5, r'$Q='+str(Q)+"$ GeV, $90\%$ CL", transform=ax.transAxes, fontsize=20,
+#        verticalalignment='top', bbox=props)
 
 py.tight_layout()
          

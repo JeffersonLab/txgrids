@@ -30,9 +30,11 @@ from collections import OrderedDict, Counter
 from  matplotlib import rc
 rc('font', **{'family': 'sans-serif', 'sans-serif': []})
 rc('text', usetex=True)
+rc('xtick', labelsize=20)
+rc('ytick', labelsize=20)
 
 lum_target=100
-
+scenario_choice = "optimistic"
 def load_obj(path):
     with open(path, 'rb') as f:
         return pickle.load(f)
@@ -216,7 +218,11 @@ def plt_unc(gs_ind, unctype, key, title_pos, Bins, hist_Analysis, hist_CrossSect
             verticalalignment='center',
             transform=ax.transAxes,
             fontsize=10)
-    h = plt.hist2d(np.log(hist_Analysis['x']), np.log(hist_Analysis['Q2']), weights=hist_CrossSection[unctype]
+    if unctype == 'sysunc':
+        h = plt.hist2d(np.log(hist_Analysis['x']), np.log(hist_Analysis['Q2']), weights=hist_CrossSection[unctype]['uncorr']
+                       [key]*100./hist_CrossSection['xsecs'][key], bins=[np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis')
+    else:
+        h = plt.hist2d(np.log(hist_Analysis['x']), np.log(hist_Analysis['Q2']), weights=hist_CrossSection[unctype]
                    [key]*100./hist_CrossSection['xsecs'][key], bins=[np.log(Bins['x']), np.log(Bins['Q2'])], cmap='viridis')
     cbar = plt.colorbar()
     cbar.ax.set_xlabel(r"$\delta^{"+key+"}_{"+uncname+"} [\%]$")
@@ -271,7 +277,8 @@ def plt_DetailedZscore(tabnames, Bins, hist_Analysis, non_empty_bins):
     props = dict(boxstyle='square', facecolor='white',
                  edgecolor='gray', alpha=0.5)
 
-    ax.text(0.1, 0.95, r'\hspace{-15pt} \textbf{Optimistic Scenario} \\'+r'$\textrm{($H_0$): '+tabnames[0].replace("_", "\_") + r'}$, \\' + r' $\textrm{($H_1$): '+tabnames[1].replace("_", "\_") + r'}$, \\  $\sqrt{s}=140.7$ GeV, '+lum_label, transform=ax.transAxes, fontsize=10, verticalalignment='top', bbox=props)
+    ax.text(0.1, 0.95, r'\hspace{-15pt} \textbf{'+scenario_choice+r' Scenario} \\'+r'$\textrm{($H_0$): '+tabnames[0].replace("_", "\_") + r'}$, \\' + r' $\textrm{($H_1$): '+tabnames[1].replace(
+        "_", "\_") + r'}$, \\  $\sqrt{s}=140.7$ GeV, '+lum_label, transform=ax.transAxes, fontsize=10, verticalalignment='top', bbox=props)
 
     ax.text(0.1, 0.7, r'$Z = \left|\frac{\frac{d\sigma^{(H_0)}}{dxdQ^2}-\frac{d\sigma^{(H_1)}}{dxdQ^2}}{\delta^{sys,stat}_{H_0,H_1}}\right|$', transform=ax.transAxes, fontsize=15, verticalalignment='center', bbox=props)
 
@@ -319,6 +326,11 @@ def plt_DetailedZscore_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins)
 
     ax.set_aspect("equal")
 
+    #pdfbaseline = "NNPDF31_nnlo_pch_as_0118"
+    #title = r"{\hspace{12pt} Ultra-"+scenario_choice+r"} \\ ($10\% \times$ systematics)"
+    title = r"\textbf{Optimistic}"
+    fig.suptitle(r'\hspace{-15pt}\textbf{'+title.replace("_", "\_") + r'}' , fontsize=20, y=0.95)
+
     #fig.suptitle(r'\hspace{-15pt}$\textrm{min: '+tabnames[0].replace("_", "\_") + r'}$, \\' +
     #         r' $\textrm{max: '+tabnames[1].replace("_", "\_") + r'}$, \\' +
     #             r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, "+lum_label+r", \textbf{Pessimistic Scenario}", fontsize=10, y=0.98)
@@ -326,10 +338,19 @@ def plt_DetailedZscore_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins)
     props = dict(boxstyle='square', facecolor='white',
                  edgecolor='gray', alpha=0.5)
 
-    ax.text(0.1, 0.95, r'\hspace{-15pt} \textbf{Optimistic Scenario} \\'+r'$\textrm{($H_0$): '+tabnames[0].replace("_", "\_") + r'}$, \\' + r' $\textrm{($H_1$): '+tabnames[1].replace(
-        "_", "\_") + r'}$, \\' + r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, $\sqrt{s}=140.7$ GeV, "+lum_label+r"\\ systematics = "+"{:.2f}".format(hist_Analysis['sys_target'])+r"$\times$original", transform=ax.transAxes, fontsize=10, verticalalignment='top', bbox=props)
+    #ax.text(0.035, 0.97, r'\hspace{-15pt} \textbf{'+scenario_choice+r'}, ' + r" $\sqrt{s}=140.7$ GeV, "+lum_label+r" \\"
+    #    +r' $\textrm{\bf($H_0$): '+tabnames[0].replace("_", "\_") + r'}$, ' 
+    #    +r' $\textrm{\bf($H_1$): '+tabnames[1].replace( "_", "\_") + r'}$,' \
+    #    +r" $N_{rep} = " +str(hist_Analysis['Nrep'])+r'$ \\',\
+    #    #r'$ Z_{k\,\,(\text{PDFrep})} = \left|\frac{d\sigma_k^{(H_0)}-d\sigma_k^{(H_1)}}{\delta^{sys,stat}_{H_0,H_1}}\right|$',\
+    #    #+r"\\ systematics = "+"{:.2f}".format(hist_Analysis['sys_target'])+r"$\times$original (corr and uncorr)", \
+    #    transform=ax.transAxes, fontsize=15, verticalalignment='top', bbox=props)
 
-    ax.text(0.1, 0.7, r'$Z = \left|\frac{\frac{d\sigma^{(H_0)}}{dxdQ^2}-\frac{d\sigma^{(H_1)}}{dxdQ^2}}{\delta^{sys,stat}_{H_0,H_1}}\right|$', transform=ax.transAxes, fontsize=15, verticalalignment='center', bbox=props)
+    #ax.text(0.035, 0.875, r'$ Z_{k\,\,(\text{PDFrep})} = \left|\frac{d\sigma_0^{(H_0)}-d\sigma_k^{(H_1)}}{\delta^{sys,stat}_{H_0,H_1}}\right|$',
+    #        transform=ax.transAxes, fontsize=25, verticalalignment='center', bbox=props)
+
+    #ax.text(0.85, 0.1, r'\hspace{-10pt} $\mu_Z $',#\\ \vspace{10pt} $\pm \sigma_Z$',
+    #        transform=ax.transAxes, fontsize=25, verticalalignment='center', bbox=props)
 
 
     cmap = matplotlib.colors.ListedColormap(#['#3535FD', 
@@ -350,11 +371,14 @@ def plt_DetailedZscore_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins)
     cbar.ax.set_yticklabels(['0', '1', '2', '3', '4', r'$>$ 5', ' '])
 
     #cbar = plt.colorbar()
-    cbar.ax.set_xlabel(r"${\rm Z}$")
-    ax.set_xlabel(r"$x$")
-    ax.set_ylabel(r"$Q^2$")
+    #cbar.ax.set_xlabel(r"${\bf \rm <Z>}$", fontsize=15)
+    cbar.ax.set_title(r"{\boldmath $Z$}", fontsize=25)
+    ax.set_xlabel(r"{\boldmath $x$}", fontsize=25)
+    ax.xaxis.set_label_coords(0.95, -0.015)
+    ax.set_ylabel(r"{\boldmath $Q^2$}", fontsize=25, rotation=0)
+    ax.yaxis.set_label_coords(-0.045, 0.88)
     ax.set_xticks(np.log([1e-4, 1e-3, 1e-2, 1e-1]))
-    ax.set_xticklabels([r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
+    ax.set_xticklabels([r'', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$'])
     ax.set_yticks(np.log([1, 10, 100, 1000, 10000]))
     ax.set_yticklabels([r'$1$', r'$10$', r'$10^2$', r'$10^3$', r'$10^4$'])
     ax.tick_params(which='major', direction="in", length=7)
@@ -363,9 +387,9 @@ def plt_DetailedZscore_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins)
     for iQ2 in range(0, Bins['NQ2']):
         for iX in range(0, Bins['Nx']):
             if non_empty_bins[iQ2*Bins['Nx']+iX]:
-                ax.text(np.log(hist_Analysis['x'][iQ2*Bins['Nx']+iX]), np.log(hist_Analysis['Q2'][iQ2*Bins['Nx']+iX]), '{:.2f}'.format(
-                    hist_Analysis['zscores_f'][iQ2*Bins['Nx']+iX])+"\n"+r'$\pm$'+'{:.2f}'.format(hist_Analysis['std_zscores'][iQ2*Bins['Nx']+iX]),
-                        color="w", ha="center", va="center", fontweight="bold", fontsize=5)
+                ax.text(np.log(hist_Analysis['x'][iQ2*Bins['Nx']+iX]), np.log(hist_Analysis['Q2'][iQ2*Bins['Nx']+iX]), '{:.1f}'.format(
+                    hist_Analysis['zscores_f'][iQ2*Bins['Nx']+iX]),#+"\n"+r'$\pm$'+'{:.2f}'.format(hist_Analysis['std_zscores'][iQ2*Bins['Nx']+iX]),
+                        color="w", ha="center", va="center", fontweight="bold", fontsize=9)
     py.tight_layout()
 
 def plt_DetailedPDFweights_witherrors(tabnames, Bins, hist_Analysis, non_empty_bins):
@@ -382,9 +406,10 @@ def plt_DetailedPDFweights_witherrors(tabnames, Bins, hist_Analysis, non_empty_b
     props = dict(boxstyle='square', facecolor='white',
                  edgecolor='gray', alpha=0.5)
 
-    ax.text(0.1, 0.95, r'\hspace{-15pt} \textbf{Optimistic Scenario} \\'+r'$\textrm{($H_0$): '+tabnames[0].replace("_", "\_") + r'}$, \\' + r' $\textrm{($H_1$): '+tabnames[1].replace("_", "\_") + r'}$, \\' + r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, $\sqrt{s}=140.7$ GeV, "+lum_label, transform=ax.transAxes, fontsize=10, verticalalignment='top', bbox=props)
+    ax.text(0.05, 0.95, r'\hspace{-15pt} \textbf{'+scenario_choice+r' Scenario} \\'+r'$\textrm{($H_0$): '+tabnames[0].replace("_", "\_") + r'}$, \\' + r' $\textrm{($H_1$): '+tabnames[1].replace(
+        "_", "\_") + r'}$, \\' + r"$N_{rep} = "+str(hist_Analysis['Nrep'])+"$, $\sqrt{s}=140.7$ GeV, "+lum_label, transform=ax.transAxes, fontsize=10, verticalalignment='top', bbox=props)
 
-    ax.text(0.1, 0.7, r'$w = \sum_k^{N_{rep}}e^{-\frac{1}{2}\chi^2_k} \pm \sigma^{SD}$', transform=ax.transAxes, fontsize=15, verticalalignment='center', bbox=props)
+    ax.text(0.05, 0.7, r'$w = \sum_k^{N_{rep}}e^{-\frac{1}{2}\chi^2_k} \pm \sigma^{SD}$', transform=ax.transAxes, fontsize=15, verticalalignment='center', bbox=props)
 
 
     #cmap = matplotlib.colors.ListedColormap(#['#3535FD', 
@@ -454,7 +479,7 @@ if __name__ == "__main__":
     CovMat_path = sub_sub_wdir+"CovMat.p"
     hist_Analysis_path = sub_sub_wdir+"hist_Analysis.p"
     # pwd+"../expdata/data/xQ2binTable-xiaoxuan-060220+syst.npy"
-    sys_path = pwd+"../expdata/src/ep_NC_optimistic-barak-102420.dat"
+    sys_path = pwd+"../expdata/src/ep_NC_"+scenario_choice+".dat"
 
     Sample={}
     hist_CrossSection={}
@@ -475,8 +500,8 @@ if __name__ == "__main__":
     min_Q = 0.1
 
     #SFs
-    min_SF = 'NNPDF31_nnlo_pch_as_0118_SF(central)'
-    max_SF = 'NNPDF31_nnlo_pch_as_0118_SF(rep)'
+    min_SF = 'Rs=0.5'
+    max_SF = 'Rs=1.0'
 
     seeds = {'min': 3, 'max': 4}
     rs = 140.71247279470288  # 140.7
