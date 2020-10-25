@@ -1,4 +1,4 @@
-SetDesc: NNPDF3.1 FT only + non-DIS + EIC (NNLO, fitted charm, alphas(MZ)=0.118)
+SetDesc: NNPDF3.1 FT only + non-DIS (NNLO, fitted charm, alphas(MZ)=0.118)
 SetIndex:
 Authors: [The NNPDF Collaboration]
 Reference: arXiv:xxxx.xxxxxx
